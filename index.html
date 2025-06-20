@@ -121,7 +121,38 @@
 
   .product-item {
     font-family: 'Lato', sans-serif;
+    cursor: pointer;
   }
+
+  .modal.hidden {
+    display: none;
+  }
+
+  .modal {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100vw; height: 100vh;
+    background: rgba(0, 0, 0, 0.6);
+    display: flex; align-items: center; justify-content: center;
+    z-index: 999;
+    }
+
+  .modal-content {
+    background: white;
+    padding: 20px;
+    max-width: 600px;
+    width: 90%;
+    border-radius: 10px;
+    position: relative;
+    }
+
+  .close {
+    position: absolute;
+    right: 15px;
+    top: 10px;
+    cursor: pointer;
+    font-size: 24px;
+    }
 
   </style>
 </head>
@@ -391,5 +422,39 @@
 
 <p style="margin-top: 2rem;">Si tu cherches quelque chose qui n'est pas dans la liste demande moi je sais où trouver beaucoup de choses 🙂</p>
 
+  <script>
+  document.querySelectorAll('.product-item').forEach(item => {
+    item.addEventListener('click', () => {
+      const modal = document.getElementById('product-modal');
+      const title = document.getElementById('modal-title');
+      const description = document.getElementById('modal-description');
+      const img = document.getElementById('modal-img');
+      const video = document.getElementById('modal-video');
+
+      title.textContent = item.dataset.name + " - " + item.dataset.price;
+      description.textContent = item.dataset.description;
+
+      if (item.dataset.img) {
+        img.src = item.dataset.img;
+        img.style.display = 'block';
+      } else {
+        img.style.display = 'none';
+      }
+
+      if (item.dataset.video) {
+        video.src = item.dataset.video;
+        video.style.display = 'block';
+      } else {
+        video.style.display = 'none';
+      }
+
+      modal.classList.remove('hidden');
+    });
+  });
+
+  document.querySelector('.modal .close').addEventListener('click', () => {
+    document.getElementById('product-modal').classList.add('hidden');
+  });
+</script>
 </body>
 </html>
