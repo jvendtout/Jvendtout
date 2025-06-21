@@ -5,6 +5,74 @@
   <meta charset="UTF-8">
   <title>Liste Produits</title>
   <style>
+  .product-item {
+    cursor: pointer;
+    margin: 4px 0;
+  }
+  .stock-red { color: red; font-weight: bold; }
+
+  .product-popup {
+    display: none;
+    padding: 1rem;
+    border: 1px solid #aaa;
+    background: #f9f9f9;
+    margin-top: 1rem;
+    border-radius: 8px;
+  }
+
+  .product-popup img, .product-popup video {
+    max-width: 100%;
+    margin-top: 0.5rem;
+    border-radius: 6px;
+  }
+
+  .product-popup button {
+    margin-top: 1rem;
+    padding: 0.5rem 1rem;
+    background: #222;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+
+  .product-popup button:hover {
+    background: #555;
+  }
+
+  .product-popup .details, .product-popup .reviews {
+    margin-top: 1rem;
+  }
+</style>
+
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    const items = document.querySelectorAll(".product-item");
+    const popup = document.createElement("div");
+    popup.className = "product-popup";
+    document.body.appendChild(popup);
+
+    items.forEach(item => {
+      item.addEventListener("click", () => {
+        const productName = item.textContent;
+        popup.innerHTML = `
+          <h3>${productName}</h3>
+          <img src="img_placeholder.jpg" alt="${productName}">
+          <button>Ajouter au panier</button>
+          <div class="details"><strong>Détails :</strong> À compléter.</div>
+          <div class="reviews"><strong>Avis :</strong> À venir.</div>
+        `;
+        popup.scrollIntoView({ behavior: "smooth" });
+        popup.style.display = "block";
+      });
+    });
+  });
+</script>
+
+<!-- Ton contenu HTML commence ici (le bloc avec <details>) -->
+<!-- 🧠 Tout le bloc HTML que tu m'as envoyé est conservé tel quel ici -->
+<!-- 👇👇👇 Place ton contenu exactement ici 👇👇👇 -->
+<!-- 👆👆👆 Tout ce que tu m'as écrit précédemment 👆👆👆 -->
     body {
       font-family: Inter, sans-serif;
       background: linear-gradient(to bottom right, #2e003e, #6a0572);
