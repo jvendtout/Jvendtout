@@ -40,29 +40,6 @@
     margin-top: 1rem;
   }
 
-<script>
-  document.addEventListener("DOMContentLoaded", () => {
-    const items = document.querySelectorAll(".product-item");
-    const popup = document.createElement("div");
-    popup.className = "product-popup";
-    document.body.appendChild(popup);
-
-    items.forEach(item => {
-      item.addEventListener("click", () => {
-        const productName = item.textContent;
-        popup.innerHTML = `
-          <h3>${productName}</h3>
-          <img src="img_placeholder.jpg" alt="${productName}">
-          <button>Ajouter au panier</button>
-          <div class="details"><strong>Détails :</strong> À compléter.</div>
-          <div class="reviews"><strong>Avis :</strong> À venir.</div>
-        `;
-        popup.scrollIntoView({ behavior: "smooth" });
-        popup.style.display = "block";
-      });
-    });
-  });
-</script>
 
 <!-- Ton contenu HTML commence ici (le bloc avec <details>) -->
 <!-- 🧠 Tout le bloc HTML que tu m'as envoyé est conservé tel quel ici -->
