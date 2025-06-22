@@ -13,7 +13,6 @@
   background: linear-gradient(to bottom right, #2e003e, #6a0572);
   color: white;
   height: 100vh;
-
   }
 
 
@@ -203,7 +202,9 @@
 /* Responsive mobile : la modale prend tout l’écran */
 @media screen and (max-width: 650px) {
   .container {
-    flex-direction: column;
+  height: auto;
+  overflow: visible;
+  flex-direction: column;
   }
 
   .modal {
@@ -216,7 +217,7 @@
 
   .product-list {
     height: auto;
-    overflow: visible;
+    overflow-y: visible;
   }
 }
 
