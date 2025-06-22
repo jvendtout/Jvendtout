@@ -250,16 +250,24 @@ body::-webkit-scrollbar {
 
 
 <div class="container"> 
-
+<!--
+	    <li class="product-item"
+		    data-name=""
+		    data-price=""
+		    data-description=""
+		    data-img="">
+		    <span class="stock-green">1</span> Mitraillette 1000 coups 📷 : 70€</li>
+-->
 <div class="product-list">
-<p>📷 = photo/vidéo dispo<br>Plus la commande est grosse plus les prix sont négociables</p>
+
+<p>📷 = photo/vidéo dispo<br>Plus la commande est grosse plus les prix sont négociables.💲</p>
 
 <details>
   <summary>Fait maison 📷</summary>
   <details>
     <summary>Pétard 20cm×4cm</summary>
     <ul>
-      <li class="product-item">Base 50g de poudre noir, 15 sec de mèche : 15€</li>
+	<li class="product-item">Base 50g de poudre noir, 15 sec de mèche : 15€</li>
     </ul>
   </details>
   <details>
@@ -282,7 +290,7 @@ body::-webkit-scrollbar {
 </details>
 
 <details>
-  <summary>Puffs jnr (a venir) 📷</summary>
+  <summary>Puffs jnr 🚬 (a venir) 📷</summary>
   <ul>
     <li class="product-item">16k : 16€</li>
     <li class="product-item">Pour 3 : 14,5€/u (43,5€)</li>
@@ -301,7 +309,7 @@ body::-webkit-scrollbar {
 </details>
 
 <details>
- <summary>Artifices 📷</summary>
+ <summary>Artifices 💥 📷</summary>
 
   <details>
     <summary class="product-item"><span class="stock-green">18</span>Flash 📷: 5€</summary>
@@ -311,31 +319,67 @@ body::-webkit-scrollbar {
   </details>
 
   <details>
-    <summary>Bison</summary>
-    <ul>
-      <li class="product-item"><span class="stock-yellow">0</span> Bison 4 : 4€50</li>
-      <li class="product-item"><span class="stock-yellow">0</span> Bison 0 : 1€</li>
-      <li class="product-item"><span class="stock-yellow">0</span> Bison 5 : 5€50</li>
-      <li class="product-item"><span class="stock-yellow">0</span> Bison 3 : 3€50</li>
-      <li class="product-item"><span class="stock-yellow">0</span> Bison 2 : 2€50</li>
-      <li class="product-item"><span class="stock-yellow">0</span> Bison 1 : 2€</li>
+  <summary>Bison 🧨</summary>
+	<ul>
+		<li class="product-item"
+		data-name="Bison 4"
+		data-price="4,50"
+		data-description="Bison 4 le plus rentable des bisons puissants.
+		Dimension : Hauteur 14 cm Diamètre 2.6 cm
+		categorie F2"
+		data-img="">
+			<span class="stock-yellow">0</span> Bison 4 : 4€50</li>
+		<li class="product-item"
+		data-name=""
+		data-price=""
+		data-description=""
+		data-img="">
+      <span class="stock-yellow">0</span> Bison 0 : 1€</li>
+      <span class="stock-yellow">0</span> Bison 5 : 5€50</li>
+      <span class="stock-yellow">0</span> Bison 3 : 3€50</li>
+      <span class="stock-yellow">0</span> Bison 2 : 2€50</li>
+      <span class="stock-yellow">0</span> Bison 1 : 2€</li>
     </ul>
   </details>
 
   <details>
-    <summary>Mitraillettes</summary>
+    <summary>Mitraillettes 🧨</summary>
     <ul>
 	    <li class="product-item"
-		  data-name="Mitraillette 1000 coups"
-		    data-price="70"
-		    data-description="Une mitraillette de 1000 coups à effet spectaculaire."
-		    data-img="img\Mitraillette-1000-coups.webp">
-		    <span class="stock-green">1</span> Mitraillette 1000 coups 📷 : 70€</li>
-      <li class="product-item"><span class="stock-yellow">0</span> Mitraillette 1500 coups : 105€</li>
-      <li class="product-item"><span class="stock-yellow">0</span> Mitraillette 400 coups : 35€</li>
-      <li class="product-item"><span class="stock-yellow">0</span> Mitraillette 100 coups : 10€</li>
-      <li class="product-item"><span class="stock-yellow">0</span> 200 Fusées or sifflantes 45s 10m 📷 : 80€</li>
-      <li class="product-item"><span class="stock-yellow">0</span> 25 Fusées or sifflantes 28s 15m : 15 €</li>
+			data-name="Mitraillette 1000 coups"
+			data-price="70"
+		    data-description="1000 petards qui petent a la suite, meilleure rapport nombre de coups/prix, 7 centimes/coups.
+			tu peux detacher les petards pour avoir 1000 petit petard a 7 centimes"
+		    data-img="img/Mitraillettes-1000-coups.webp">
+				<span class="stock-green">1</span> Mitraillette 1000 coups 📷 : 70€</li>
+		<li class="product-item"
+			data-name="Mitraillette 1500 coups"
+		    data-price="110"
+		    data-description="1500 petards qui petent a la suite, 7,3 centimes/coups.
+			tu peux detacher les petards pour avoir 1500 petit petard a 7,3 centimes"
+		    data-img="img/Mitraillettes-1500-coups.webp">
+				<span class="stock-yellow">0</span> Mitraillette 1500 coups : 110€</li>
+		<li class="product-item"
+			data-name="Mitraillette 400 coups"
+		    data-price="35"
+		    data-description="400 petards qui petent a la suite, 8,75 centimes/coups.
+			tu peux detacher les petards pour avoir 400 petit petard a 8,75 centimes"
+		    data-img="img/Mitraillettes-400-coups.webp">
+				<span class="stock-yellow">0</span> Mitraillette 400 coups : 35€</li>
+		<li class="product-item"
+			data-name="Mitraillette 100 coups"
+		    data-price="10"
+		    data-description="100 petards qui petent a la suite, 10 centimes/coups."
+		    data-img="img/Mitraillettes-100-coups.webp">
+				<span class="stock-yellow">0</span> Mitraillette 100 coups : 10€</li>
+		<li class="product-item"
+			data-name="Mitraillette 40 coups"
+		    data-price="5"
+		    data-description="40 petards qui petent a la suite, 12,5, centimes/coups."
+		    data-img="img/Mitraillettes-40-coups.webp">
+				<span class="stock-yellow">0</span> Mitraillette 40 coups : 5€</li>
+				<span class="stock-yellow">0</span> 200 Fusées or sifflantes 45s 10m 📷 : 80€</li>
+				<span class="stock-yellow">0</span> 25 Fusées or sifflantes 28s 15m : 15 €</li>
     </ul>
   </details>
   
@@ -498,7 +542,7 @@ body::-webkit-scrollbar {
 </details>
 
 <details>
-  <summary>Produits chimiques</summary>
+  <summary>Produits chimiques🧪</summary>
   <ul>
     <li>Acide chlorhydrique : 12€/L 📷</li>
     <li>Alcool à brûler : 10€/L 📷</li>
