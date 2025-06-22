@@ -1,17 +1,21 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
+<link href="https://fonts.googleapis.com/css2?family=Inter&family=Poppins&family=Lato&display=swap" rel="stylesheet">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta charset="UTF-8">
   <title>J'vend tout</title>
   <style>
-    body {
-      font-family: Inter, sans-serif;
-      background: linear-gradient(to bottom right, #2e003e, #6a0572);
-      color: #fff;
-      padding: 2rem;
-      margin: 0;
-    }
+  body {
+  margin: 0;
+  padding: 2rem;
+  font-family: 'Inter', sans-serif;
+  background: linear-gradient(to bottom right, #2e003e, #6a0572);
+  color: white;
+  height: 100vh;
+
+  }
+
 
     summary {
       font-weight: bold;
@@ -85,63 +89,53 @@
       background-color: rgba(255, 255, 255, 0.1);
       color: white;
     }
-
-#top-banner {
-  top: 0;
-  left: 0;
-  width: 100%;
-  background-color: #6a05ff;
-  color: white;
-  text-align: center;
-  padding: 12px 0;
-  font-size: 1.2rem;
-  font-weight: bold;
-  z-index: 9999;
-  box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.5);
-}
-
-#top-banner a {
-  color: #ffd369;
-  text-decoration: underline;
-}
-
-#top-banner a:hover {
-  color: white;
-  text-decoration: none;
-}
-
-#bottom-banner {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  width: 100%;
-  background-color: #6a0572;
-  color: white;
-  text-align: center;
-  padding: 12px 0;
-  font-size: 1.2rem;
-  font-weight: bold;
-  z-index: 9999;
-  box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.5);
-}
-
-#bottom-banner a {
-  color: #ffd369;
-  text-decoration: underline;
-}
-
-#bottom-banner a:hover {
-  color: white;
-  text-decoration: none;
-}
-
-<link href="https://fonts.googleapis.com/css2?family=Inter&family=Poppins&family=Lato&display=swap" rel="stylesheet">
-  body {
-  margin: 0;
-  display: flex;
-  height: 100vh;
-  font-family: 'Inter', sans-serif;
-  }
+	#top-banner {
+	top: 0;
+	left: 0;
+	width: 100%;
+	background-color: #6a05ff;
+	color: white;
+	text-align: center;
+	padding: 12px 0;
+	font-size: 1.2rem;
+	font-weight: bold;
+	z-index: 9999;
+	}
+	
+	#top-banner a {
+	color: #ffd369;
+	text-decoration: underline;
+	}
+	
+	#top-banner a:hover {
+	color: white;
+	text-decoration: none;
+	}
+	
+	#bottom-banner {
+	position: fixed;
+	bottom: 0;
+	left: 0;
+	width: 100%;
+	background-color: #6a0572;
+	color: white;
+	text-align: center;
+	padding: 12px 0;
+	font-size: 1.2rem;
+	font-weight: bold;
+	z-index: 9999;
+	box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.5);
+	}
+	
+	#bottom-banner a {
+	color: #ffd369;
+	text-decoration: underline;
+	}
+	
+	#bottom-banner a:hover {
+	color: white;
+	text-decoration: none;
+	}
 
 .container {
   display: flex;
@@ -226,20 +220,37 @@
   }
 }
 
+/* Pour tout le document */
+html, body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  overflow: auto;
+  scrollbar-width: none;        /* Firefox */
+  -ms-overflow-style: none;     /* Internet Explorer / Edge Legacy */
+}
+
+/* Pour Chrome, Safari, Edge (Chromium), Opera */
+html::-webkit-scrollbar,
+body::-webkit-scrollbar {
+  display: none;
+}
+
   </style>
 </head>
+<body>	
 
 <div class="banner" id="top-banner">
-  ⚠️site en développement⚠️
+  ⚠️Site en développement⚠️
 </div>
-
 
 <div class="banner" id="bottom-banner">
   Pour commander, <a href="https://www.snapchat.com/add/jvendtous" target="_blank" rel="noopener noreferrer">contacte moi sur snap</a>
 </div>
 
-<body>
+
 <div class="container"> 
+
 <div class="product-list">
 <p>📷 = photo/vidéo dispo<br>Plus la commande est grosse plus les prix sont négociables</p>
 
@@ -271,7 +282,7 @@
 </details>
 
 <details>
-  <summary>Puffs jnr 📷</summary>
+  <summary>Puffs jnr (a venir) 📷</summary>
   <ul>
     <li class="product-item">16k : 16€</li>
     <li class="product-item">Pour 3 : 14,5€/u (43,5€)</li>
@@ -331,7 +342,7 @@
   <details>
   <summary>Fusées</summary>
   <ul>
-    
+    <li><span class="stock-yellow">0</span> Fusées Z4 : 4€</li>
     <li><span class="stock-yellow">0</span> Fusées Z1 : 3€</li>
     <li><span class="stock-yellow">0</span> Fusées Z3 : 3€75</li>
     <li><span class="stock-yellow">0</span> Fusées Z2 : 3€50</li>
