@@ -177,7 +177,7 @@
   flex-shrink: 0;
   position: relative;
   box-shadow: -2px 0 8px rgba(0,0,0,0.3);
-  z-index: 10;
+  z-index: 1000;
 }
 
 .modal-content {
@@ -598,49 +598,154 @@ body::-webkit-scrollbar {
       <span class="close">✖</span>
       <h2 id="modal-title"></h2>
       <p id="modal-description"></p>
+	  <div id="cart-controls" style="display: flex; align-items: center; justify-content: flex-end; gap: 10px; margin-top: 20px;">
+  <button id="remove-one" style="display:none; background: transparent; border: none; color: white; font-size: 1.2rem; cursor: pointer;">🗑️</button>
+  <span id="item-qty" style="display:none; font-weight: bold;">x1</span>
+  <button id="add-to-cart" style="background: #ffd369; color: black; padding: 8px 14px; border: none; border-radius: 6px; cursor: pointer; font-weight: bold;">
+    🛒 Ajouter
+  </button>
+</div>
       <img id="modal-img" style="max-width:100%; display:none;" />
       <video id="modal-video" controls style="max-width:100%; display:none;"></video>
     </div>
   </div>
 </div>
 
+<div id="cart" style="position: fixed; top: 80px; right: 10px; background: #1c1c1c; color: white; padding: 12px; border-radius: 10px; width: 250px; font-size: 0.9rem; z-index: 10000;">
+  <h3 style="margin-top:0;">🛒 Panier</h3>
+  <ul id="cart-items" style="padding-left: 20px; max-height: 200px; overflow-y: auto;"></ul>
+  <p><strong>Total :</strong> <span id="cart-total">0</span> €</p>
+</div>
+
   <script>
-  document.querySelectorAll('.product-item').forEach(item => {
-    item.addEventListener('click', () => {
-      const modal = document.getElementById('product-modal');
-      const title = document.getElementById('modal-title');
-      const description = document.getElementById('modal-description');
-      const img = document.getElementById('modal-img');
-      const video = document.getElementById('modal-video');
-
-      // Affiche les infos du produit
-      title.textContent = `${item.dataset.name} - ${item.dataset.price}€`;
-      description.textContent = item.dataset.description;
-
-      if (item.dataset.img) {
-        img.src = item.dataset.img;
-        img.style.display = 'block';
-      } else {
-        img.style.display = 'none';
-      }
-
-      if (item.dataset.video) {
-        video.src = item.dataset.video;
-        video.style.display = 'block';
-      } else {
-        video.style.display = 'none';
-      }
-
-      modal.classList.add('show');
-      modal.classList.remove('hidden');
-    });
-  });
-
-  document.querySelector('.modal .close').addEventListener('click', () => {
+document.querySelectorAll('.product-item').forEach(item => {
+  item.addEventListener('click', () => {
     const modal = document.getElementById('product-modal');
-    modal.classList.add('hidden');
-    modal.classList.remove('show');
+    const title = document.getElementById('modal-title');
+    const description = document.getElementById('modal-description');
+    const img = document.getElementById('modal-img');
+    const video = document.getElementById('modal-video');
+    const name = item.dataset.name;
+    const price = parseFloat(item.dataset.price);
+    const existing = cart.find(p => p.name === name);
+
+    currentProduct = {
+      name: name,
+      price: price,
+      qty: existing ? existing.qty : 0
+    };
+
+    updateQtyDisplay();
+
+    // Supprimer cette ligne, qtyInput n'existe pas
+    // qtyInput.value = 1;
+
+    // Affiche les infos du produit
+    title.textContent = `${name} - ${price}€`;
+    description.textContent = item.dataset.description || '';
+
+    if (item.dataset.img) {
+      img.src = item.dataset.img;
+      img.style.display = 'block';
+    } else {
+      img.style.display = 'none';
+    }
+
+    if (item.dataset.video) {
+      video.src = item.dataset.video;
+      video.style.display = 'block';
+    } else {
+      video.style.display = 'none';
+    }
+
+    modal.classList.add('show');
+    modal.classList.remove('hidden');
   });
+});
+
+  
+const cart = [];
+const cartItemsEl = document.getElementById('cart-items');
+const cartTotalEl = document.getElementById('cart-total');
+
+const addToCartBtn = document.getElementById('add-to-cart');
+const removeOneBtn = document.getElementById('remove-one');
+const qtyDisplay = document.getElementById('item-qty');
+
+let currentProduct = {
+  name: '',
+  price: 0,
+  qty: 0
+};
+
+function updateCartUI() {
+  cartItemsEl.innerHTML = '';
+  let total = 0;
+
+  cart.forEach(item => {
+    const li = document.createElement('li');
+    li.textContent = `${item.name} x${item.qty} — ${item.qty * item.price}€`;
+    cartItemsEl.appendChild(li);
+    total += item.price * item.qty;
+  });
+
+  cartTotalEl.textContent = total.toFixed(2);
+}
+
+function updateQtyDisplay() {
+  if (currentProduct.qty > 1) {
+    qtyDisplay.style.display = 'inline';
+    removeOneBtn.style.display = 'inline';
+  } else if (currentProduct.qty === 1) {
+    qtyDisplay.style.display = 'inline';
+    removeOneBtn.style.display = 'none';
+  } else {
+    qtyDisplay.style.display = 'none';
+    removeOneBtn.style.display = 'none';
+  }
+
+  qtyDisplay.textContent = `x${currentProduct.qty}`;
+}
+
+addToCartBtn.addEventListener('click', () => {
+  if (!currentProduct.name || isNaN(currentProduct.price)) return;
+
+  // cherche si le produit existe déjà dans le panier
+  let existing = cart.find(p => p.name === currentProduct.name);
+
+  if (existing) {
+    existing.qty += 1;
+  } else {
+    cart.push({
+      name: currentProduct.name,
+      price: currentProduct.price,
+      qty: 1
+    });
+  }
+
+  currentProduct.qty += 1;
+  updateQtyDisplay();
+  updateCartUI();
+});
+
+removeOneBtn.addEventListener('click', () => {
+  if (!currentProduct.name) return;
+
+  let existing = cart.find(p => p.name === currentProduct.name);
+
+  if (existing && existing.qty > 1) {
+    existing.qty -= 1;
+    currentProduct.qty -= 1;
+  } else if (existing && existing.qty === 1) {
+    cart.splice(cart.indexOf(existing), 1);
+    currentProduct.qty = 0;
+  }
+
+  updateQtyDisplay();
+  updateCartUI();
+});
+
+  
 </script>
 </body>
 </html>
