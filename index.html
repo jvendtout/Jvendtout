@@ -746,6 +746,13 @@ removeOneBtn.addEventListener('click', () => {
 });
 
   
+  // Fermer la modale quand on clique sur la croix
+document.querySelector('.modal .close').addEventListener('click', () => {
+  const modal = document.getElementById('product-modal');
+  modal.classList.remove('show');
+  modal.classList.add('hidden');
+});
+
 </script>
 </body>
 </html>
