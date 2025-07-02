@@ -158,6 +158,7 @@
   font-size: 1rem;
   cursor: pointer;
   transition: background-color 0.3s;
+  margin-right: 24px;
 }
 
 #cart-button:hover {
@@ -269,11 +270,15 @@
   }
 
   .modal {
-    position: absolute;
+    position: fixed;
     top: 0;
     left: 0;
+    right: 0;
     width: 100%;
     height: 100%;
+    margin: 0;
+    max-width: none;
+    z-index: 1000;
   }
 
   .product-list {
