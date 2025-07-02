@@ -47,13 +47,13 @@
       margin: 5px 0;
     }
 
-    .stock-green {
+    .in-stock {
       color: #8ef58e;
       font-weight: bold;
       font-family: 'Lato', sans-serif;
     }
 
-    .stock-yellow {
+    .out-stock {
       color: #ffd369;
       font-weight: bold;
       font-family: 'Lato', sans-serif;
@@ -89,16 +89,20 @@
       color: white;
     }
 	#top-banner {
-	top: 0;
-	left: 0;
-	width: 100%;
-	background-color: #6a05ff;
-	color: white;
-	text-align: center;
-	padding: 12px 0;
-	font-size: 1.2rem;
-	font-weight: bold;
-	z-index: 9999;
+  top: 0;
+  left: 0;
+  width: 100%;
+  background-color: #6a05ff;
+  color: white;
+  padding: 12px 20px;
+  font-size: 1.2rem;
+  font-weight: bold;
+  z-index: 9999;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
 	}
 	
 	#top-banner a {
@@ -135,6 +139,56 @@
 	color: white;
 	text-decoration: none;
 	}
+		
+	#cart {
+	background: #1c1c1c;
+	padding: 10px;
+	border-radius: 10px;
+	font-size: 0.85rem;
+	width: 230px
+	}
+	
+	#cart-button {
+  background-color: #ffd369;
+  color: #000;
+  border: none;
+  border-radius: 8px;
+  padding: 8px 16px;
+  font-weight: bold;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+#cart-button:hover {
+  background-color: #fcbf49;
+}
+#cart-modal .modal-content {
+  background: linear-gradient(135deg, #2e003e, #6a0572); /* violet pro */
+  color: white;
+  border-radius: 10px;
+  padding: 20px;
+  font-family: 'Inter', sans-serif;
+}
+
+
+#cart-list li {
+  margin-bottom: 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+#cart-list button {
+  background: #ffd369;
+  color: #000;
+  border: none;
+  padding: 5px 10px;
+  border-radius: 6px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
 
 .container {
   display: flex;
@@ -173,7 +227,6 @@
   height: 100%;
   background: linear-gradient(135deg, #5f259f, #8a2be2);
   color: white;
-  display: none;
   flex-shrink: 0;
   position: relative;
   box-shadow: -2px 0 8px rgba(0,0,0,0.3);
@@ -195,9 +248,17 @@
       font-size: 24px;
     }
 	
-	.modal.show {
+.modal.show {
   display: block;
-   }
+  position: fixed; /* Fixe dans l'écran */
+  top: 0;
+  right: 0;
+  width: 400px;
+  max-width: 100%;
+  height: 100%;
+  z-index: 1000;
+}
+
    
 /* Responsive mobile : la modale prend tout l’écran */
 @media screen and (max-width: 650px) {
@@ -241,9 +302,14 @@ body::-webkit-scrollbar {
 </head>
 <body>	
 
-<div class="banner" id="top-banner">
-  ⚠️Site en développement⚠️
+<div id="top-banner">
+  <span>⚠️ Site en développement ⚠️</span>
+<button id="cart-button">
+  🛒 <span id="cart-label">Total : <span id="cart-total">0</span> €</span>
+</button>
+
 </div>
+
 
 <div class="banner" id="bottom-banner">
   Pour commander, <a href="https://www.snapchat.com/add/jvendtous" target="_blank" rel="noopener noreferrer">contacte moi sur snap</a>
@@ -251,14 +317,7 @@ body::-webkit-scrollbar {
 
 
 <div class="container"> 
-<!--
-	    <li class="product-item"
-		    data-name=""
-		    data-price=""
-		    data-description=""
-		    data-img="">
-		    <span class="stock-green">1</span> Mitraillette 1000 coups 📷 : 70€</li>
--->
+
 <div class="product-list">
 
 <p>📷 = photo/vidéo dispo<br>Plus la commande est grosse plus les prix sont négociables.💲</p>
@@ -313,7 +372,7 @@ body::-webkit-scrollbar {
  <summary>Artifices 💥 📷</summary>
 
   <details>
-    <summary class="product-item"><span class="stock-green">18</span>Flash 📷: 5€</summary>
+    <summary class="product-item"><span class="in-stock">18</span>Flash 📷: 5€</summary>
     <ul>
       <li>maximum légal, meilleure rapport puissance, bruit, taille, prix</li>
     </ul>
@@ -329,17 +388,17 @@ body::-webkit-scrollbar {
 		Dimension : Hauteur 14 cm Diamètre 2.6 cm
 		categorie F2"
 		data-img="">
-			<span class="stock-yellow">0</span> Bison 4 : 4€50</li>
+			<span class="out-stock">0</span> Bison 4 : 4€50</li>
 		<li class="product-item"
 		data-name=""
 		data-price=""
 		data-description=""
 		data-img="">
-      <span class="stock-yellow">0</span> Bison 0 : 1€</li>
-      <span class="stock-yellow">0</span> Bison 5 : 5€50</li>
-      <span class="stock-yellow">0</span> Bison 3 : 3€50</li>
-      <span class="stock-yellow">0</span> Bison 2 : 2€50</li>
-      <span class="stock-yellow">0</span> Bison 1 : 2€</li>
+      <span class="out-stock">0</span> Bison 0 : 1€</li>
+      <span class="out-stock">0</span> Bison 5 : 5€50</li>
+      <span class="out-stock">0</span> Bison 3 : 3€50</li>
+      <span class="out-stock">0</span> Bison 2 : 2€50</li>
+      <span class="out-stock">0</span> Bison 1 : 2€</li>
     </ul>
   </details>
 
@@ -353,7 +412,7 @@ body::-webkit-scrollbar {
 			Tu peux detacher les petards pour avoir 1000 petit petard a 7 centimes.
 			Longueur : 4 mètres"
 		    data-img="img/Mitraillettes/Mitraillette-1000-coups.webp">
-				<span class="stock-green">1</span> Mitraillette 1000 coups 📷 : 70€</li>
+				<span class="in-stock">1</span> Mitraillette 1000 coups 📷 : 70€</li>
 		<li class="product-item"
 			data-name="Mitraillette 1500 coups"
 		    data-price="110"
@@ -361,58 +420,58 @@ body::-webkit-scrollbar {
 			Tu peux detacher les petards pour avoir 1500 petit petard a 7,3 centimes.
 			Longueur : 4,85 mètres"
 		    data-img="img/Mitraillettes/Mitraillette-1500-coups.webp">
-				<span class="stock-yellow">0</span> Mitraillette 1500 coups : 110€</li>
+				<span class="out-stock">0</span> Mitraillette 1500 coups : 110€</li>
 		<li class="product-item"
 			data-name="Mitraillette 400 coups"
 		    data-price="35"
 		    data-description="400 petards qui petent a la suite, 8,75 centimes/coups.
 			Tu peux detacher les petards pour avoir 400 petit petard a 8,75 centimes."
 		    data-img="img/Mitraillettes/Mitraillette-400-coups.webp">
-				<span class="stock-yellow">0</span> Mitraillette 400 coups : 35€</li>
+				<span class="out-stock">0</span> Mitraillette 400 coups : 35€</li>
 		<li class="product-item"
 			data-name="Mitraillette 200 coups"
 		    data-price="19"
 		    data-description="200 petards qui petent a la suite, 9,5 centimes/coups."
 		    data-img="img/Mitraillettes/Mitraillette-200-coups.webp">
-				<span class="stock-yellow">0</span> Mitraillette 200 coups : 19€</li>
+				<span class="out-stock">0</span> Mitraillette 200 coups : 19€</li>
 		<li class="product-item"
 			data-name="Mitraillette 100 coups"
 		    data-price="10"
 		    data-description="100 petards qui petent a la suite, 10 centimes/coups."
 		    data-img="img/Mitraillettes/Mitraillette-100-coups.webp">
-				<span class="stock-yellow">0</span> Mitraillette 100 coups : 10€</li>
+				<span class="out-stock">0</span> Mitraillette 100 coups : 10€</li>
 		<li class="product-item"
 			data-name="Mitraillette 40 coups"
 		    data-price="5"
 		    data-description="40 petards qui petent a la suite, 12,5 centimes/coups."
 		    data-img="img/Mitraillettes/Mitraillette-40-coups.webp">
-				<span class="stock-yellow">0</span> Mitraillette 40 coups : 5€</li>
+				<span class="out-stock">0</span> Mitraillette 40 coups : 5€</li>
 		<li class="product-item"
 			data-name="200 Fusées or sifflantes 45s 10m"
 		    data-price="80"
 		    data-description="200 fusées doré qui partent a la suite a 10m de plus en plus vite pendant 45 secondes, 40 centimes/fusées."
 		    data-img="img/Tam-tam/200-Fusées-or-sifflantes-45s-10m.webp">
-				<span class="stock-yellow">0</span> 200 Fusées or sifflantes 45s 10m 📷 : 80€</li>
+				<span class="out-stock">0</span> 200 Fusées or sifflantes 45s 10m 📷 : 80€</li>
 		<li class="product-item"
 			data-name="25 Fusées or sifflantes 28s 15m"
 		    data-price="80"
 		    data-description="25 fusées doré qui partent a la suite a 15m de plus en plus vite pendant 28 secondes, 60 centimes/fusées."
 		    data-img="img/Tam-tam/25-Fusées-or-sifflantes-28s-15m.webp">
-				<span class="stock-yellow">0</span> 25 Fusées or sifflantes 28s 15m : 15 €</li>
+				<span class="out-stock">0</span> 25 Fusées or sifflantes 28s 15m : 15 €</li>
     </ul>
   </details>
   
   <details>
   <summary>Fusées</summary>
   <ul>
-    <li><span class="stock-yellow">0</span> Fusées Z4 : 4€</li>
-    <li><span class="stock-yellow">0</span> Fusées Z1 : 3€</li>
-    <li><span class="stock-yellow">0</span> Fusées Z3 : 3€75</li>
-    <li><span class="stock-yellow">0</span> Fusées Z2 : 3€50</li>
-    <li><span class="stock-yellow">0</span> Fusées extrème : 4€</li>
-    <li><span class="stock-yellow">0</span> Fusées bombardier : 5€</li>
-    <li><span class="stock-yellow">0</span> Fusées boréal : 4€</li>
-    <li><span class="stock-yellow">0</span> Fusées parrachute : 4€</li>
+    <li><span class="out-stock">0</span> Fusées Z4 : 4€</li>
+    <li><span class="out-stock">0</span> Fusées Z1 : 3€</li>
+    <li><span class="out-stock">0</span> Fusées Z3 : 3€75</li>
+    <li><span class="out-stock">0</span> Fusées Z2 : 3€50</li>
+    <li><span class="out-stock">0</span> Fusées extrème : 4€</li>
+    <li><span class="out-stock">0</span> Fusées bombardier : 5€</li>
+    <li><span class="out-stock">0</span> Fusées boréal : 4€</li>
+    <li><span class="out-stock">0</span> Fusées parrachute : 4€</li>
   </ul>
 </details>
 
@@ -422,49 +481,49 @@ body::-webkit-scrollbar {
     <details>
       <summary>A goupille 1min : 20€</summary>
       <ul>
-        <li class="product-item"><span class="stock-yellow">0</span> Rouge</li>
-        <li class="product-item"><span class="stock-yellow">0</span> Bleu</li>
-        <li class="product-item"><span class="stock-yellow">0</span> Blanc</li>
-        <li class="product-item"><span class="stock-yellow">0</span> Vert</li>
-        <li class="product-item"><span class="stock-yellow">0</span> Jaune</li>
-        <li class="product-item"><span class="stock-yellow">0</span> Rose</li>
-        <li class="product-item"><span class="stock-yellow">0</span> Violet</li>
-        <li class="product-item"><span class="stock-yellow">0</span> Orange</li>
-        <li class="product-item"><span class="stock-yellow">0</span> Noir</li>
+        <li class="product-item"><span class="out-stock">0</span> Rouge</li>
+        <li class="product-item"><span class="out-stock">0</span> Bleu</li>
+        <li class="product-item"><span class="out-stock">0</span> Blanc</li>
+        <li class="product-item"><span class="out-stock">0</span> Vert</li>
+        <li class="product-item"><span class="out-stock">0</span> Jaune</li>
+        <li class="product-item"><span class="out-stock">0</span> Rose</li>
+        <li class="product-item"><span class="out-stock">0</span> Violet</li>
+        <li class="product-item"><span class="out-stock">0</span> Orange</li>
+        <li class="product-item"><span class="out-stock">0</span> Noir</li>
       </ul>
     </details>
     <details>
       <summary>A main 45s : 20€</summary>
       <ul>
-        <li class="product-item"><span class="stock-yellow">0</span> Rouge</li>
-        <li class="product-item"><span class="stock-yellow">0</span> Bleu</li>
-        <li class="product-item"><span class="stock-yellow">0</span> Blanc</li>
-        <li class="product-item"><span class="stock-yellow">0</span> Vert</li>
-        <li class="product-item"><span class="stock-yellow">0</span> Bleu blanc rouge</li>
+        <li class="product-item"><span class="out-stock">0</span> Rouge</li>
+        <li class="product-item"><span class="out-stock">0</span> Bleu</li>
+        <li class="product-item"><span class="out-stock">0</span> Blanc</li>
+        <li class="product-item"><span class="out-stock">0</span> Vert</li>
+        <li class="product-item"><span class="out-stock">0</span> Bleu blanc rouge</li>
       </ul>
     </details>
     <details>
       <summary>1min : 15€</summary>
       <ul>
-        <li class="product-item"><span class="stock-yellow">0</span> Rouge</li>
-        <li class="product-item"><span class="stock-yellow">0</span> Bleu</li>
-        <li class="product-item"><span class="stock-yellow">0</span> Blanc</li>
-        <li class="product-item"><span class="stock-yellow">0</span> Vert</li>
-        <li class="product-item"><span class="stock-yellow">0</span> Jaune</li>
+        <li class="product-item"><span class="out-stock">0</span> Rouge</li>
+        <li class="product-item"><span class="out-stock">0</span> Bleu</li>
+        <li class="product-item"><span class="out-stock">0</span> Blanc</li>
+        <li class="product-item"><span class="out-stock">0</span> Vert</li>
+        <li class="product-item"><span class="out-stock">0</span> Jaune</li>
       </ul>
     </details>
     <details>
       <summary>2min : 28€</summary>
       <ul>
-        <li class="product-item"><span class="stock-yellow">0</span> Rouge</li>
-        <li class="product-item"><span class="stock-yellow">0</span> Bleu</li>
-        <li class="product-item"><span class="stock-yellow">0</span> Blanc</li>
-        <li class="product-item"><span class="stock-green">1</span> Rose</li>
+        <li class="product-item"><span class="out-stock">0</span> Rouge</li>
+        <li class="product-item"><span class="out-stock">0</span> Bleu</li>
+        <li class="product-item"><span class="out-stock">0</span> Blanc</li>
+        <li class="product-item"><span class="in-stock">1</span> Rose</li>
       </ul>
     </details>
 
-    <li class="product-item"><span class="stock-yellow">0</span> Pack 6 boule fumigènes couleurs différentes 30s : 10€</li>
-    <li class="product-item"><span class="stock-green">1</span> Sortie double rouge 45s : 20€</li>
+    <li class="product-item"><span class="out-stock">0</span> Pack 6 boule fumigènes couleurs différentes 30s : 10€</li>
+    <li class="product-item"><span class="in-stock">1</span> Sortie double rouge 45s : 20€</li>
   </ul>
 </details>
 
@@ -474,13 +533,13 @@ body::-webkit-scrollbar {
     <details>
       <summary>Torche Bengal 40s</summary>
       <ul>
-        <li class="product-item"><span class="stock-yellow">0</span> Rouge</li>
-        <li class="product-item"><span class="stock-yellow">0</span> Vert</li>
-        <li class="product-item"><span class="stock-yellow">0</span> Bleu</li>
+        <li class="product-item"><span class="out-stock">0</span> Rouge</li>
+        <li class="product-item"><span class="out-stock">0</span> Vert</li>
+        <li class="product-item"><span class="out-stock">0</span> Bleu</li>
       </ul>
     </details>
-    <li class="product-item"><span class="stock-yellow">0</span> Feu Bengal rouge 40s : 15€</li>
-    <li class="product-item"><span class="stock-yellow">0</span> Feu Bengal bleu 1min : 16€</li>
+    <li class="product-item"><span class="out-stock">0</span> Feu Bengal rouge 40s : 15€</li>
+    <li class="product-item"><span class="out-stock">0</span> Feu Bengal bleu 1min : 16€</li>
   </ul>
 </details>
 
@@ -488,32 +547,32 @@ body::-webkit-scrollbar {
   <details>
     <summary>Torches de jardin</summary>
     <ul>
-      <li class="product-item"><span class="stock-yellow">0</span> 45min : 10€</li>
-      <li class="product-item"><span class="stock-yellow">0</span> 90min : 18€</li>
+      <li class="product-item"><span class="out-stock">0</span> 45min : 10€</li>
+      <li class="product-item"><span class="out-stock">0</span> 90min : 18€</li>
     </ul>
   </details>
 
   <details>
     <summary>Jets de scène</summary>
     <ul>
-      <li class="product-item"><span class="stock-yellow">0</span> Jet de scène argent 2m 30s : 15€</li>
-      <li class="product-item"><span class="stock-yellow">0</span> Jet de scène argent 3m 60s : 30€</li>
+      <li class="product-item"><span class="out-stock">0</span> Jet de scène argent 2m 30s : 15€</li>
+      <li class="product-item"><span class="out-stock">0</span> Jet de scène argent 3m 60s : 30€</li>
     </ul>
   </details>
 
   <details>
     <summary>Feux d'artifice</summary>
     <ul>
-      <li class="product-item"><span class="stock-yellow">0</span> Atomico : 20€</li>
-      <li class="product-item"><span class="stock-yellow">0</span> Black Arrow : 30€</li>
-      <li class="product-item"><span class="stock-yellow">0</span> Atomic sisters : 30€</li>
-      <li class="product-item"><span class="stock-yellow">0</span> Étoile rouge : 6€</li>
-      <li class="product-item"><span class="stock-yellow">0</span> Étoile verte : 6€</li>
-      <li class="product-item"><span class="stock-yellow">0</span> Crépitants : 6€</li>
-      <li class="product-item"><span class="stock-yellow">0</span> Étoile verte & crépitants : 6€</li>
-      <li class="product-item"><span class="stock-yellow">0</span> Étoile jaune & crépitants : 6€</li>
-      <li class="product-item"><span class="stock-yellow">0</span> Méga étoile argent : 6€</li>
-      <li class="product-item"><span class="stock-yellow">0</span> Étoile pourpre & crépitants : 6€</li>
+      <li class="product-item"><span class="out-stock">0</span> Atomico : 20€</li>
+      <li class="product-item"><span class="out-stock">0</span> Black Arrow : 30€</li>
+      <li class="product-item"><span class="out-stock">0</span> Atomic sisters : 30€</li>
+      <li class="product-item"><span class="out-stock">0</span> Étoile rouge : 6€</li>
+      <li class="product-item"><span class="out-stock">0</span> Étoile verte : 6€</li>
+      <li class="product-item"><span class="out-stock">0</span> Crépitants : 6€</li>
+      <li class="product-item"><span class="out-stock">0</span> Étoile verte & crépitants : 6€</li>
+      <li class="product-item"><span class="out-stock">0</span> Étoile jaune & crépitants : 6€</li>
+      <li class="product-item"><span class="out-stock">0</span> Méga étoile argent : 6€</li>
+      <li class="product-item"><span class="out-stock">0</span> Étoile pourpre & crépitants : 6€</li>
     </ul>
   </details>
 
@@ -527,7 +586,7 @@ body::-webkit-scrollbar {
 			Dimensions de contenant du feu d’artifice : 21cm de hauteur et 9cm de diamètre
 		    Catégorie : F3"
 			data-img="img/Volcans/Volcan-or-et-argent-7m-60s.webp">
-				<span class="stock-yellow">0</span> Volcan or et argent 7m 60s 📷 : 80€</li>
+				<span class="out-stock">0</span> Volcan or et argent 7m 60s 📷 : 80€</li>
       </ul>
     </details>
 	
@@ -556,13 +615,38 @@ body::-webkit-scrollbar {
     <li>GHD Platinum + neuf : 150€</li>
   </ul>
   <details>
-    <summary>Airpods avec ANC (réduction de bruit) neuf 📷</summary>
+    <summary>Airpods avec ANC (réduction de bruit) neuf </summary>
     <ul>
-      <li>Pro 2 : 120€</li>
-      <li>3 : 100€</li>
-      <li>4 : 120€</li>
-      <li>Max : 350€</li>
-      <li>Coque sangle (noir, vert, bleu): 8€</li>
+		<li class="product-item"
+			data-name="Airpods pro 2"
+		    data-price="100"
+		    data-description="Airpods pro 2, qualité parfaite, même la garantie marche, tarif revendeur beacoup moins cher"
+		    data-img="img/Airpods/Airpods-pro-2.webp">
+				<span class="in-stock">1</span>Airpods pro 2 : 100€</li>
+    	<li class="product-item"
+			data-name="Airpods 3"
+		    data-price="100"
+		    data-description="Airpods 3, qualité parfaite, même la garantie marche, tarif revendeur beacoup moins cher"
+		    data-img="img/Airpods/Airpods-3.webp">
+				<span class="out-stock">0</span>Airpods 3 : 100€</li>
+		<li class="product-item"
+			data-name="Airpods 4"
+		    data-price="100"
+		    data-description="Airpods 4, qualité parfaite, même la garantie marche, tarif revendeur beacoup moins cher"
+		    data-img="img/Airpods/Airpods-4.webp">
+				<span class="out-stock">0</span>Airpods 4 : 100€</li>
+		<li class="product-item"
+			data-name="Airmax"
+		    data-price="350"
+		    data-description="Airmax, qualité parfaite, même la garantie marche, tarif revendeur beacoup moins cher"
+		    data-img="img/Airpods/Airmax.webp">
+				<span class="out-stock">0</span>Airmax : 350€</li>
+		<li class="product-item"
+			data-name="Boitier sangle"
+		    data-price="8"
+		    data-description="Boitier de Airpods avec sangle, dispo en 3 couleurs, qualité parfaite, tarif revendeur beacoup moins cher"
+		    data-img="img/Airpods/Boitier-sangle-noir.webp">
+				<span class="out-stock">0</span>boitier sangle (noir, vert, bleu): 8€</li>
     </ul>
   </details>
 </details>
@@ -612,6 +696,15 @@ body::-webkit-scrollbar {
   </div>
 </div>
 
+<div id="cart-modal" class="modal hidden">
+  <div class="modal-content">
+    <span class="close">✖</span>
+    <h2>🛒 Votre panier</h2>
+    <ul id="cart-list"></ul>
+    <p style="margin-top: 1rem;"><strong>Total :</strong> <span id="cart-modal-total">0</span> €</p>
+  </div>
+</div>
+
   <script>
 document.querySelectorAll('.product-item').forEach(item => {
   item.addEventListener('click', () => {
@@ -632,9 +725,6 @@ document.querySelectorAll('.product-item').forEach(item => {
 
     updateQtyDisplay();
 
-    // Supprimer cette ligne, qtyInput n'existe pas
-    // qtyInput.value = 1;
-
     // Affiche les infos du produit
     title.textContent = `${name} - ${price}€`;
     description.textContent = item.dataset.description || '';
@@ -652,7 +742,9 @@ document.querySelectorAll('.product-item').forEach(item => {
     } else {
       video.style.display = 'none';
     }
-
+		// Fermer la modale panier si ouverte
+	cartModal.classList.remove('show');
+	cartModal.classList.add('hidden');
     modal.classList.add('show');
     modal.classList.remove('hidden');
   });
@@ -673,34 +765,92 @@ let currentProduct = {
   qty: 0
 };
 
-function updateCartUI() {
-  cartItemsEl.innerHTML = '';
+const cartModal = document.getElementById('cart-modal');
+const cartList = document.getElementById('cart-list');
+const cartModalTotal = document.getElementById('cart-modal-total');
+
+cartModal.querySelector('.close').addEventListener('click', () => {
+  cartModal.classList.remove('show');
+  cartModal.classList.add('hidden');
+});
+
+function updateCartModal() {
+  cartList.innerHTML = '';
   let total = 0;
 
   cart.forEach(item => {
     const li = document.createElement('li');
-    li.textContent = `${item.name} x${item.qty} — ${item.qty * item.price}€`;
-    cartItemsEl.appendChild(li);
+
+    const name = document.createElement('span');
+    name.textContent = `${item.name} x${item.qty}`;
+
+    const controls = document.createElement('div');
+    controls.style.display = 'flex';
+    controls.style.gap = '5px';
+
+    const plus = document.createElement('button');
+    plus.textContent = '+';
+    plus.onclick = () => {
+      item.qty += 1;
+      updateCartUI();
+      updateCartModal();
+    };
+
+    const minus = document.createElement('button');
+    minus.textContent = '−';
+    minus.onclick = () => {
+      item.qty -= 1;
+      if (item.qty <= 0) cart.splice(cart.indexOf(item), 1);
+      updateCartUI();
+      updateCartModal();
+    };
+
+    controls.appendChild(minus);
+    controls.appendChild(plus);
+
+    li.appendChild(name);
+    li.appendChild(controls);
+    cartList.appendChild(li);
+
+    total += item.qty * item.price;
+  });
+
+  cartModalTotal.textContent = total.toFixed(2);
+}
+
+function updateCartUI() {
+  let total = 0;
+  cart.forEach(item => {
     total += item.price * item.qty;
   });
 
-  cartTotalEl.textContent = total.toFixed(2);
-}
+const totalSpan = document.getElementById('cart-total');
+const labelSpan = document.getElementById('cart-label');
 
+if (total === 0) {
+  labelSpan.style.display = 'none';
+} else {
+  totalSpan.textContent = total.toFixed(2);
+  labelSpan.style.display = 'inline';
+}
+}
+	
 function updateQtyDisplay() {
-  if (currentProduct.qty > 1) {
+  if (currentProduct.qty > 0) {
     qtyDisplay.style.display = 'inline';
-    removeOneBtn.style.display = 'inline';
-  } else if (currentProduct.qty === 1) {
-    qtyDisplay.style.display = 'inline';
-    removeOneBtn.style.display = 'none';
+    qtyDisplay.textContent = `x${currentProduct.qty}`;
+
+    if (currentProduct.qty > -1) {
+      removeOneBtn.style.display = 'inline';
+    } else {
+      removeOneBtn.style.display = 'none';
+    }
   } else {
     qtyDisplay.style.display = 'none';
     removeOneBtn.style.display = 'none';
   }
-
-  qtyDisplay.textContent = `x${currentProduct.qty}`;
 }
+
 
 addToCartBtn.addEventListener('click', () => {
   if (!currentProduct.name || isNaN(currentProduct.price)) return;
@@ -741,12 +891,37 @@ removeOneBtn.addEventListener('click', () => {
 });
 
   
-  // Fermer la modale quand on clique sur la croix
-document.querySelector('.modal .close').addEventListener('click', () => {
+// Fermeture de la modale produit
+document.querySelector('#product-modal .close').addEventListener('click', () => {
   const modal = document.getElementById('product-modal');
   modal.classList.remove('show');
   modal.classList.add('hidden');
 });
+
+// Fermeture de la modale panier
+document.querySelector('#cart-modal .close').addEventListener('click', () => {
+  const modal = document.getElementById('cart-modal');
+  modal.classList.remove('show');
+  modal.classList.add('hidden');
+});
+
+
+window.onload = () => {
+  const cartButton = document.getElementById('cart-button');
+  cartButton.addEventListener('click', () => {
+    updateCartModal();
+	// Fermer la modale produit si elle est ouverte
+	document.getElementById('product-modal').classList.remove('show');
+	document.getElementById('product-modal').classList.add('hidden');
+
+	cartModal.classList.remove('hidden');
+	cartModal.classList.add('show');
+  });
+
+  // Masquer "Total" au démarrage
+  document.getElementById('cart-label').style.display = 'none';
+};
+
 
 </script>
 </body>
