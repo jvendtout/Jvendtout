@@ -323,365 +323,67 @@ body::-webkit-scrollbar {
 
 <div class="container"> 
 
-<div class="product-list">
+	<script>
+async function chargerArticles() {
+  try {
+    const res = await fetch("articles.json"); // charge ton fichier
+    const articles = await res.json();
 
-<p>📷 = photo/vidéo dispo<br>Plus la commande est grosse plus les prix sont négociables.💲</p>
+    const productList = document.querySelector(".product-list");
+    productList.innerHTML = ""; // nettoie ce qu'il y avait
 
-<details>
-  <summary>Fait maison 📷</summary>
-  <details>
-    <summary>Pétard 20cm×4cm</summary>
-    <ul>
-	<li class="product-item">Base 50g de poudre noir, 15 sec de mèche : 15€</li>
-    </ul>
-  </details>
-  <details>
-    <summary>Supplément : pas cher</summary>
-    <ul>
-      <li class="product-item">Parfait finitions parfaites, décoratif</li>
-      <li class="product-item">Papier craft, décoratif</li>
-      <li class="product-item">Scotche</li>
-      <li class="product-item">Semi poudre flash</li>
-      <li class="product-item">Mini feu bengale au début</li>
-      <li class="product-item">+ Couche de carton</li>
-      <li class="product-item">+- poudre noir</li>
-      <li class="product-item">+- mèche</li>
-    </ul>
-  </details>
-  <ul>
-    <li class="product-item">Feu bengal couleurs jaune ou bleu. Taille, intensité, duré au choix.</li>
-  </ul>
-  <p>Si tu me donnes des tubes en carton épais j'offre des choses</p>
-</details>
+    articles.forEach(article => {
+      // crée un élément <li> comme ceux que tu avais avant
+      const li = document.createElement("li");
+      li.classList.add("product-item");
+      li.dataset.name = article.id;
+      li.dataset.price = article.prix;
+      li.dataset.description = article.description;
+      li.dataset.img = article.image || "";
+      li.dataset.video = article.video || "";
 
-<details>
-  <summary>Puffs jnr 🚬 (a venir) 📷</summary>
-  <ul>
-    <li class="product-item">16k : 16€</li>
-    <li class="product-item">Pour 3 : 14,5€/u (43,5€)</li>
-    <li class="product-item">Pour 10 : 13€/u (130€)</li>
-  </ul>
-  <details>
-    <summary>Goûts (5 disponibles)</summary>
-    <ul>
-      <li class="product-item">tu peux choisir 1 gout que je vendrais pour 15€ ( saufsi il est vraiment nul)</li>
-      <li class="product-item">2 gouts pour 25€</li>
-      <li class="product-item">3 gout pour 30€</li>
-      <li class="product-item">pas possible de choisir</li>
-      <li class="product-item">pas possible de choisir</li>
-    </ul>
-  </details>
-</details>
+      li.innerHTML = `<span class="in-stock">1</span> ${article.nom} 📷 : ${article.prix}€`;
 
-<details>
- <summary>Artifices 💥 📷</summary>
+      productList.appendChild(li);
+    });
 
-  <details>
-    <summary class="product-item"><span class="in-stock">18</span>Flash 📷: 5€</summary>
-    <ul>
-      <li>maximum légal, meilleure rapport puissance, bruit, taille, prix</li>
-    </ul>
-  </details>
+    // réattache les événements (ouvrir la modale etc.)
+    document.querySelectorAll('.product-item').forEach(item => {
+      item.addEventListener('click', () => {
+        const modal = document.getElementById('product-modal');
+        document.getElementById('modal-title').textContent = `${item.dataset.name} - ${item.dataset.price}€`;
+        document.getElementById('modal-description').textContent = item.dataset.description;
 
-  <details>
-  <summary>Bison 🧨</summary>
-	<ul>
-		<li class="product-item"
-		data-name="Bison 4"
-		data-price="4,50"
-		data-description="Bison 4 le plus rentable des bisons puissants.
-		Dimension : Hauteur 14 cm Diamètre 2.6 cm
-		categorie F2"
-		data-img="">
-			<span class="out-stock">0</span> Bison 4 : 4€50</li>
-		<li class="product-item"
-		data-name=""
-		data-price=""
-		data-description=""
-		data-img="">
-      <span class="out-stock">0</span> Bison 0 : 1€</li>
-      <span class="out-stock">0</span> Bison 5 : 5€50</li>
-      <span class="out-stock">0</span> Bison 3 : 3€50</li>
-      <span class="out-stock">0</span> Bison 2 : 2€50</li>
-      <span class="out-stock">0</span> Bison 1 : 2€</li>
-    </ul>
-  </details>
+        const img = document.getElementById('modal-img');
+        const video = document.getElementById('modal-video');
 
-  <details>
-    <summary>Mitraillettes 🧨</summary>
-    <ul>
-	    <li class="product-item"
-			data-name="Mitraillette 1000 coups"
-			data-price="70"
-		    data-description="1000 petards qui petent a la suite, meilleure rapport nombre de coups/prix, 7 centimes/coups.
-			Tu peux detacher les petards pour avoir 1000 petit petard a 7 centimes.
-			Longueur : 4 mètres"
-		    data-img="img/Mitraillettes/Mitraillette-1000-coups.webp">
-				<span class="in-stock">1</span> Mitraillette 1000 coups 📷 : 70€</li>
-		<li class="product-item"
-			data-name="Mitraillette 1500 coups"
-		    data-price="110"
-		    data-description="1500 petards qui petent a la suite, 7,3 centimes/coups.
-			Tu peux detacher les petards pour avoir 1500 petit petard a 7,3 centimes.
-			Longueur : 4,85 mètres"
-		    data-img="img/Mitraillettes/Mitraillette-1500-coups.webp">
-				<span class="out-stock">0</span> Mitraillette 1500 coups : 110€</li>
-		<li class="product-item"
-			data-name="Mitraillette 400 coups"
-		    data-price="35"
-		    data-description="400 petards qui petent a la suite, 8,75 centimes/coups.
-			Tu peux detacher les petards pour avoir 400 petit petard a 8,75 centimes."
-		    data-img="img/Mitraillettes/Mitraillette-400-coups.webp">
-				<span class="out-stock">0</span> Mitraillette 400 coups : 35€</li>
-		<li class="product-item"
-			data-name="Mitraillette 200 coups"
-		    data-price="19"
-		    data-description="200 petards qui petent a la suite, 9,5 centimes/coups."
-		    data-img="img/Mitraillettes/Mitraillette-200-coups.webp">
-				<span class="out-stock">0</span> Mitraillette 200 coups : 19€</li>
-		<li class="product-item"
-			data-name="Mitraillette 100 coups"
-		    data-price="10"
-		    data-description="100 petards qui petent a la suite, 10 centimes/coups."
-		    data-img="img/Mitraillettes/Mitraillette-100-coups.webp">
-				<span class="out-stock">0</span> Mitraillette 100 coups : 10€</li>
-		<li class="product-item"
-			data-name="Mitraillette 40 coups"
-		    data-price="5"
-		    data-description="40 petards qui petent a la suite, 12,5 centimes/coups."
-		    data-img="img/Mitraillettes/Mitraillette-40-coups.webp">
-				<span class="out-stock">0</span> Mitraillette 40 coups : 5€</li>
-		<li class="product-item"
-			data-name="200 Fusées or sifflantes 45s 10m"
-		    data-price="80"
-		    data-description="200 fusées doré qui partent a la suite a 10m de plus en plus vite pendant 45 secondes, 40 centimes/fusées."
-		    data-img="img/Tam-tam/200-Fusées-or-sifflantes-45s-10m.webp">
-				<span class="out-stock">0</span> 200 Fusées or sifflantes 45s 10m 📷 : 80€</li>
-		<li class="product-item"
-			data-name="25 Fusées or sifflantes 28s 15m"
-		    data-price="80"
-		    data-description="25 fusées doré qui partent a la suite a 15m de plus en plus vite pendant 28 secondes, 60 centimes/fusées."
-		    data-img="img/Tam-tam/25-Fusées-or-sifflantes-28s-15m.webp">
-				<span class="out-stock">0</span> 25 Fusées or sifflantes 28s 15m : 15 €</li>
-    </ul>
-  </details>
-  
-  <details>
-  <summary>Fusées</summary>
-  <ul>
-    <li><span class="out-stock">0</span> Fusées Z4 : 4€</li>
-    <li><span class="out-stock">0</span> Fusées Z1 : 3€</li>
-    <li><span class="out-stock">0</span> Fusées Z3 : 3€75</li>
-    <li><span class="out-stock">0</span> Fusées Z2 : 3€50</li>
-    <li><span class="out-stock">0</span> Fusées extrème : 4€</li>
-    <li><span class="out-stock">0</span> Fusées bombardier : 5€</li>
-    <li><span class="out-stock">0</span> Fusées boréal : 4€</li>
-    <li><span class="out-stock">0</span> Fusées parrachute : 4€</li>
-  </ul>
-</details>
+        if (item.dataset.img) {
+          img.src = item.dataset.img;
+          img.style.display = "block";
+        } else {
+          img.style.display = "none";
+        }
 
-<details>
-  <summary>Fumigènes</summary>
-  <ul>
-    <details>
-      <summary>A goupille 1min : 20€</summary>
-      <ul>
-        <li class="product-item"><span class="out-stock">0</span> Rouge</li>
-        <li class="product-item"><span class="out-stock">0</span> Bleu</li>
-        <li class="product-item"><span class="out-stock">0</span> Blanc</li>
-        <li class="product-item"><span class="out-stock">0</span> Vert</li>
-        <li class="product-item"><span class="out-stock">0</span> Jaune</li>
-        <li class="product-item"><span class="out-stock">0</span> Rose</li>
-        <li class="product-item"><span class="out-stock">0</span> Violet</li>
-        <li class="product-item"><span class="out-stock">0</span> Orange</li>
-        <li class="product-item"><span class="out-stock">0</span> Noir</li>
-      </ul>
-    </details>
-    <details>
-      <summary>A main 45s : 20€</summary>
-      <ul>
-        <li class="product-item"><span class="out-stock">0</span> Rouge</li>
-        <li class="product-item"><span class="out-stock">0</span> Bleu</li>
-        <li class="product-item"><span class="out-stock">0</span> Blanc</li>
-        <li class="product-item"><span class="out-stock">0</span> Vert</li>
-        <li class="product-item"><span class="out-stock">0</span> Bleu blanc rouge</li>
-      </ul>
-    </details>
-    <details>
-      <summary>1min : 15€</summary>
-      <ul>
-        <li class="product-item"><span class="out-stock">0</span> Rouge</li>
-        <li class="product-item"><span class="out-stock">0</span> Bleu</li>
-        <li class="product-item"><span class="out-stock">0</span> Blanc</li>
-        <li class="product-item"><span class="out-stock">0</span> Vert</li>
-        <li class="product-item"><span class="out-stock">0</span> Jaune</li>
-      </ul>
-    </details>
-    <details>
-      <summary>2min : 28€</summary>
-      <ul>
-        <li class="product-item"><span class="out-stock">0</span> Rouge</li>
-        <li class="product-item"><span class="out-stock">0</span> Bleu</li>
-        <li class="product-item"><span class="out-stock">0</span> Blanc</li>
-        <li class="product-item"><span class="in-stock">1</span> Rose</li>
-      </ul>
-    </details>
+        if (item.dataset.video) {
+          video.src = item.dataset.video;
+          video.style.display = "block";
+        } else {
+          video.style.display = "none";
+        }
 
-    <li class="product-item"><span class="out-stock">0</span> Pack 6 boule fumigènes couleurs différentes 30s : 10€</li>
-    <li class="product-item"><span class="in-stock">1</span> Sortie double rouge 45s : 20€</li>
-  </ul>
-</details>
+        modal.classList.add("show");
+        modal.classList.remove("hidden");
+      });
+    });
 
-<details>
-  <summary>Feu Bengal</summary>
-  <ul>
-    <details>
-      <summary>Torche Bengal 40s</summary>
-      <ul>
-        <li class="product-item"><span class="out-stock">0</span> Rouge</li>
-        <li class="product-item"><span class="out-stock">0</span> Vert</li>
-        <li class="product-item"><span class="out-stock">0</span> Bleu</li>
-      </ul>
-    </details>
-    <li class="product-item"><span class="out-stock">0</span> Feu Bengal rouge 40s : 15€</li>
-    <li class="product-item"><span class="out-stock">0</span> Feu Bengal bleu 1min : 16€</li>
-  </ul>
-</details>
+  } catch (err) {
+    console.error("Erreur chargement articles.json", err);
+  }
+}
 
-
-  <details>
-    <summary>Torches de jardin</summary>
-    <ul>
-      <li class="product-item"><span class="out-stock">0</span> 45min : 10€</li>
-      <li class="product-item"><span class="out-stock">0</span> 90min : 18€</li>
-    </ul>
-  </details>
-
-  <details>
-    <summary>Jets de scène</summary>
-    <ul>
-      <li class="product-item"><span class="out-stock">0</span> Jet de scène argent 2m 30s : 15€</li>
-      <li class="product-item"><span class="out-stock">0</span> Jet de scène argent 3m 60s : 30€</li>
-    </ul>
-  </details>
-
-  <details>
-    <summary>Feux d'artifice</summary>
-    <ul>
-      <li class="product-item"><span class="out-stock">0</span> Atomico : 20€</li>
-      <li class="product-item"><span class="out-stock">0</span> Black Arrow : 30€</li>
-      <li class="product-item"><span class="out-stock">0</span> Atomic sisters : 30€</li>
-      <li class="product-item"><span class="out-stock">0</span> Étoile rouge : 6€</li>
-      <li class="product-item"><span class="out-stock">0</span> Étoile verte : 6€</li>
-      <li class="product-item"><span class="out-stock">0</span> Crépitants : 6€</li>
-      <li class="product-item"><span class="out-stock">0</span> Étoile verte & crépitants : 6€</li>
-      <li class="product-item"><span class="out-stock">0</span> Étoile jaune & crépitants : 6€</li>
-      <li class="product-item"><span class="out-stock">0</span> Méga étoile argent : 6€</li>
-      <li class="product-item"><span class="out-stock">0</span> Étoile pourpre & crépitants : 6€</li>
-    </ul>
-  </details>
-
-    <details>
-      <summary>Volcans</summary>
-      <ul>
-	  	   <li class="product-item"
-			data-name="Volcan or et argent 7m 60s"
-			data-price="80"
-		    data-description="Envoie un jet d'étincelles doré et argenté a 7m pendant 1 minute.
-			Dimensions de contenant du feu d’artifice : 21cm de hauteur et 9cm de diamètre
-		    Catégorie : F3"
-			data-img="img/Volcans/Volcan-or-et-argent-7m-60s.webp">
-				<span class="out-stock">0</span> Volcan or et argent 7m 60s 📷 : 80€</li>
-      </ul>
-    </details>
-	
-<ul>
-  <li class="product-item">Mini 14 juillet 3m 120s 📷 : 90€</li>
-  <li class="product-item">Mèche : 5€/m 📷</li>
-  <li class="product-item">Feu d'artifice/Compact : cher à très très cher</li>
-</ul>
-</details>
-
-
-<details>
-  <summary>Maillot neuf, taille au choix, qualité excellente 📷 :</summary>
-  <ul>
-    <li>j'ai le maillot étoilé du psg pour 100€</li>
-    <li>Sans flocage : 50€</li>
-    <li>Nom, numéro au choix (joueur ou perso) : 60€</li>
-  </ul>
-  <p style="margin-left: 40px;">Pour 5 acheté : -20€</p>
-</details>
-
-<details>
-  <summary>Électronique</summary>
-  <ul>
-    <li>Dyson supersonic HD08 neuf : 250€</li>
-    <li>GHD Platinum + neuf : 150€</li>
-  </ul>
-  <details>
-    <summary>Airpods avec ANC (réduction de bruit) neuf </summary>
-    <ul>
-		<li class="product-item"
-			data-name="Airpods pro 2"
-		    data-price="100"
-		    data-description="Airpods pro 2, qualité parfaite, même la garantie marche, tarif revendeur beacoup moins cher"
-		    data-img="img/Airpods/Airpods-pro-2.webp">
-				<span class="in-stock">1</span>Airpods pro 2 : 100€</li>
-    	<li class="product-item"
-			data-name="Airpods 3"
-		    data-price="100"
-		    data-description="Airpods 3, qualité parfaite, même la garantie marche, tarif revendeur beacoup moins cher"
-		    data-img="img/Airpods/Airpods-3.webp">
-				<span class="out-stock">0</span>Airpods 3 : 100€</li>
-		<li class="product-item"
-			data-name="Airpods 4"
-		    data-price="100"
-		    data-description="Airpods 4, qualité parfaite, même la garantie marche, tarif revendeur beacoup moins cher"
-		    data-img="img/Airpods/Airpods-4.webp">
-				<span class="out-stock">0</span>Airpods 4 : 100€</li>
-		<li class="product-item"
-			data-name="Airmax"
-		    data-price="350"
-		    data-description="Airmax, qualité parfaite, même la garantie marche, tarif revendeur beacoup moins cher"
-		    data-img="img/Airpods/Airmax.webp">
-				<span class="out-stock">0</span>Airmax : 350€</li>
-		<li class="product-item"
-			data-name="Boitier sangle"
-		    data-price="8"
-		    data-description="Boitier de Airpods avec sangle, dispo en 3 couleurs, qualité parfaite, tarif revendeur beacoup moins cher"
-		    data-img="img/Airpods/Boitier-sangle-noir.webp">
-				<span class="out-stock">0</span>boitier sangle (noir, vert, bleu): 8€</li>
-    </ul>
-  </details>
-</details>
-
-<details>
-  <summary>Parfums</summary>
-  <ul>
-    <li>Plus de 1500 parfums, demandez celui que vous voulez je l'ai sûrement 📷 : 50€-80€</li>
-  </ul>
-</details>
-
-<details>
-  <summary>Produits chimiques🧪</summary>
-  <ul>
-    <li>Acide chlorhydrique : 12€/L 📷</li>
-    <li>Alcool à brûler : 10€/L 📷</li>
-    <li style="margin-left: 40px;">Les 2 bouteilles d’un litre (feu rouge) : 20€</li>
-  </ul>
-</details>
-
-<details>
-  <summary>Numérique</summary>
-  <ul>
-    <li>Application au choix crack pour tel ou pc (l'avoir gratuit, modé, illimité...) : 5€</li>
-    <li>Crack calculatrices numworks N0100 et N0110 (fond d'écran, thème, jeux gb, gbc, nes, liseuse...) 📷 : 5€</li>
-  </ul>
-</details>
-
-<p style="margin-top: 2rem;">Si tu cherches quelque chose qui n'est pas dans la liste demande moi je sais où trouver beaucoup de choses 🙂</p>
-</div>
+// appel automatique
+chargerArticles();
+</script>
 
   <div id="product-modal" class="modal hidden">
     <div class="modal-content">
@@ -931,3 +633,4 @@ window.onload = () => {
 </script>
 </body>
 </html>
+
