@@ -1,0 +1,23 @@
+<form id="addArticleForm">
+  <input type="text" name="nom" placeholder="Nom" required>
+  <input type="text" name="id" placeholder="ID" required>
+  <input type="text" name="image" placeholder="Chemin image">
+  <input type="text" name="video" placeholder="Chemin vidéo">
+  <textarea name="description" placeholder="Description"></textarea>
+  <input type="number" name="prix" placeholder="Prix" required>
+  <input type="text" name="categorie" placeholder="Catégorie">
+  <button type="submit">Ajouter</button>
+</form>
+
+<script>
+document.getElementById("addArticleForm").addEventListener("submit", e => {
+  e.preventDefault();
+  const formData = new FormData(e.target);
+  const article = Object.fromEntries(formData.entries());
+
+  let articles = JSON.parse(localStorage.getItem("articles") || "[]");
+  articles.push(article);
+  localStorage.setItem("articles", JSON.stringify(articles));
+  alert("Article ajouté !");
+});
+</script>
