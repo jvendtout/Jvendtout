@@ -1,0 +1,467 @@
+[
+  {
+    "nom": "Airpods pro 2",
+    "id": "airpods-pro-2",
+    "thumbnail": "",
+    "categorie": "Electroniques/Airpods",
+    "prix": 100,
+    "description": "Airpods pro 2, qualité parfaite, même la garantie marche, tarif revendeur beacoup moins cher",
+    "medias": [
+      {
+        "type": "image",
+        "path": "img/Articles/Electroniques/Airpods/Airpods-pro-2/Airpods-pro-2.webp"
+      }
+    ],
+    "image": "img/Articles/Electroniques/Airpods/Airpods-pro-2/Airpods-pro-2.webp"
+  },
+  {
+    "nom": "Airpods 3",
+    "id": "airpods-3",
+    "thumbnail": "",
+    "categorie": "Electroniques/Airpods",
+    "prix": 100,
+    "description": "Airpods 3, qualité parfaite, même la garantie marche, tarif revendeur beacoup moins cher",
+    "medias": [
+      {
+        "type": "image",
+        "path": "img/Articles/Electroniques/Airpods/Airpods-3/Airpods-3.webp"
+      }
+    ],
+    "image": "img/Articles/Electroniques/Airpods/Airpods-3/Airpods-3.webp"
+  },
+  {
+    "nom": "Airpods 4",
+    "id": "airpods-4",
+    "thumbnail": "",
+    "categorie": "Electroniques/Airpods",
+    "prix": 100,
+    "description": "Airpods 4, qualité parfaite, même la garantie marche, tarif revendeur beacoup moins cher",
+    "medias": [
+      {
+        "type": "image",
+        "path": "img/Articles/Electroniques/Airpods/Airpods-4/Airpods-4.webp"
+      }
+    ],
+    "image": "img/Articles/Electroniques/Airpods/Airpods-4/Airpods-4.webp"
+  },
+  {
+    "nom": "Airpods Max",
+    "id": "airpods-max",
+    "thumbnail": "",
+    "categorie": "Electroniques/Airpods",
+    "prix": 350,
+    "description": "Airmax, qualité parfaite, même la garantie marche, tarif revendeur beacoup moins cher",
+    "medias": [
+      {
+        "type": "image",
+        "path": "img/Articles/Electroniques/Airpods/airpods-max/airpod-max.webp"
+      }
+    ],
+    "image": "img/Articles/Electroniques/Airpods/airpods-max/airpod-max.webp"
+  },
+  {
+    "nom": "Boitier d'Airpods",
+    "id": "boitier-airpods",
+    "thumbnail": "",
+    "categorie": "Electroniques/Airpods",
+    "prix": 8,
+    "description": "Boitier de Airpods avec sangle, dispo en 3 couleurs, qualité parfaite, tarif revendeur beacoup moins cher",
+    "medias": [
+      {
+        "type": "image",
+        "path": "img/Articles/Electroniques/Airpods/Boitier-airpods/Boitier-airpods-noir.jpg"
+      },
+      {
+        "type": "image",
+        "path": "img/Articles/Electroniques/Airpods/Boitier-airpods/Boitier-airpods-bleu.jpg"
+      },
+      {
+        "type": "image",
+        "path": "img/Articles/Electroniques/Airpods/Boitier-airpods/Boitier-airpods-vert.jpg"
+      }
+    ],
+    "image": "img/Articles/Electroniques/Airpods/Boitier-airpods/Boitier-airpods-noir.jpg"
+  },
+  {
+    "nom": "Mitraillette 1000 coups",
+    "id": "mitraillette-1000-coups",
+    "image": "img/Articles/Artifices/Mitraillettes/mitraillette-1000-coups/Mitraillette-1000-coups.webp",
+    "video": "",
+    "categorie": "Artifices/Mitraillettes",
+    "prix": 70,
+    "description": "1000 petards qui petent a la suite, meilleure rapport nombre de coups/prix, 7 centimes/coups. Tu peux detacher les petards pour avoir 1000 petit petard a 7 centimes. Longueur : 4 mètres"
+  },
+  {
+    "nom": "Mitraillette 1500 coups",
+    "id": "mitraillette-1500-coups",
+    "image": "img/Articles/Artifices/Mitraillettes/mitraillette-1500-coups/Mitraillette-1500-coups.webp",
+    "video": "",
+    "categorie": "Artifices/Mitraillettes",
+    "prix": 110,
+    "description": "1500 petards qui petent a la suite, 7,3 centimes/coups. Tu peux detacher les petards pour avoir 1500 petit petard a 7,3 centimes. Longueur : 4,85 mètres"
+  },
+  {
+    "nom": "Mitraillette 400 coups",
+    "id": "mitraillette-400-coups",
+    "image": "/img/Articles/Artifices/Mitraillettes/mitraillette-400-coups/Mitraillette-400-coups.webp",
+    "video": "",
+    "categorie": "Artifices/Mitraillettes",
+    "prix": 35,
+    "description": "400 petards qui petent a la suite, 8,75 centimes/coups. Tu peux detacher les petards pour avoir 400 petit petard a 8,75 centimes."
+  },
+  {
+    "nom": "Mitraillette 200 coups",
+    "id": "mitraillette-200-coups",
+    "image": "/img/Articles/Artifices/Mitraillettes/mitraillette-200-coups/Mitraillette-200-coups.webp",
+    "video": "",
+    "categorie": "Artifices/Mitraillettes",
+    "prix": 19,
+    "description": "200 petards qui petent a la suite, 9,5 centimes/coups."
+  },
+  {
+    "nom": "Mitraillette 100 coups",
+    "id": "mitraillette-100-coups",
+    "image": "/img/Articles/Artifices/Mitraillettes/mitraillette-100-coups/Mitraillette-100-coups.webp",
+    "video": "",
+    "categorie": "Artifices/Mitraillettes",
+    "prix": 10,
+    "description": "100 petards qui petent a la suite, 10 centimes/coups."
+  },
+  {
+    "nom": "Mitraillette 40 coups",
+    "id": "mitraillette-40-coups",
+    "image": "/img/Articles/Artifices/Mitraillettes/mitraillette-40-coups/Mitraillette-40-coups.webp",
+    "video": "",
+    "categorie": "Artifices/Mitraillettes",
+    "prix": 5,
+    "description": "40 petards qui petent a la suite, 12,5 centimes/coups."
+  },
+  {
+    "nom": "Tam tam 200 coups",
+    "id": "tam-tam-200",
+    "thumbnail": "",
+    "categorie": "Artifices/Compacts/Tam tam",
+    "prix": 80,
+    "description": "200 fusées doré qui partent a la suite a 10m de plus en plus vite pendant 45 secondes, 40 centimes/fusées.",
+    "medias": [
+      {
+        "type": "image",
+        "path": "img/Articles/Artifices/Compact/Tam-tam/tam-tam-200/tam-tam-200.webp"
+      }
+    ],
+    "image": "img/Articles/Artifices/Compact/Tam-tam/tam-tam-200/tam-tam-200.webp"
+  },
+  {
+    "nom": "25 Fusées or sifflantes 28s 15m",
+    "id": "tam-tam-25",
+    "thumbnail": "",
+    "categorie": "Artifices/Compacts/Tam tam",
+    "prix": 15,
+    "description": "25 fusées doré qui partent a la suite a 15m de plus en plus vite pendant 28 secondes, 60 centimes/fusées.",
+    "medias": [
+      {
+        "type": "image",
+        "path": "img/Articles/Artifices/Compact/Tam-tam/tam-tam-25/tam-tam-25.webp"
+      }
+    ],
+    "image": "img/Articles/Artifices/Compact/Tam-tam/tam-tam-25/tam-tam-25.webp"
+  },
+  {
+    "nom": "Volcan or et argent 7m 60s",
+    "id": "volcan-or-et-argent-7m-60s",
+    "thumbnail": "",
+    "categorie": "Artifices/Volcans",
+    "prix": 80,
+    "description": "Envoie un jet d'étincelles doré et argenté a 7m pendant 1 minute.\nDimensions de contenant du feu d'artifice : 21cm de hauteur et 9cm de diamètre\nCatégorie : F3",
+    "medias": [
+      {
+        "type": "image",
+        "path": "img/Articles/Artifices/Volcans/volcan-or-et-argent-7m-60s/Volcan-or-et-argent-7m-60s.webp"
+      },
+      {
+        "type": "image",
+        "path": "img/Articles/Artifices/Volcans/volcan-or-et-argent-7m-60s/Volcan-or-et-argent-7m-60-2.png"
+      },
+      {
+        "type": "image",
+        "path": "img/Articles/Artifices/Volcans/volcan-or-et-argent-7m-60s/Volcan-or-et-argent-7m-60-3.png"
+      },
+      {
+        "type": "video",
+        "path": "img/Articles/Artifices/Volcans/volcan-or-et-argent-7m-60s/Volcan-or-et-argent-7m-60s.mp4"
+      }
+    ],
+    "image": "img/Articles/Artifices/Volcans/volcan-or-et-argent-7m-60s/Volcan-or-et-argent-7m-60s.webp",
+    "video": "img/Articles/Artifices/Volcans/volcan-or-et-argent-7m-60s/Volcan-or-et-argent-7m-60s.mp4"
+  },
+  {
+    "nom": "Bison 0",
+    "id": "bison-0",
+    "image": "",
+    "video": "",
+    "thumbnail": "",
+    "categorie": "Artifices/Bison",
+    "prix": 1,
+    "description": "Petard Bison 0"
+  },
+  {
+    "nom": "Bison 5",
+    "id": "bison-5",
+    "image": "",
+    "video": "",
+    "thumbnail": "",
+    "categorie": "Artifices/Bison",
+    "prix": 5.5,
+    "description": "Petard Bison 5"
+  },
+  {
+    "nom": "Bison 3",
+    "id": "bison-3",
+    "image": "",
+    "video": "",
+    "thumbnail": "",
+    "categorie": "Artifices/Bison",
+    "prix": 3.5,
+    "description": "Petard Bison 3"
+  },
+  {
+    "nom": "Bison 2",
+    "id": "bison-2",
+    "image": "",
+    "video": "",
+    "thumbnail": "",
+    "categorie": "Artifices/Bison",
+    "prix": 2.5,
+    "description": "Petard Bison 2"
+  },
+  {
+    "nom": "Bison 1",
+    "id": "bison-1",
+    "image": "",
+    "video": "",
+    "thumbnail": "",
+    "categorie": "Artifices/Bison",
+    "prix": 2,
+    "description": "Petard Bison 1"
+  },
+  {
+    "nom": "Bison 4",
+    "id": "bison-4",
+    "image": "",
+    "video": "",
+    "thumbnail": "",
+    "categorie": "Artifices/Bison",
+    "prix": 4.5,
+    "description": "Bison 4 le plus rentable des bisons puissants. Dimension : Hauteur 14 cm Diamètre 2.6 cm categorie F2"
+  },
+  {
+    "nom": "Flash",
+    "id": "flash",
+    "image": "",
+    "video": "",
+    "thumbnail": "",
+    "categorie": "Artifices",
+    "prix": 5,
+    "description": "Maximum légal, meilleur rapport puissance, bruit, taille, prix"
+  },
+  {
+    "nom": "Mini 14 juillet 3m 120s",
+    "id": "mini-14-juillet",
+    "image": "",
+    "video": "",
+    "thumbnail": "",
+    "categorie": "Artifices",
+    "prix": 90,
+    "description": "Feu d'artifice mini 14 juillet, monte à 3m pendant 120 secondes"
+  },
+  {
+    "nom": "Mèche",
+    "id": "meche",
+    "image": "",
+    "video": "",
+    "thumbnail": "",
+    "categorie": "Artifices/Accessoires",
+    "prix": 5,
+    "description": "Mèche pour artifices, prix au mètre"
+  },
+  {
+    "nom": "Dyson supersonic HD08 neuf",
+    "id": "dyson-supersonic",
+    "image": "",
+    "video": "",
+    "thumbnail": "",
+    "categorie": "Electroniques",
+    "prix": 250,
+    "description": "Sèche-cheveux Dyson supersonic HD08, neuf"
+  },
+  {
+    "nom": "GHD Platinum + neuf",
+    "id": "ghd-platinum",
+    "image": "",
+    "video": "",
+    "thumbnail": "",
+    "categorie": "Electroniques",
+    "prix": 150,
+    "description": "Lisseur GHD Platinum+, neuf"
+  },
+  {
+    "nom": "Maillot PSG étoilé",
+    "id": "maillot-psg-etoile",
+    "image": "",
+    "video": "",
+    "thumbnail": "",
+    "categorie": "Vêtements/Maillots",
+    "prix": 100,
+    "description": "Maillot étoilé du PSG, qualité excellente, taille au choix"
+  },
+  {
+    "nom": "Maillot sans flocage",
+    "id": "maillot-sans-flocage",
+    "image": "",
+    "video": "",
+    "thumbnail": "",
+    "categorie": "Vêtements/Maillots",
+    "prix": 50,
+    "description": "Maillot sans flocage, qualité excellente, taille au choix"
+  },
+  {
+    "nom": "Maillot avec flocage",
+    "id": "maillot-avec-flocage",
+    "image": "",
+    "video": "",
+    "thumbnail": "",
+    "categorie": "Vêtements/Maillots",
+    "prix": 60,
+    "description": "Maillot avec nom et numéro au choix, qualité excellente, taille au choix"
+  },
+  {
+    "nom": "Parfums divers",
+    "id": "parfums",
+    "image": "",
+    "video": "",
+    "thumbnail": "",
+    "categorie": "Parfums",
+    "prix": 65,
+    "description": "Plus de 1500 parfums disponibles, prix entre 50€ et 80€"
+  },
+  {
+    "nom": "Acide chlorhydrique",
+    "id": "acide-chlorhydrique",
+    "image": "",
+    "video": "",
+    "thumbnail": "",
+    "categorie": "Produits chimiques",
+    "prix": 12,
+    "description": "Acide chlorhydrique, prix au litre"
+  },
+  {
+    "nom": "Alcool à brûler",
+    "id": "alcool-bruler",
+    "image": "",
+    "video": "",
+    "thumbnail": "",
+    "categorie": "Produits chimiques",
+    "prix": 10,
+    "description": "Alcool à brûler, prix au litre"
+  },
+  {
+    "nom": "Pack feu rouge",
+    "id": "pack-feu-rouge",
+    "image": "",
+    "video": "",
+    "thumbnail": "",
+    "categorie": "Produits chimiques",
+    "prix": 20,
+    "description": "Les 2 bouteilles d'un litre (acide chlorhydrique + alcool à brûler)"
+  },
+  {
+    "nom": "Applications crackées",
+    "id": "app-crack",
+    "image": "",
+    "video": "",
+    "thumbnail": "",
+    "categorie": "Numérique",
+    "prix": 5,
+    "description": "Application au choix crack pour tel ou pc (l'avoir gratuit, modé, illimité...)"
+  },
+  {
+    "nom": "Crack calculatrices numworks",
+    "id": "crack-numworks",
+    "image": "",
+    "video": "",
+    "thumbnail": "",
+    "categorie": "Numérique",
+    "prix": 5,
+    "description": "Crack calculatrices numworks N0100 et N0110 (fond d'écran, thème, jeux gb, gbc, nes, liseuse...)"
+  },
+  {
+    "nom": "Feu Bengal couleurs",
+    "id": "feu-bengal-couleurs",
+    "image": "",
+    "video": "",
+    "thumbnail": "",
+    "categorie": "Fait maison/Feu Bengal",
+    "prix": 15,
+    "description": "Feu bengal couleurs jaune ou bleu. Taille, intensité, durée au choix."
+  },
+  {
+    "nom": "Puffs jnr 16k",
+    "id": "puffs-jnr-16k",
+    "image": "",
+    "video": "",
+    "thumbnail": "",
+    "categorie": "Puffs",
+    "prix": 16,
+    "description": "Puffs jnr 16k, plusieurs goûts disponibles"
+  },
+  {
+    "nom": "Fumigène Rose 2min",
+    "id": "fumigene-rose-2min",
+    "image": "",
+    "video": "",
+    "thumbnail": "",
+    "categorie": "Artifices/Fumigènes",
+    "prix": 28,
+    "description": "Fumigène couleur rose, durée 2 minutes"
+  },
+  {
+    "nom": "Sortie double rouge 45s",
+    "id": "sortie-double-rouge",
+    "image": "",
+    "video": "",
+    "thumbnail": "",
+    "categorie": "Artifices/Fumigènes",
+    "prix": 20,
+    "description": "Fumigène sortie double rouge, durée 45 secondes"
+  },
+  {
+    "nom": "Torche de jardin 90min",
+    "id": "torche-jardin-90",
+    "thumbnail": "",
+    "categorie": "Artifices/Torches de jardin",
+    "prix": 10,
+    "description": "Une torche de jardin qui brûle pendant 1h30",
+    "medias": [
+      {
+        "type": "image",
+        "path": "img/Articles/Artifices/Torches de jardin/torche-jardin-90/torche-jardin-90.webp"
+      }
+    ],
+    "image": "img/Articles/Artifices/Torches de jardin/torche-jardin-90/torche-jardin-90.webp"
+  },
+  {
+    "nom": "Torche de jardin 45min",
+    "id": "torche-jardin-45",
+    "thumbnail": "",
+    "categorie": "Artifices/Torches de jardin",
+    "prix": 6,
+    "description": "Une torche de jardin qui brûle pendant 45 minutes",
+    "medias": [
+      {
+        "type": "image",
+        "path": "img/Articles/Artifices/Torches de jardin/torche-jardin-45/torche-jardin-45.webp"
+      }
+    ],
+    "image": "img/Articles/Artifices/Torches de jardin/torche-jardin-45/torche-jardin-45.webp"
+  }
+]
