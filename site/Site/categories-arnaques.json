@@ -1,0 +1,101 @@
+[
+  {
+    "name": "Type d'arnaque",
+    "children": [
+      {
+        "name": "Faux vendeurs",
+        "children": []
+      },
+      {
+        "name": "Escroquerie PayPal",
+        "children": []
+      },
+      {
+        "name": "Faux sites",
+        "children": []
+      },
+      {
+        "name": "Phishing",
+        "children": []
+      }
+    ]
+  },
+  {
+    "name": "Plateforme",
+    "children": [
+      {
+        "name": "Snapchat",
+        "icon": "img/_technique/icon/Snapchat.png",
+        "children": []
+      },
+      {
+        "name": "Telegram",
+        "icon": "img/_technique/icon/telegram.png",
+        "children": []
+      },
+      {
+        "name": "Discord",
+        "icon": "img/_technique/icon/discord.ico",
+        "children": []
+      },
+      {
+        "name": "Instagram",
+        "icon": "img/_technique/icon/Instagram.png",
+        "children": []
+      },
+      {
+        "name": "Facebook",
+        "icon": "img/_technique/icon/facebook.png",
+        "children": []
+      },
+      {
+        "name": "WhatsApp",
+        "icon": "img/_technique/icon/whatsapp.png",
+        "children": []
+      },
+      {
+        "name": "TikTok",
+        "icon": "img/_technique/icon/tiktok.png",
+        "children": []
+      }
+    ]
+  },
+  {
+    "name": "Montant",
+    "children": [
+      {
+        "name": "Moins de 50€",
+        "children": []
+      },
+      {
+        "name": "50€ - 200€",
+        "children": []
+      },
+      {
+        "name": "200€ - 500€",
+        "children": []
+      },
+      {
+        "name": "Plus de 500€",
+        "children": []
+      }
+    ]
+  },
+  {
+    "name": "Statut",
+    "children": [
+      {
+        "name": "Signalé",
+        "children": []
+      },
+      {
+        "name": "Vérifié",
+        "children": []
+      },
+      {
+        "name": "Bloqué",
+        "children": []
+      }
+    ]
+  }
+]
