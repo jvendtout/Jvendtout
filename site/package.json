@@ -4,16 +4,14 @@
   "description": "Site de vente e-commerce avec interface d'administration",
   "main": "Site/server.js",
   "engines": {
-    "node": ">=14.0.0",
-    "npm": ">=6.0.0"
+    "node": ">=18.0.0"
   },
   "scripts": {
     "start": "node Site/server.js",
     "dev": "NODE_ENV=development node Site/server.js",
-    "prod": "NODE_ENV=production node Site/server.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "prod": "NODE_ENV=production node Site/server.js"
   },
-  "keywords": ["ecommerce", "node", "express", "boutique", "vente"],
+  "keywords": ["ecommerce","node","express","boutique","vente"],
   "author": "MALO",
   "license": "ISC",
   "dependencies": {
@@ -23,7 +21,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/[votre-username]/jvendtout.git"
+    "url": "https://github.com/jvendtout/jvendtout.git"
   },
-  "homepage": "https://github.com/[votre-username]/jvendtout#readme"
+  "homepage": "https://github.com/jvendtout/jvendtout#readme"
 }
