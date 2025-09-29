@@ -484,6 +484,11 @@
     margin: 0 !important;
     border-radius: 0 !important;
   }
+  /* Empêcher que les boutons sortent de l'écran sur mobile */
+  #file-explorer-modal .modal-content { display:flex; flex-direction:column; }
+  #file-explorer-modal .modal-content > div[style*="display:flex"][style*="height:calc(100vh"] { flex:1 1 auto; min-height:0; }
+  #file-explorer-modal .modal-content > div:last-of-type { position:sticky; bottom:0; background:#2e003e; z-index:20; }
+  #file-explorer-modal .modal-content > div:last-of-type button { flex:0 0 auto; }
   
   /* Ajustement du layout pour mobile */
   #file-explorer-modal [style*="display:flex"][style*="width:70%"] {
@@ -1061,7 +1066,7 @@
           <button id="close-file-explorer" class="close-btn" style="background:none;border:none;color:#ffd369;font-size:1.5em;cursor:pointer;">×</button>
         </div>
         
-        <div style="display:flex; height:calc(100vh - 140px); overflow:hidden; padding:0 20px;">
+  <div style="display:flex; height:calc(100vh - 140px); overflow:hidden; padding:0 20px; padding-bottom:70px; box-sizing:border-box;">
           <!-- Grille de fichiers à plein écran -->
           <div style="width:70%; height:100%; overflow-y:auto; padding:16px;">
             <!-- Navigation -->
@@ -1084,7 +1089,7 @@
           <input type="hidden" id="selected-file-paths" value="">
         </div>
         
-        <div style="display:flex;justify-content:space-between;margin-top:20px; padding:0 20px 20px 20px;">
+  <div class="explorer-footer" style="display:flex;justify-content:space-between;margin-top:20px; padding:10px 20px 20px 20px; background:rgba(46,0,78,0.85);backdrop-filter:blur(6px);">
           <button id="cancel-file-selection" class="btn" style="background:#6d6d6d;padding:10px 20px;border-radius:6px;border:none;color:#fff;cursor:pointer;">Annuler</button>
           <div style="display:flex;align-items:center;gap:10px;">
             <span id="mobile-selection-count" style="color:#8ef58e;font-weight:bold;display:none;">0 sélection(s)</span>

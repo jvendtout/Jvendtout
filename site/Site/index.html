@@ -401,10 +401,15 @@
     @keyframes mobileMenuFade { from { opacity:0; transform: translateY(-6px);} to {opacity:1; transform: translateY(0);} }
     /* Hide original buttons on small screens when consolidated menu used */
     @media (max-width: 760px) {
-      .controls .control-btn, .controls .sort-dropdown { display: none; }
+      /* Cacher seulement les boutons originaux (enfants directs) hors wrapper */
+      .controls > .control-btn,
+      .controls > .sort-dropdown,
+      .controls > #cart-button { display: none; }
       .controls .mobile-menu-toggle { display: inline-flex; }
-      .controls { align-items: stretch; }
-      .controls.mobile-menu-active { flex-wrap: wrap; }
+      .controls { align-items: center; }
+      .search-container { flex: 1; }
+      .mobile-menu-wrapper { margin-left: 8px; }
+      /* Panneau sous la ligne, pleine largeur */
       .mobile-menu-panel { width: 100%; position: static; box-shadow: none; background: rgba(46,0,79,0.6); border: 1px solid rgba(255,255,255,0.1); margin-top: 8px; }
       .mobile-menu-panel .sort-options { background: rgba(255,255,255,0.06); padding: 4px; }
     }
@@ -5086,7 +5091,8 @@
         });
         
         if (response.ok) {
-          alert('Votre avis a été soumis et sera examiné par un administrateur.');
+          // Suppression popup succès (remplacée par log)
+          console.log('Avis soumis (succès) – notification popup désactivée.');
           closeModal('add-review-modal');
           document.getElementById('add-review-form').reset();
           selectedRating = 5;
