@@ -227,4 +227,25 @@ git push origin main
 
 ---
 
+# Déploiement sur Render
+
+1. Commit & push (package.json à la racine).
+2. Render -> New -> Web Service.
+3. Sélectionner repo.
+4. Environment: Node
+5. Root Directory: (laisser vide)
+6. Build Command: npm install
+7. Start Command: npm start
+8. Créer.
+
+Tester:
+- /index.html
+- /admin.html
+- /api/articles
+- /healthz
+
+Limite plan gratuit: fichiers JSON modifiés perdus lors d’un REBUILD (pas entre simples redémarrages). Pour persistance durable => base de données plus tard.
+
+---
+
 **Félicitations ! 🎉** Votre site JVendTout est maintenant en ligne et accessible au monde entier !

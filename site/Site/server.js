@@ -1,40 +1,147 @@
 const express = require('express');
 const fs = require('fs');
 const path = require('path');
-const multer = require('multer');
 const app = express();
 
-// Chemins des fichiers JSON
+// --- Définition des chemins critiques ---
 const categoriesPath = path.join(__dirname, 'categories.json');
 
-// Configuration Multer pour l'upload de fichiers
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    const tempDir = path.join(__dirname, 'temp');
-    if (!fs.existsSync(tempDir)) {
-      fs.mkdirSync(tempDir, { recursive: true });
-    }
-    cb(null, tempDir);
-  },
-  filename: (req, file, cb) => {
-    // Nom temporaire unique
-    cb(null, Date.now() + '-' + Math.round(Math.random() * 1E9) + path.extname(file.originalname));
+function ensureFile(filePath, defaultContent){
+  if(!fs.existsSync(filePath)){
+    fs.writeFileSync(filePath, defaultContent, 'utf8');
+    console.log('[init] créé', path.basename(filePath));
   }
-});
+}
+ensureFile(categoriesPath, '[]');
 
-const upload = multer({ 
-  storage: storage,
-  limits: {
-    fileSize: 10 * 1024 * 1024, // 10MB max
-  },
-  fileFilter: (req, file, cb) => {
-    // Accepter images et vidéos
-    if (file.mimetype.startsWith('image/') || file.mimetype.startsWith('video/')) {
-      cb(null, true);
-    } else {
-      cb(new Error('Type de fichier non supporté'), false);
+// --- Auth basique protégée pour /admin.html ---
+// Variables à définir sur Render (Environment):
+//  ADMIN_USER : identifiant
+//  ADMIN_PASS : mot de passe (min 16+ caractères aléatoires)
+//  ADMIN_TOKEN (optionnel) : jeton alternatif à envoyer dans x-admin-token
+//  ADMIN_IP_WHITELIST (optionnel) : liste CSV d'IP autorisées (ex: "1.2.3.4,5.6.7.8")
+//  ADMIN_MAX_FAILS / ADMIN_WINDOW_MS / ADMIN_LOCK_MS (optionnels) pour ajuster la protection brute force
+const ADMIN_USER = process.env.ADMIN_USER || 'Moi le dieu des dieux';
+const ADMIN_PASS = process.env.ADMIN_PASS || 'Si un connard voit ca je l\'encule';
+const ADMIN_TOKEN = process.env.ADMIN_TOKEN; // Bypass si header x-admin-token == ADMIN_TOKEN
+const ADMIN_IP_WHITELIST = (process.env.ADMIN_IP_WHITELIST || '81.185.167.251').split(',').map(s=>s.trim()).filter(Boolean);
+const MAX_FAILS = parseInt(process.env.ADMIN_MAX_FAILS || '8');
+const WINDOW_MS = parseInt(process.env.ADMIN_WINDOW_MS || (15*60*1000).toString());
+const LOCK_MS = parseInt(process.env.ADMIN_LOCK_MS || (30*60*1000).toString());
+
+// Mémoire in-memory (suffisant pour un petit site sans cluster)
+const authAttempts = new Map(); // ip -> {fails, first, lockUntil}
+
+function now(){ return Date.now(); }
+
+function registerFail(ip){
+  const entry = authAttempts.get(ip) || { fails:0, first: now(), lockUntil:0 };
+  // reset fenêtre si expirée
+  if(now() - entry.first > WINDOW_MS){
+    entry.fails = 0; entry.first = now(); entry.lockUntil = 0;
+  }
+  entry.fails++;
+  if(entry.fails >= MAX_FAILS){
+    entry.lockUntil = now() + LOCK_MS;
+  }
+  authAttempts.set(ip, entry);
+  return entry;
+}
+
+function registerSuccess(ip){
+  if(authAttempts.has(ip)) authAttempts.delete(ip);
+}
+
+function constantTimeEqual(a,b){
+  if(a.length !== b.length) return false;
+  let ok = 1;
+  for(let i=0;i<a.length;i++) ok &= (a.charCodeAt(i) === b.charCodeAt(i)) ? 1 : 0;
+  return !!ok;
+}
+
+app.set('trust proxy', 1); // nécessaire pour avoir req.ip correcte derrière Render
+
+if(ADMIN_PASS === 'change-me'){
+  console.warn('[SECURITE] ADMIN_PASS utilise la valeur par défaut. Définissez un mot de passe fort via les variables d\'environnement.');
+}
+
+function requireAdmin(req,res,next){
+  if(req.path !== '/admin.html') return next();
+
+  const ip = req.ip || req.connection?.remoteAddress || 'unknown';
+
+  // Whitelist IP si configurée
+  if(ADMIN_IP_WHITELIST.length && !ADMIN_IP_WHITELIST.includes(ip)){
+    return res.status(403).send('Accès restreint');
+  }
+
+  const attempt = authAttempts.get(ip);
+  if(attempt && attempt.lockUntil && attempt.lockUntil > now()){
+    const reste = Math.ceil((attempt.lockUntil - now())/1000);
+    return res.status(429).send('Trop de tentatives. Ré essaie dans '+reste+'s');
+  }
+
+  // Bypass via token (si défini) pour automatisations (header: x-admin-token)
+  if(ADMIN_TOKEN && req.headers['x-admin-token'] === ADMIN_TOKEN){
+    registerSuccess(ip);
+    return next();
+  }
+
+  const header = req.headers.authorization || '';
+  if(!header.startsWith('Basic ')){
+    res.set('WWW-Authenticate','Basic realm="Admin"');
+    registerFail(ip);
+    return res.status(401).send('Auth requise');
+  }
+  const decoded = Buffer.from(header.slice(6),'base64').toString();
+  const sep = decoded.indexOf(':');
+  const u = sep === -1 ? decoded : decoded.slice(0,sep);
+  const p = sep === -1 ? '' : decoded.slice(sep+1);
+  const userOk = constantTimeEqual(u, ADMIN_USER);
+  const passOk = constantTimeEqual(p, ADMIN_PASS);
+  if(userOk && passOk){
+    registerSuccess(ip);
+    return next();
+  }
+  const data = registerFail(ip);
+  const remain = Math.max(0, MAX_FAILS - data.fails);
+  res.set('WWW-Authenticate','Basic realm="Admin"');
+  return res.status(401).send('Identifiants invalides ('+remain+' tentatives restantes)');
+}
+
+// Middleware pour protéger les endpoints d'écriture API
+function requireAdminWrite(req,res,next){
+  // On protège toutes les méthodes sensibles (POST, PUT, DELETE) sur /api/* sauf lecture pure
+  if(!req.path.startsWith('/api/')) return next();
+  if(!['POST','PUT','DELETE','PATCH'].includes(req.method)) return next();
+
+  // Réutilisation de la logique minimaliste: on exige soit le token admin, soit Basic Auth valide
+  const ip = req.ip || req.connection?.remoteAddress || 'unknown';
+  if(ADMIN_IP_WHITELIST.length && !ADMIN_IP_WHITELIST.includes(ip)){
+    return res.status(403).json({ error: 'Accès API restreint (IP)' });
+  }
+  // Token rapide
+  if(ADMIN_TOKEN && req.headers['x-admin-token'] === ADMIN_TOKEN){
+    return next();
+  }
+  const header = req.headers.authorization || '';
+  if(header.startsWith('Basic ')){
+    const decoded = Buffer.from(header.slice(6),'base64').toString();
+    const sep = decoded.indexOf(':');
+    const u = sep === -1 ? decoded : decoded.slice(0,sep);
+    const p = sep === -1 ? '' : decoded.slice(sep+1);
+    if(constantTimeEqual(u, ADMIN_USER) && constantTimeEqual(p, ADMIN_PASS)){
+      return next();
     }
   }
+  res.set('WWW-Authenticate','Basic realm="Admin API"');
+  return res.status(401).json({ error: 'Auth requise' });
+}
+
+// Injection du middleware global avant la définition des routes API
+app.use(requireAdminWrite);
+app.get('/admin.html', requireAdmin, (req,res)=>{
+  res.sendFile(path.join(__dirname,'admin.html'));
 });
 
 app.use(express.json());
@@ -248,9 +355,8 @@ app.put('/api/categories-arnaques', (req, res) => {
   });
 });
 
-// Configuration pour le déploiement
+// Lancer le serveur
 const PORT = process.env.PORT || 3000;
-const HOST = process.env.HOST || '0.0.0.0';
 
 // Endpoint de diagnostic des médias
 app.get('/api/check-media', (req, res) => {
@@ -521,7 +627,6 @@ app.put('/api/avis-pending', (req, res) => {
   }
 });
 
-
 // Routes pour les avis archivés
 const avisArchivedFile = path.join(__dirname, 'avis-archived.json');
 
@@ -687,73 +792,8 @@ app.post('/api/save-computer', (req, res) => {
   }
 });
 
-// Endpoint pour upload de médias d'avis
-app.post('/api/upload-avis-media', upload.array('medias[]'), (req, res) => {
-  try {
-    const { produitId, categorie } = req.body;
-    console.log('🔧 Upload avis médias - categorie reçue:', categorie, 'produitId:', produitId);
-    
-    if (!req.files || req.files.length === 0) {
-      return res.json({ success: true, files: [] });
-    }
-    
-    // Transformer la catégorie pour correspondre à la structure des dossiers
-    let categorieFolder = categorie || 'Divers';
-    if (categorieFolder.includes('Électronique')) {
-      categorieFolder = categorieFolder.replace('Électronique', 'Electroniques');
-    }
-    
-    // Créer le dossier de destination sous img/Articles/Categories/Produit/avis/
-    const targetDir = path.join(__dirname, 'img', 'Articles', categorieFolder, produitId || 'produit', 'avis');
-    console.log('🔧 Dossier cible:', targetDir);
-    
-    if (!fs.existsSync(targetDir)) {
-      fs.mkdirSync(targetDir, { recursive: true });
-    }
-    
-    const uploadedFiles = [];
-    
-    // Trouver le prochain numéro d'incrémentation
-    const existingFiles = fs.readdirSync(targetDir);
-    let nextNumber = 1;
-    
-    // Chercher le plus grand numéro existant
-    existingFiles.forEach(filename => {
-      const match = filename.match(/^(\d+)-/);
-      if (match) {
-        const num = parseInt(match[1]);
-        if (num >= nextNumber) {
-          nextNumber = num + 1;
-        }
-      }
-    });
-    
-    // Déplacer et renommer chaque fichier uploadé
-    req.files.forEach((file, index) => {
-      const fileExtension = path.extname(file.originalname);
-      const baseFileName = produitId || 'avis';
-      const newFileName = `${nextNumber + index}-${baseFileName}${fileExtension}`;
-      const newPath = path.join(targetDir, newFileName);
-      
-      // Déplacer le fichier temporaire vers sa destination finale
-      fs.renameSync(file.path, newPath);
-      
-      // URL relative pour le frontend avec le bon chemin Articles/Categories/Produit/avis/
-      const relativePath = `img/Articles/${categorieFolder}/${produitId || 'produit'}/avis/${newFileName}`;
-      console.log('🔧 Chemin généré:', relativePath);
-      uploadedFiles.push(relativePath);
-    });
-    
-    res.json({ success: true, files: uploadedFiles });
-  } catch (error) {
-    console.error('Erreur upload médias avis:', error);
-    res.status(500).json({ success: false, error: error.message });
-  }
-});
-
-app.listen(PORT, HOST, () => {
-  console.log(`🚀 Serveur lancé sur http://${HOST}:${PORT}`);
-  console.log(`📊 Interface admin: http://${HOST}:${PORT}/admin.html`);
-  console.log(`🛒 Boutique: http://${HOST}:${PORT}/index.html`);
-  console.log(`🌍 Environment: ${process.env.NODE_ENV || 'development'}`);
+app.listen(PORT, () => {
+  console.log(`Serveur lancé sur http://localhost:${PORT}`);
+  console.log(`- Interface admin: http://localhost:${PORT}/admin.html`);
+  console.log(`- Boutique: http://localhost:${PORT}/index.html`);
 });

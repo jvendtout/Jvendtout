@@ -1,27 +1,20 @@
 {
   "name": "jvendtout",
   "version": "1.0.0",
-  "description": "Site de vente e-commerce avec interface d'administration",
+  "description": "Site e-commerce + interface admin",
   "main": "Site/server.js",
-  "engines": {
-    "node": ">=18.0.0"
-  },
+  "engines": { "node": ">=18.0.0" },
   "scripts": {
     "start": "node Site/server.js",
-    "dev": "NODE_ENV=development node Site/server.js",
-    "prod": "NODE_ENV=production node Site/server.js"
+    "dev": "NODE_ENV=development node Site/server.js"
   },
-  "keywords": ["ecommerce","node","express","boutique","vente"],
-  "author": "MALO",
-  "license": "ISC",
   "dependencies": {
-    "body-parser": "^2.2.0",
     "express": "^5.1.0",
     "multer": "^2.0.2"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/jvendtout/jvendtout.git"
+    "url": "https://github.com/jvendtout/Jvendtout.git"
   },
-  "homepage": "https://github.com/jvendtout/jvendtout#readme"
+  "license": "ISC"
 }
