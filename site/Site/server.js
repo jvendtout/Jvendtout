@@ -23,8 +23,33 @@ ensureFile(categoriesPath, '[]');
 //  ADMIN_MAX_FAILS / ADMIN_WINDOW_MS / ADMIN_LOCK_MS (optionnels) pour ajuster la protection brute force
 const ADMIN_USER = process.env.ADMIN_USER || 'Moi le dieu des dieux';
 const ADMIN_PASS = process.env.ADMIN_PASS || 'Si un connard voit ca je l\'encule';
-const ADMIN_TOKEN = process.env.ADMIN_TOKEN; // Bypass si header x-admin-token == ADMIN_TOKEN
-const ADMIN_IP_WHITELIST = (process.env.ADMIN_IP_WHITELIST || '81.185.167.251').split(',').map(s=>s.trim()).filter(Boolean);
+// ADMIN_TOKEN : jeton machine pour script / automatisation (header x-admin-token)
+// IMPORTANT: Le token ne doit pas être révélé côté front public. À générer long (>= 48 chars).
+const ADMIN_TOKEN = process.env.ADMIN_TOKEN; // Bypass complet (sauf endpoints exigeant Basic fort)
+
+// --- Configuration dynamique admin (ipWhitelist / ipBypass) ---
+const adminConfigFile = path.join(__dirname, 'admin-config.json');
+function loadAdminConfig(){
+  try {
+    if(!fs.existsSync(adminConfigFile)){
+      const initial = {
+        ipWhitelist: (process.env.ADMIN_IP_WHITELIST || '78.193.237.36').split(',').map(s=>s.trim()).filter(Boolean),
+        ipBypass: (process.env.ADMIN_IP_BYPASS || 'true').toLowerCase() === 'true'
+      };
+      fs.writeFileSync(adminConfigFile, JSON.stringify(initial, null, 2));
+      return initial;
+    }
+    return JSON.parse(fs.readFileSync(adminConfigFile,'utf8'));
+  } catch(e){
+    console.error('[admin-config] erreur chargement', e);
+    return { ipWhitelist: [], ipBypass: false };
+  }
+}
+function saveAdminConfig(cfg){
+  fs.writeFileSync(adminConfigFile, JSON.stringify(cfg, null, 2));
+}
+let runtimeConfig = loadAdminConfig();
+function reloadAdminConfig(){ runtimeConfig = loadAdminConfig(); }
 const MAX_FAILS = parseInt(process.env.ADMIN_MAX_FAILS || '8');
 const WINDOW_MS = parseInt(process.env.ADMIN_WINDOW_MS || (15*60*1000).toString());
 const LOCK_MS = parseInt(process.env.ADMIN_LOCK_MS || (30*60*1000).toString());
@@ -69,10 +94,36 @@ function requireAdmin(req,res,next){
   if(req.path !== '/admin.html') return next();
 
   const ip = req.ip || req.connection?.remoteAddress || 'unknown';
+  // Logs debug (peu verbeux en prod, enlever si besoin)
+  console.log('[AUTH admin] ip=', ip, ' authHeader=', !!req.headers.authorization, ' tokenHeader=', !!req.headers['x-admin-token']);
 
-  // Whitelist IP si configurée
-  if(ADMIN_IP_WHITELIST.length && !ADMIN_IP_WHITELIST.includes(ip)){
-    return res.status(403).send('Accès restreint');
+  // Bypass token (prioritaire) si fourni et valide (permet accès même si IP pas whitelistee si tu veux changer la whitelist)
+  if(ADMIN_TOKEN && req.headers['x-admin-token'] === ADMIN_TOKEN){
+    console.log('[AUTH admin] bypass via token');
+    registerSuccess(ip);
+    return next();
+  }
+
+  const { ipWhitelist, ipBypass } = runtimeConfig;
+  if(ipBypass && ipWhitelist.length && ipWhitelist.includes(ip)){
+    console.log('[AUTH admin] bypass IP pour', ip);
+    registerSuccess(ip);
+    return next();
+  }
+
+  // Tant que l'utilisateur n'a pas présenté d'auth Basic, on doit renvoyer 401 avec WWW-Authenticate pour forcer la popup.
+  const header = req.headers.authorization || '';
+  if(!header.startsWith('Basic ')){
+    // On ne bloque PAS encore par IP pour permettre la popup (sinon certains navigateurs ne l'affichent pas si 403 direct)
+    res.set('WWW-Authenticate','Basic realm="Admin"');
+    registerFail(ip);
+    return res.status(401).send('Auth requise');
+  }
+
+  // À partir d'ici on a reçu des credentials, on peut appliquer IP + brute force.
+  if(ipWhitelist.length && !ipWhitelist.includes(ip)){
+    console.log('[AUTH admin] IP refusée', ip);
+    return res.status(403).send('Accès restreint (IP)');
   }
 
   const attempt = authAttempts.get(ip);
@@ -81,18 +132,6 @@ function requireAdmin(req,res,next){
     return res.status(429).send('Trop de tentatives. Ré essaie dans '+reste+'s');
   }
 
-  // Bypass via token (si défini) pour automatisations (header: x-admin-token)
-  if(ADMIN_TOKEN && req.headers['x-admin-token'] === ADMIN_TOKEN){
-    registerSuccess(ip);
-    return next();
-  }
-
-  const header = req.headers.authorization || '';
-  if(!header.startsWith('Basic ')){
-    res.set('WWW-Authenticate','Basic realm="Admin"');
-    registerFail(ip);
-    return res.status(401).send('Auth requise');
-  }
   const decoded = Buffer.from(header.slice(6),'base64').toString();
   const sep = decoded.indexOf(':');
   const u = sep === -1 ? decoded : decoded.slice(0,sep);
@@ -101,11 +140,13 @@ function requireAdmin(req,res,next){
   const passOk = constantTimeEqual(p, ADMIN_PASS);
   if(userOk && passOk){
     registerSuccess(ip);
+    console.log('[AUTH admin] succès pour', ip);
     return next();
   }
   const data = registerFail(ip);
   const remain = Math.max(0, MAX_FAILS - data.fails);
   res.set('WWW-Authenticate','Basic realm="Admin"');
+  console.log('[AUTH admin] échec credentials ip=', ip, 'restant=', remain);
   return res.status(401).send('Identifiants invalides ('+remain+' tentatives restantes)');
 }
 
@@ -117,7 +158,11 @@ function requireAdminWrite(req,res,next){
 
   // Réutilisation de la logique minimaliste: on exige soit le token admin, soit Basic Auth valide
   const ip = req.ip || req.connection?.remoteAddress || 'unknown';
-  if(ADMIN_IP_WHITELIST.length && !ADMIN_IP_WHITELIST.includes(ip)){
+  const { ipWhitelist, ipBypass } = runtimeConfig;
+  if(ipBypass && ipWhitelist.length && ipWhitelist.includes(ip)){
+    return next();
+  }
+  if(ipWhitelist.length && !ipWhitelist.includes(ip)){
     return res.status(403).json({ error: 'Accès API restreint (IP)' });
   }
   // Token rapide
@@ -142,6 +187,61 @@ function requireAdminWrite(req,res,next){
 app.use(requireAdminWrite);
 app.get('/admin.html', requireAdmin, (req,res)=>{
   res.sendFile(path.join(__dirname,'admin.html'));
+});
+
+// --- Middleware fort: exige Auth Basic valide, ignore token & bypass IP ---
+function requireAdminStrong(req,res,next){
+  const ip = req.ip || req.connection?.remoteAddress || 'unknown';
+  const header = req.headers.authorization || '';
+  if(!header.startsWith('Basic ')){
+    res.set('WWW-Authenticate','Basic realm="AdminConfig"');
+    return res.status(401).json({ error: 'Auth Basic requise' });
+  }
+  const decoded = Buffer.from(header.slice(6),'base64').toString();
+  const sep = decoded.indexOf(':');
+  const u = sep === -1 ? decoded : decoded.slice(0,sep);
+  const p = sep === -1 ? '' : decoded.slice(sep+1);
+  const userOk = constantTimeEqual(u, ADMIN_USER);
+  const passOk = constantTimeEqual(p, ADMIN_PASS);
+  if(!(userOk && passOk)){
+    res.set('WWW-Authenticate','Basic realm="AdminConfig"');
+    return res.status(401).json({ error: 'Identifiants invalides' });
+  }
+  return next();
+}
+
+// --- Endpoints de configuration sécurité ---
+app.get('/api/admin/security-config', requireAdminStrong, (req,res)=>{
+  // Ne jamais renvoyer l'ADMIN_PASS ni le token
+  res.json({
+    ipWhitelist: runtimeConfig.ipWhitelist,
+    ipBypass: runtimeConfig.ipBypass,
+    tokenDefined: !!ADMIN_TOKEN
+  });
+});
+
+app.put('/api/admin/security-config', requireAdminStrong, (req,res)=>{
+  try {
+    const { ipWhitelist, ipBypass } = req.body || {};
+    if(ipWhitelist && !Array.isArray(ipWhitelist)){
+      return res.status(400).json({ error: 'ipWhitelist doit être un tableau' });
+    }
+    if(ipWhitelist && ipWhitelist.some(ip => typeof ip !== 'string')){
+      return res.status(400).json({ error: 'Chaque IP doit être une chaîne' });
+    }
+    if(typeof ipBypass !== 'undefined' && typeof ipBypass !== 'boolean'){
+      return res.status(400).json({ error: 'ipBypass doit être booléen' });
+    }
+    const newCfg = { ...runtimeConfig };
+    if(ipWhitelist) newCfg.ipWhitelist = ipWhitelist.map(s=>s.trim()).filter(Boolean);
+    if(typeof ipBypass === 'boolean') newCfg.ipBypass = ipBypass;
+    saveAdminConfig(newCfg);
+    reloadAdminConfig();
+    return res.json({ success: true, config: runtimeConfig });
+  } catch(e){
+    console.error('[admin-config] update error', e);
+    return res.status(500).json({ error: 'Impossible de mettre à jour la config' });
+  }
 });
 
 app.use(express.json());
