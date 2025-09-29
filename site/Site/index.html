@@ -359,6 +359,56 @@
       transform: translateY(-2px);
     }
 
+    /* --- Mobile consolidated menu --- */
+    .mobile-menu-wrapper { position: relative; }
+    .mobile-menu-toggle {
+      background: #6a2c93;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      padding: 10px 14px;
+      font-weight: 600;
+      display: none; /* hidden desktop */
+      align-items: center;
+      gap: 6px;
+      cursor: pointer;
+    }
+    .mobile-menu-toggle:active { transform: scale(0.96); }
+    .mobile-menu-toggle span { font-size: 14px; }
+    .mobile-menu-panel {
+      position: absolute;
+      top: 110%;
+      right: 0;
+      background: rgba(46,0,79,0.95);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255,255,255,0.15);
+      box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+      border-radius: 12px;
+      padding: 8px;
+      display: none;
+      flex-direction: column;
+      min-width: 180px;
+      z-index: 9999;
+      animation: mobileMenuFade .25s ease;
+    }
+    .mobile-menu-panel.open { display: flex; }
+    .mobile-menu-panel button.control-btn,
+    .mobile-menu-panel .control-btn { width: 100%; justify-content: flex-start; }
+    .mobile-menu-panel .sort-dropdown { width: 100%; }
+    .mobile-menu-panel .sort-dropdown .control-btn { width: 100%; }
+    .mobile-menu-panel .sort-options { position: static; box-shadow: none; border: none; background: transparent; opacity: 1; visibility: visible; transform: none; padding-top: 4px; }
+    .mobile-menu-panel .sort-option { border-radius: 6px; }
+    @keyframes mobileMenuFade { from { opacity:0; transform: translateY(-6px);} to {opacity:1; transform: translateY(0);} }
+    /* Hide original buttons on small screens when consolidated menu used */
+    @media (max-width: 760px) {
+      .controls .control-btn, .controls .sort-dropdown { display: none; }
+      .controls .mobile-menu-toggle { display: inline-flex; }
+      .controls { align-items: stretch; }
+      .controls.mobile-menu-active { flex-wrap: wrap; }
+      .mobile-menu-panel { width: 100%; position: static; box-shadow: none; background: rgba(46,0,79,0.6); border: 1px solid rgba(255,255,255,0.1); margin-top: 8px; }
+      .mobile-menu-panel .sort-options { background: rgba(255,255,255,0.06); padding: 4px; }
+    }
+
     /* Dropdowns de tri */
     .sort-dropdown {
       position: relative;
@@ -598,7 +648,6 @@
       max-width: 100%;
       height: 100%;
       margin: 0;
-      border-radius: 0;
     }
 
     /* Modal de sélection de produit plus large */
@@ -3411,6 +3460,12 @@
             <span class="search-icon"><img src="img/_technique/icon/loupe.png" alt="Rechercher" class="icon-white" style="width: 16px; height: 16px;"></span>
             <input type="text" id="search-input" placeholder="Rechercher un article...">
           </div>
+          <div class="mobile-menu-wrapper">
+            <button class="mobile-menu-toggle" type="button" aria-expanded="false" aria-controls="mobile-menu-panel-articles">
+              ☰ <span>Menu</span>
+            </button>
+            <div class="mobile-menu-panel" id="mobile-menu-panel-articles" role="menu" aria-label="Actions Articles"></div>
+          </div>
           <button class="control-btn" id="category-button">
             <img src="img/_technique/icon/categorie.png" alt="Catégories" class="icon-white" style="width: 16px; height: 16px; vertical-align: middle; margin-right: 5px;"> Catégories
           </button>
@@ -3450,6 +3505,12 @@
             <span class="search-icon"><img src="img/_technique/icon/loupe.png" alt="Rechercher" class="icon-white" style="width: 16px; height: 16px;"></span>
             <input type="text" id="search-input" placeholder="Rechercher une offre...">
           </div>
+          <div class="mobile-menu-wrapper">
+            <button class="mobile-menu-toggle" type="button" aria-expanded="false" aria-controls="mobile-menu-panel-offres">
+              ☰ <span>Menu</span>
+            </button>
+            <div class="mobile-menu-panel" id="mobile-menu-panel-offres" role="menu" aria-label="Actions Offres"></div>
+          </div>
           <div class="sort-dropdown">
             <button class="control-btn" id="sort-button-offres">
               <img src="img/_technique/icon/trier.png" alt="Trier" class="icon-white" style="width: 16px; height: 16px; vertical-align: middle; margin-right: 5px;"> Trier <span class="dropdown-arrow">▼</span>
@@ -3481,6 +3542,12 @@
           <div class="search-container">
             <span class="search-icon"><img src="img/_technique/icon/loupe.png" alt="Rechercher" class="icon-white" style="width: 16px; height: 16px;"></span>
             <input type="text" id="search-input" placeholder="Rechercher un arnaqueur...">
+          </div>
+          <div class="mobile-menu-wrapper">
+            <button class="mobile-menu-toggle" type="button" aria-expanded="false" aria-controls="mobile-menu-panel-arnaques">
+              ☰ <span>Menu</span>
+            </button>
+            <div class="mobile-menu-panel" id="mobile-menu-panel-arnaques" role="menu" aria-label="Actions Arnaques"></div>
           </div>
           <div class="sort-dropdown">
             <button class="control-btn" id="sort-button-arnaques">
@@ -3523,6 +3590,12 @@
           <div class="search-container">
             <span class="search-icon"><img src="img/_technique/icon/loupe.png" alt="Rechercher" class="icon-white" style="width: 16px; height: 16px;"></span>
             <input type="text" id="search-input" placeholder="Rechercher une preuve...">
+          </div>
+          <div class="mobile-menu-wrapper">
+            <button class="mobile-menu-toggle" type="button" aria-expanded="false" aria-controls="mobile-menu-panel-preuves">
+              ☰ <span>Menu</span>
+            </button>
+            <div class="mobile-menu-panel" id="mobile-menu-panel-preuves" role="menu" aria-label="Actions Preuves"></div>
           </div>
           <div class="sort-dropdown">
             <button class="control-btn" id="sort-button-preuves">
@@ -5266,6 +5339,81 @@
     // Initialisation au chargement de la page
     document.addEventListener('DOMContentLoaded', function() {
       console.log('DOMContentLoaded - Initialisation...');
+        // Initialisation menu mobile consolidé
+        (function initMobileMenus(){
+          const sectionConfigs = [
+            { section:'articles', panel:'#mobile-menu-panel-articles', ids:['category-button','sort-button','filter-button','cart-button'] },
+            { section:'offres', panel:'#mobile-menu-panel-offres', ids:['sort-button-offres','category-button-offres','filter-button-offres'] },
+            { section:'arnaques', panel:'#mobile-menu-panel-arnaques', ids:['sort-button-arnaques','category-button-arnaques'] },
+            { section:'preuves', panel:'#mobile-menu-panel-preuves', ids:['sort-button-preuves','category-button-preuves','add-review-btn'] }
+          ];
+
+          function moveButtonsIfMobile(){
+            const isMobile = window.matchMedia('(max-width:760px)').matches;
+            sectionConfigs.forEach(cfg=>{
+              const panel = document.querySelector(cfg.panel);
+              if(!panel) return;
+              if(isMobile){
+                // remplir panel si vide
+                if(panel.childElementCount===0){
+                  cfg.ids.forEach(id=>{
+                    const el = document.getElementById(id);
+                    if(el){
+                      // Pour les dropdowns, déplacer le parent .sort-dropdown entier
+                      const dropdown = el.closest('.sort-dropdown');
+                      if(dropdown && !panel.contains(dropdown)) panel.appendChild(dropdown);
+                      else if(!dropdown && !panel.contains(el)) panel.appendChild(el);
+                    }
+                  });
+                }
+              } else {
+                // remettre les éléments dans leur .controls d'origine
+                if(panel.childElementCount>0){
+                  const controls = panel.closest('.controls');
+                  if(controls){
+                    // insérer après le wrapper mobile
+                    const wrapper = controls.querySelector('.mobile-menu-wrapper');
+                    [...panel.children].forEach(child=>{
+                      if(child.classList.contains('sort-dropdown')){
+                        controls.insertBefore(child, wrapper.nextSibling);
+                      } else {
+                        controls.appendChild(child);
+                      }
+                    });
+                  }
+                  panel.innerHTML='';
+                }
+              }
+            });
+          }
+
+          moveButtonsIfMobile();
+          window.addEventListener('resize',()=>{
+            moveButtonsIfMobile();
+          });
+
+          // Gestion toggles
+          document.querySelectorAll('.mobile-menu-toggle').forEach(btn=>{
+            btn.addEventListener('click',()=>{
+              const panel = btn.parentElement.querySelector('.mobile-menu-panel');
+              const open = panel.classList.toggle('open');
+              btn.setAttribute('aria-expanded', open?'true':'false');
+              // fermer autres
+              if(open){
+                document.querySelectorAll('.mobile-menu-panel').forEach(p=>{ if(p!==panel) p.classList.remove('open'); });
+                document.querySelectorAll('.mobile-menu-toggle').forEach(b=>{ if(b!==btn) b.setAttribute('aria-expanded','false'); });
+              }
+            });
+          });
+
+          // fermeture clic extérieur
+          document.addEventListener('click', (e)=>{
+            if(!e.target.closest('.mobile-menu-wrapper')){
+              document.querySelectorAll('.mobile-menu-panel.open').forEach(p=>p.classList.remove('open'));
+              document.querySelectorAll('.mobile-menu-toggle[aria-expanded="true"]').forEach(b=>b.setAttribute('aria-expanded','false'));
+            }
+          });
+        })();
       
       // Gestion du menu hamburger
       const hamburger = document.getElementById('hamburger');
