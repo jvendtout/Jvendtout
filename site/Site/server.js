@@ -23,9 +23,7 @@ ensureFile(categoriesPath, '[]');
 //  ADMIN_MAX_FAILS / ADMIN_WINDOW_MS / ADMIN_LOCK_MS (optionnels) pour ajuster la protection brute force
 const ADMIN_USER = process.env.ADMIN_USER || 'Moi le dieu des dieux';
 const ADMIN_PASS = process.env.ADMIN_PASS || 'Si un connard voit ca je l\'encule';
-// ADMIN_TOKEN : jeton machine pour script / automatisation (header x-admin-token)
-// IMPORTANT: Le token ne doit pas être révélé côté front public. À générer long (>= 48 chars).
-const ADMIN_TOKEN = process.env.ADMIN_TOKEN; // Bypass complet (sauf endpoints exigeant Basic fort)
+// (Token supprimé : accès uniquement via Basic Auth et éventuel bypass IP)
 
 // --- Configuration dynamique admin (ipWhitelist / ipBypass) ---
 const adminConfigFile = path.join(__dirname, 'admin-config.json');
@@ -97,12 +95,7 @@ function requireAdmin(req,res,next){
   // Logs debug (peu verbeux en prod, enlever si besoin)
   console.log('[AUTH admin] ip=', ip, ' authHeader=', !!req.headers.authorization, ' tokenHeader=', !!req.headers['x-admin-token']);
 
-  // Bypass token (prioritaire) si fourni et valide (permet accès même si IP pas whitelistee si tu veux changer la whitelist)
-  if(ADMIN_TOKEN && req.headers['x-admin-token'] === ADMIN_TOKEN){
-    console.log('[AUTH admin] bypass via token');
-    registerSuccess(ip);
-    return next();
-  }
+  // (Bypass token retiré)
 
   const { ipWhitelist, ipBypass } = runtimeConfig;
   if(ipBypass && ipWhitelist.length && ipWhitelist.includes(ip)){
@@ -118,12 +111,6 @@ function requireAdmin(req,res,next){
     res.set('WWW-Authenticate','Basic realm="Admin"');
     registerFail(ip);
     return res.status(401).send('Auth requise');
-  }
-
-  // À partir d'ici on a reçu des credentials, on peut appliquer IP + brute force.
-  if(ipWhitelist.length && !ipWhitelist.includes(ip)){
-    console.log('[AUTH admin] IP refusée', ip);
-    return res.status(403).send('Accès restreint (IP)');
   }
 
   const attempt = authAttempts.get(ip);
@@ -156,19 +143,14 @@ function requireAdminWrite(req,res,next){
   if(!req.path.startsWith('/api/')) return next();
   if(!['POST','PUT','DELETE','PATCH'].includes(req.method)) return next();
 
-  // Réutilisation de la logique minimaliste: on exige soit le token admin, soit Basic Auth valide
+  // Réutilisation de la logique minimaliste: Basic Auth ou IP bypass
   const ip = req.ip || req.connection?.remoteAddress || 'unknown';
   const { ipWhitelist, ipBypass } = runtimeConfig;
   if(ipBypass && ipWhitelist.length && ipWhitelist.includes(ip)){
     return next();
   }
-  if(ipWhitelist.length && !ipWhitelist.includes(ip)){
-    return res.status(403).json({ error: 'Accès API restreint (IP)' });
-  }
-  // Token rapide
-  if(ADMIN_TOKEN && req.headers['x-admin-token'] === ADMIN_TOKEN){
-    return next();
-  }
+  // Si pas bypass et pas token et pas Basic valide plus tard, l'IP pourra être un facteur, mais on ne bloque plus juste sur IP avant d'essayer Basic.
+  // (Token retiré)
   const header = req.headers.authorization || '';
   if(header.startsWith('Basic ')){
     const decoded = Buffer.from(header.slice(6),'base64').toString();
@@ -215,8 +197,7 @@ app.get('/api/admin/security-config', requireAdminStrong, (req,res)=>{
   // Ne jamais renvoyer l'ADMIN_PASS ni le token
   res.json({
     ipWhitelist: runtimeConfig.ipWhitelist,
-    ipBypass: runtimeConfig.ipBypass,
-    tokenDefined: !!ADMIN_TOKEN
+    ipBypass: runtimeConfig.ipBypass
   });
 });
 
