@@ -99,6 +99,17 @@ function normalizeIp(ip){
   return ip;
 }
 
+// Récupération IP client plus robuste (priorité X-Forwarded-For)
+function getClientIp(req){
+  const xff = req.headers['x-forwarded-for'];
+  if(xff){
+    // Prendre la première IP (chaîne potentiellement "client, proxy1, proxy2")
+    const first = xff.split(',')[0].trim();
+    return normalizeIp(first);
+  }
+  return normalizeIp(req.ip || req.connection?.remoteAddress || '');
+}
+
 app.set('trust proxy', 1); // nécessaire pour avoir req.ip correcte derrière Render
 
 if(ADMIN_PASS === 'change-me'){
@@ -108,30 +119,29 @@ if(ADMIN_PASS === 'change-me'){
 function requireAdmin(req,res,next){
   if(req.path !== '/admin.html') return next();
 
-  const ip = req.ip || req.connection?.remoteAddress || 'unknown';
-  // Logs debug (peu verbeux en prod, enlever si besoin)
-  console.log('[AUTH admin] ip=', ip, ' authHeader=', !!req.headers.authorization, ' tokenHeader=', !!req.headers['x-admin-token']);
-
-  // (Bypass token retiré)
-
+  const rawIp = req.ip || req.connection?.remoteAddress || 'unknown';
+  const clientIp = getClientIp(req) || rawIp;
   const { ipWhitelist, ipBypass } = runtimeConfig;
-  const normIp = normalizeIp(ip);
-  if(ipBypass && ipWhitelist.length && (ipWhitelist.includes(ip) || ipWhitelist.includes(normIp))){
-    console.log('[AUTH admin] bypass IP pour', ip);
-    registerSuccess(ip);
+  const hasWhitelist = Array.isArray(ipWhitelist) && ipWhitelist.length > 0;
+  const bypassActive = !!ipBypass && hasWhitelist;
+
+  // Log debug condensé
+  console.log('[AUTH admin] ipRaw=%s clientIp=%s bypass=%s whitelist=%j', rawIp, clientIp, bypassActive, ipWhitelist);
+
+  if(bypassActive && ipWhitelist.includes(clientIp)){
+    console.log('[AUTH admin] BYPASS accordé pour', clientIp);
+    registerSuccess(clientIp);
     return next();
   }
 
-  // Tant que l'utilisateur n'a pas présenté d'auth Basic, on doit renvoyer 401 avec WWW-Authenticate pour forcer la popup.
   const header = req.headers.authorization || '';
   if(!header.startsWith('Basic ')){
-    // On ne bloque PAS encore par IP pour permettre la popup (sinon certains navigateurs ne l'affichent pas si 403 direct)
     res.set('WWW-Authenticate','Basic realm="Admin"');
-    registerFail(ip);
+    registerFail(clientIp);
     return res.status(401).send('Auth requise');
   }
 
-  const attempt = authAttempts.get(ip);
+  const attempt = authAttempts.get(clientIp);
   if(attempt && attempt.lockUntil && attempt.lockUntil > now()){
     const reste = Math.ceil((attempt.lockUntil - now())/1000);
     return res.status(429).send('Trop de tentatives. Ré essaie dans '+reste+'s');
@@ -144,14 +154,14 @@ function requireAdmin(req,res,next){
   const userOk = constantTimeEqual(u, ADMIN_USER);
   const passOk = constantTimeEqual(p, ADMIN_PASS);
   if(userOk && passOk){
-    registerSuccess(ip);
-    console.log('[AUTH admin] succès pour', ip);
+    registerSuccess(clientIp);
+    console.log('[AUTH admin] succès pour', clientIp);
     return next();
   }
-  const data = registerFail(ip);
+  const data = registerFail(clientIp);
   const remain = Math.max(0, MAX_FAILS - data.fails);
   res.set('WWW-Authenticate','Basic realm="Admin"');
-  console.log('[AUTH admin] échec credentials ip=', ip, 'restant=', remain);
+  console.log('[AUTH admin] échec credentials ip=%s restant=%d', clientIp, remain);
   return res.status(401).send('Identifiants invalides ('+remain+' tentatives restantes)');
 }
 
@@ -162,10 +172,9 @@ function requireAdminWrite(req,res,next){
   if(!['POST','PUT','DELETE','PATCH'].includes(req.method)) return next();
 
   // Réutilisation de la logique minimaliste: Basic Auth ou IP bypass
-  const ip = req.ip || req.connection?.remoteAddress || 'unknown';
+  const clientIp = getClientIp(req) || 'unknown';
   const { ipWhitelist, ipBypass } = runtimeConfig;
-  const normIp = normalizeIp(ip);
-  if(ipBypass && ipWhitelist.length && (ipWhitelist.includes(ip) || ipWhitelist.includes(normIp))){
+  if(ipBypass && Array.isArray(ipWhitelist) && ipWhitelist.length && ipWhitelist.includes(clientIp)){
     return next();
   }
   // Si pas bypass et pas token et pas Basic valide plus tard, l'IP pourra être un facteur, mais on ne bloque plus juste sur IP avant d'essayer Basic.
@@ -192,7 +201,7 @@ app.get('/admin.html', requireAdmin, (req,res)=>{
 
 // --- Middleware fort: exige Auth Basic valide, ignore token & bypass IP ---
 function requireAdminStrong(req,res,next){
-  const ip = req.ip || req.connection?.remoteAddress || 'unknown';
+  const ip = getClientIp(req) || 'unknown';
   const header = req.headers.authorization || '';
   if(!header.startsWith('Basic ')){
     res.set('WWW-Authenticate','Basic realm="AdminConfig"');
@@ -286,26 +295,6 @@ app.use((req, res, next) => {
   next();
 });
 
-// Alias rétrocompatibilité: si requête /img/Airpods/... rediriger vers /img/Electronique/Airpods/...
-app.get('/img/Airpods/:file', (req,res,next) => {
-  const target = path.join(__dirname, 'img', 'Electronique', 'Airpods', req.params.file);
-  if (fs.existsSync(target)) return res.sendFile(target);
-  return next();
-});
-
-// Alias pour /img/Mitraillettes/* vers /img/Artifices/Mitraillettes/*
-app.get('/img/Mitraillettes/:file', (req,res,next) => {
-  const target = path.join(__dirname, 'img', 'Artifices', 'Mitraillettes', req.params.file);
-  if (fs.existsSync(target)) return res.sendFile(target);
-  return next();
-});
-
-// Alias pour /img/Tam-tam/* vers /img/Artifices/Tam-tam/*
-app.get('/img/Tam-tam/:file', (req,res,next) => {
-  const target = path.join(__dirname, 'img', 'Artifices', 'Tam-tam', req.params.file);
-  if (fs.existsSync(target)) return res.sendFile(target);
-  return next();
-});
 
 // Endpoint pour explorer les fichiers/dossiers dans img/
 app.get('/api/explorer', (req, res) => {
