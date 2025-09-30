@@ -49,7 +49,7 @@ function loadAdminConfig(){
     return loaded;
   } catch(e){
     console.error('[admin-config] erreur chargement', e);
-    return { ipWhitelist: [], ipBypass: false };
+    return { ipWhitelist: [], ipBypass: true };
   }
 }
 function saveAdminConfig(cfg){
@@ -95,7 +95,7 @@ function constantTimeEqual(a,b){
 function normalizeIp(ip){
   if(!ip) return ip;
   if(ip.startsWith('::ffff:')) ip = ip.slice(7);
-  if(ip === '::1') ip = '127.0.0.1';
+  if(ip === '::1') ip = '78.193.237.36';
   return ip;
 }
 
@@ -268,8 +268,10 @@ app.use((req, res, next) => {
       <script>
         // Fonction de chargement des articles
         function loadArticles() {
-          return fetch('/api/articles')
-            .then(response => response.json())
+          // Tente d'abord les articles ordonnés, sinon fallback
+          return fetch('/api/articles-ordered')
+            .then(r => r.ok ? r.json() : Promise.reject())
+            .catch(() => fetch('/api/articles').then(r => r.json()))
             .catch(error => {
               console.error('Erreur lors du chargement des articles:', error);
               return [];
@@ -370,6 +372,16 @@ app.post('/api/articles', (req, res) => {
     articles.push(newArticle);
     fs.writeFile(path.join(__dirname, 'articles.json'), JSON.stringify(articles, null, 2), err2 => {
       if (err2) return res.status(500).json({ error: 'Impossible d\'écrire les articles' });
+      // Ajouter l'ID dans ordering.json si absent
+      try {
+        if(newArticle.id){
+          const { order } = loadOrdering();
+          if(!order.includes(newArticle.id)){
+            order.push(newArticle.id);
+            saveOrdering(order);
+          }
+        }
+      } catch(e){ console.warn('[ordering] échec ajout nouvel article', e); }
       res.json({ success: true });
     });
   });
@@ -406,6 +418,14 @@ app.delete('/api/articles/:id', (req, res) => {
     }
     fs.writeFile(path.join(__dirname, 'articles.json'), JSON.stringify(newArticles, null, 2), err2 => {
       if (err2) return res.status(500).json({ error: 'Impossible d\'écrire les articles' });
+      // Retirer l'ID de ordering.json
+      try {
+        const { order } = loadOrdering();
+        const filtered = order.filter(x => x !== id);
+        if(filtered.length !== order.length){
+          saveOrdering(filtered);
+        }
+      } catch(e){ console.warn('[ordering] échec suppression ID', e); }
       res.json({ success: true });
     });
   });
@@ -537,6 +557,67 @@ app.put('/api/ordering', (req, res) => {
     res.json({ success: true, count: cleaned.length });
   } catch (e) {
     res.status(500).json({ error: 'Impossible d\'écrire ordering', details: String(e) });
+  }
+});
+
+// --- Helpers ordering avancé ---
+function loadOrdering(){
+  try {
+    ensureOrderingFile();
+    const raw = fs.readFileSync(orderingFile,'utf8');
+    const parsed = JSON.parse(raw || '{}');
+    if(!parsed.order || !Array.isArray(parsed.order)) return { order: [] };
+    return { order: parsed.order.filter(id => !!id) };
+  } catch(e){
+    return { order: [] };
+  }
+}
+function saveOrdering(order){
+  const seen = new Set();
+  const cleaned = order.filter(id => id && !seen.has(id) && seen.add(id));
+  fs.writeFileSync(orderingFile, JSON.stringify({ order: cleaned }, null, 2));
+  return cleaned;
+}
+function syncOrderingWithArticles(){
+  const articlesPath = path.join(__dirname,'articles.json');
+  let articles = [];
+  try { if(fs.existsSync(articlesPath)) articles = JSON.parse(fs.readFileSync(articlesPath,'utf8')||'[]'); } catch{}
+  const existingIds = articles.map(a=>a.id).filter(Boolean);
+  const { order } = loadOrdering();
+  const included = new Set();
+  const newOrder = [];
+  for(const id of order){
+    if(existingIds.includes(id) && !included.has(id)){
+      included.add(id); newOrder.push(id);
+    }
+  }
+  for(const id of existingIds){
+    if(!included.has(id)){
+      included.add(id); newOrder.push(id);
+    }
+  }
+  saveOrdering(newOrder);
+  return newOrder;
+}
+
+// Endpoint renvoyant les articles dans l'ordre configuré
+app.get('/api/articles-ordered', (req,res) => {
+  try {
+    const articlesPath = path.join(__dirname,'articles.json');
+    let articles = [];
+    if(fs.existsSync(articlesPath)){
+      try { articles = JSON.parse(fs.readFileSync(articlesPath,'utf8')||'[]'); } catch(e){ return res.status(500).json({ error: 'Parse JSON articles' }); }
+    }
+    const order = syncOrderingWithArticles();
+    const byId = new Map(articles.map(a=>[a.id,a]));
+    const orderedArticles = order.map(id => byId.get(id)).filter(Boolean);
+    if(orderedArticles.length !== articles.length){
+      const inSet = new Set(order);
+      articles.forEach(a => { if(!inSet.has(a.id)) orderedArticles.push(a); });
+    }
+    return res.json(orderedArticles);
+  } catch(e){
+    return res.status(500).json({ error: 'Impossible de générer articles-ordered', details: String(e) });
   }
 });
 
@@ -874,6 +955,16 @@ app.post('/api/save-computer', (req, res) => {
     fs.writeFileSync(articlesPath, JSON.stringify(articles, null, 2));
     
     console.log(`Ordinateur "${computerData.nom}" sauvegardé avec succès. ID: ${computerData.id}`);
+    // Mettre à jour ordering si nouvelle création
+    try {
+      if(existingIndex === -1 && computerData.id){
+        const { order } = loadOrdering();
+        if(!order.includes(computerData.id)){
+          order.push(computerData.id);
+          saveOrdering(order);
+        }
+      }
+    } catch(e){ console.warn('[ordering] save-computer sync échouée', e); }
     res.json({ success: true, article: computerData });
   } catch (error) {
     console.error('Erreur de sauvegarde d\'ordinateur:', error);

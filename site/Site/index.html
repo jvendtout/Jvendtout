@@ -396,7 +396,9 @@
     .mobile-menu-panel .control-btn { width: 100%; justify-content: flex-start; }
     .mobile-menu-panel .sort-dropdown { width: 100%; }
     .mobile-menu-panel .sort-dropdown .control-btn { width: 100%; }
-    .mobile-menu-panel .sort-options { position: static; box-shadow: none; border: none; background: transparent; opacity: 1; visibility: visible; transform: none; padding-top: 4px; }
+  /* Mobile: options de tri masquées par défaut, visibles seulement si dropdown actif */
+  .mobile-menu-panel .sort-options { position: static; box-shadow: none; border: none; background: transparent; opacity: 0; visibility: hidden; transform: none; padding-top: 4px; height: 0; overflow: hidden; transition: opacity .25s ease; }
+  .mobile-menu-panel .sort-dropdown.active .sort-options { opacity: 1; visibility: visible; height: auto; }
     .mobile-menu-panel .sort-option { border-radius: 6px; }
     @keyframes mobileMenuFade { from { opacity:0; transform: translateY(-6px);} to {opacity:1; transform: translateY(0);} }
     /* Hide original buttons on small screens when consolidated menu used */
@@ -406,12 +408,23 @@
       .controls > .sort-dropdown,
       .controls > #cart-button { display: none; }
       .controls .mobile-menu-toggle { display: inline-flex; }
-      .controls { align-items: center; }
+      .controls { align-items: center; flex-direction: row !important; flex-wrap: nowrap; }
       .search-container { flex: 1; }
-      .mobile-menu-wrapper { margin-left: 8px; }
-      /* Panneau sous la ligne, pleine largeur */
-      .mobile-menu-panel { width: 100%; position: static; box-shadow: none; background: rgba(46,0,79,0.6); border: 1px solid rgba(255,255,255,0.1); margin-top: 8px; }
-      .mobile-menu-panel .sort-options { background: rgba(255,255,255,0.06); padding: 4px; }
+      .mobile-menu-wrapper { position: relative; margin-left: 8px; top: 0; right: 0; }
+      /* Panneau flottant (restauré) */
+      .mobile-menu-panel { width: 220px; position: absolute; top: 42px; right: 0; box-shadow: 0 8px 24px rgba(0,0,0,0.4); background: rgba(46,0,79,0.9); border: 1px solid rgba(255,255,255,0.15); margin-top: 0; border-radius:12px; }
+      @media (max-width: 420px){
+        .mobile-menu-panel { width: 200px; }
+      }
+  .mobile-menu-panel .sort-options { background: rgba(255,255,255,0.06); padding: 4px; border-radius:8px; }
+    }
+
+    /* Override spécifique pour petite largeur: garder recherche + menu sur une ligne */
+    @media (max-width: 760px) {
+      .content-section .controls { display: flex; }
+      .content-section .controls .search-container { min-width: 0; }
+      .content-section .controls .mobile-menu-wrapper { flex: 0 0 auto; position: relative; right: auto; top: auto; }
+      .content-section .controls .mobile-menu-toggle { white-space: nowrap; }
     }
 
     /* Dropdowns de tri */
@@ -3944,11 +3957,19 @@
       try {
         switch(currentSection) {
           case 'articles':
-            console.log('Chargement des articles...');
-            const articlesRes = await fetch('/api/articles');
-            console.log('Réponse articles:', articlesRes.status);
-            articlesData = await articlesRes.json();
-            console.log('Articles chargés:', articlesData.length);
+            console.log('Chargement des articles (ordre de pertinence)...');
+            try {
+              const ts = Date.now();
+              const orderedRes = await fetch('/api/articles-ordered?ts='+ts, { cache: 'no-store' });
+              if(!orderedRes.ok) throw new Error('Réponse non OK /api/articles-ordered');
+              articlesData = await orderedRes.json();
+              console.log('Articles ordonnés chargés:', articlesData.length);
+            } catch(errOrdered){
+              console.warn('Fallback vers /api/articles:', errOrdered.message);
+              const fallbackRes = await fetch('/api/articles?ts=' + Date.now(), { cache: 'no-store' });
+              articlesData = await fallbackRes.json();
+              console.log('Articles fallback chargés:', articlesData.length);
+            }
             displayArticles(articlesData);
             // Charger les produits pour le formulaire d'avis après le chargement des articles
             loadProductsForReview();
@@ -5511,11 +5532,21 @@
               
               // Exécuter le tri
               const sortType = option.dataset.sort;
-              const section = dropdown.closest('.content-section').id.replace('-section', '');
+              const sectionContainer = dropdown.closest('.content-section');
+              const section = sectionContainer ? sectionContainer.id.replace('-section','') : currentSection;
               applySorting(section, sortType);
               
               // Fermer le dropdown
               dropdown.classList.remove('active');
+              // Si on est en mode mobile (panneau ouvert), fermer aussi le panneau menu
+              if(window.matchMedia('(max-width:760px)').matches){
+                const mobilePanel = dropdown.closest('.mobile-menu-panel');
+                if(mobilePanel){
+                  mobilePanel.classList.remove('open');
+                  const toggle = mobilePanel.parentElement.querySelector('.mobile-menu-toggle');
+                  if(toggle) toggle.setAttribute('aria-expanded','false');
+                }
+              }
             });
           });
         });

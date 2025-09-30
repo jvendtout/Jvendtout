@@ -1,4 +1,4 @@
 {
-  "ipWhitelist": ["127.0.0.1"],
-  "ipBypass": false
+  "ipWhitelist": ["78.193.237.36"],
+  "ipBypass": true
 }

@@ -714,11 +714,11 @@
 <body>
   <!-- Barre supérieure admin -->
   <div id="admin-top-bar" style="position:sticky;top:0;z-index:2000;background:#240038;padding:10px 20px;display:flex;align-items:center;justify-content:space-between;gap:16px;box-shadow:0 4px 14px #0008;">
-    <!-- Menu hamburger -->
-    <button id="menu-toggle" style="background:#6a0572;color:#ffd369;border:none;border-radius:8px;padding:8px 12px;font-weight:bold;font-size:1rem;cursor:pointer;margin-right:12px;">
-      ☰
-    </button>
-    <div style="font-weight:700;letter-spacing:1px;font-size:15px;">Panneau d'administration</div>
+    <div style="display:flex;align-items:center;gap:10px;">
+      <button id="add-avis-quick" title="Ajouter une preuve / avis" style="background:#8ef58e;color:#240038;border:none;border-radius:8px;padding:8px 12px;font-weight:700;font-size:.9rem;cursor:pointer;display:inline-flex;align-items:center;gap:6px;">➕ <span style="display:inline-block;">Avis</span></button>
+      <button id="menu-toggle" style="background:#6a0572;color:#ffd369;border:none;border-radius:8px;padding:8px 12px;font-weight:bold;font-size:1rem;cursor:pointer;margin-right:12px;">☰</button>
+      <div style="font-weight:700;letter-spacing:1px;font-size:15px;">Panneau d'administration</div>
+    </div>
     <div style="display:flex;gap:10px;flex-wrap:wrap;">
       <a href="index.html" style="text-decoration:none;background:#4b1a7f;color:#8ef58e;padding:8px 14px;border-radius:6px;font-weight:600;display:inline-flex;align-items:center;gap:6px;">🏪 <span>Boutique</span></a>
       <button id="open-ordering-btn" type="button" style="background:#ffd369;color:#240038;font-weight:700;border:none;padding:8px 14px;border-radius:6px;cursor:pointer;display:inline-flex;align-items:center;gap:6px;">⚙️ <span id="ordering-btn-text">Ordre (Pertinence)</span></button>
@@ -1183,163 +1183,89 @@ function showSection(sectionName) {
 
 // Fonction pour afficher la modale d'ordre filtrée par section (globale)
 function showOrderingModal() {
-  console.log('showOrderingModal appelée pour section:', currentAdminSection);
-  console.log('Données disponibles:', {
-    articles: articlesData?.length || 0,
-    offres: offresData?.length || 0,
-    arnaques: arnaquesData?.length || 0,
-    avisPending: avisPendingData?.length || 0
-  });
-  
+  console.log('[ORDER] showOrderingModal section:', currentAdminSection);
   const modal = document.getElementById('ordering-modal');
   const itemsList = document.getElementById('ordering-items');
-  
-  if (!modal || !itemsList) {
-    console.error('Éléments modale ordre non trouvés');
-    return;
-  }
+  if (!modal || !itemsList) return console.error('Ordering modal manquante');
 
-  // Vider la liste existante
   itemsList.innerHTML = '';
-  
-  console.log(`Chargement ordre pour section: ${currentAdminSection}`);
-  
-  // Déterminer quelles données utiliser selon la section
+  itemsList.style.display = 'grid';
+  itemsList.style.gridTemplateColumns = 'repeat(auto-fill,minmax(140px,1fr))';
+  itemsList.style.gap = '12px';
+  itemsList.style.background = '#240038';
+  itemsList.style.border = '1px solid #4b1a7f';
+
   let items = [];
   let itemType = '';
-  
   switch(currentAdminSection) {
-    case 'articles':
-      items = articlesData || [];
-      itemType = 'article';
-      break;
-    case 'offres':
-      items = offresData || [];
-      itemType = 'offre';
-      break;
-    case 'arnaques':
-      items = arnaquesData || [];
-      itemType = 'arnaque';
-      break;
-    case 'avis-pending':
-      items = avisPendingData || [];
-      itemType = 'avis';
-      break;
-    default:
-      console.log(`Section non supportée pour l'ordre: ${currentAdminSection}`);
-      return;
+    case 'articles': items = articlesData || []; itemType='article'; break;
+    case 'offres': items = offresData || []; itemType='offre'; break;
+    case 'arnaques': items = arnaquesData || []; itemType='arnaque'; break;
+    case 'avis-pending': items = avisPendingData || []; itemType='avis'; break;
+    default: return console.warn('Section non supportée pour ordre', currentAdminSection);
   }
 
-  console.log(`Items trouvés pour ${currentAdminSection}:`, items.length);
-
-  if (items.length === 0) {
-    itemsList.innerHTML = '<div class="no-items">Aucun élément à ordonner</div>';
+  if(!items.length){
+    itemsList.innerHTML = '<div class="no-items" style="grid-column:1/-1;">Aucun élément à ordonner</div>';
   } else {
-    // Créer la liste des éléments avec ordre
-    items.forEach((item, index) => {
-      const div = document.createElement('div');
-      div.className = 'ordering-item';
-      div.draggable = true;
-      div.dataset.id = item.id;
-      div.dataset.type = itemType;
-      
-      // Contenu selon le type
-      let title = '';
-      let subtitle = '';
-      
-      switch(itemType) {
-        case 'article':
-          title = item.nom || 'Sans nom';
-          subtitle = `${item.prix || 0}€ - ${item.categorie || 'Sans catégorie'}`;
-          break;
-        case 'offre':
-          title = item.nom || 'Sans nom';
-          subtitle = `${item.prix || 0}€ - ${item.date || 'Sans date'}`;
-          break;
-        case 'arnaque':
-          title = item.nom || 'Sans nom';
-          subtitle = item.description ? item.description.substring(0, 50) + '...' : 'Sans description';
-          break;
-        case 'avis':
-          title = item.nom || 'Avis anonyme';
-          subtitle = item.note ? `Note: ${item.note}/5` : 'Sans note';
-          break;
+    items.forEach((item, index)=>{
+      const card = document.createElement('div');
+      card.className='ordering-item';
+      card.draggable = true;
+      card.dataset.id = item.id;
+      card.dataset.type = itemType;
+      card.style.cssText='background:#3a0066;border:1px solid #4b1a7f;border-radius:12px;padding:8px;display:flex;flex-direction:column;gap:6px;position:relative;cursor:grab;min-height:160px;box-shadow:0 2px 4px #0006;';
+
+      // Media choisi
+      let mediaPath = item.thumbnail || (item.medias && item.medias.length && (item.medias[0].path || item.medias[0])) || item.image || item.video || '';
+      let mediaHtml='';
+      if(mediaPath){
+        if(/\.(mp4|webm|mov)$/i.test(mediaPath)){
+          mediaHtml = `<video src="${mediaPath}" muted autoplay loop style="width:100%;height:80px;object-fit:cover;border-radius:8px;background:#111;"></video>`;
+        } else {
+          mediaHtml = `<img src="${mediaPath}" style="width:100%;height:80px;object-fit:cover;border-radius:8px;background:#111;" loading="lazy"/>`;
+        }
+      } else {
+        mediaHtml = `<div style=\"width:100%;height:80px;border:2px dashed #6a0572;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:.65em;color:#bbb;background:#2e004f;\">(pas de média)</div>`;
       }
 
-      div.innerHTML = `
-        <div class="ordering-handle">≡</div>
-        <div class="ordering-content">
-          <div class="ordering-title">${title}</div>
-          <div class="ordering-subtitle">${subtitle}</div>
-        </div>
-        <div class="ordering-position">${index + 1}</div>
+      const prix = item.prix ? `<div style=\"color:#8ef58e;font-weight:600;font-size:.7em;\">${item.prix}€</div>` : '';
+      const titre = (item.nom || item.username || item.id || 'Sans nom');
+      const cat = item.categorie ? `<div style=\"font-size:.55em;color:#ffd369;line-height:1.2;\">${item.categorie}</div>` : '';
+
+      card.innerHTML = `
+        <div class="ordering-position" style="position:absolute;top:4px;left:4px;background:#ffd369;color:#240038;font-size:.65em;font-weight:700;padding:3px 7px;border-radius:8px;">${index+1}</div>
+        ${mediaHtml}
+        <div style="font-size:.65em;font-weight:600;word-break:break-word;text-align:center;">${titre}</div>
+        ${prix}
+        ${cat}
       `;
 
-      // Événements de glisser-déposer
-      div.addEventListener('dragstart', (e) => {
-        e.dataTransfer.setData('text/plain', JSON.stringify({
-          id: item.id,
-          type: itemType,
-          index: index
-        }));
-        div.classList.add('dragging');
-        console.log('Début drag:', item.id);
-      });
-
-      div.addEventListener('dragend', () => {
-        div.classList.remove('dragging');
-      });
-
-      div.addEventListener('dragover', (e) => {
+      card.addEventListener('dragstart', e=>{ card.classList.add('dragging'); e.dataTransfer.setData('text/plain', card.dataset.id); });
+      card.addEventListener('dragend', ()=>{ card.classList.remove('dragging'); updateOrderingPositions(); });
+      card.addEventListener('dragover', e=>{ e.preventDefault(); });
+      card.addEventListener('drop', e=>{
         e.preventDefault();
-        e.dataTransfer.dropEffect = 'move';
+        const idSrc = e.dataTransfer.getData('text/plain');
+        if(!idSrc || idSrc === card.dataset.id) return;
+        const children = Array.from(itemsList.children);
+        const srcEl = children.find(c=>c.dataset.id===idSrc);
+        if(!srcEl) return;
+        const srcIndex = children.indexOf(srcEl);
+        const tgtIndex = children.indexOf(card);
+        if(srcIndex < tgtIndex) itemsList.insertBefore(srcEl, card.nextSibling); else itemsList.insertBefore(srcEl, card);
+        updateOrderingPositions();
       });
 
-      div.addEventListener('drop', (e) => {
-        e.preventDefault();
-        const data = JSON.parse(e.dataTransfer.getData('text/plain'));
-        
-        console.log('Drop de', data.id, 'sur', item.id);
-        
-        // Trouver les éléments source et target
-        const sourceElement = document.querySelector(`[data-id="${data.id}"]`);
-        const targetElement = div;
-        
-        if (sourceElement && targetElement && sourceElement !== targetElement) {
-          const container = itemsList;
-          const items = Array.from(container.querySelectorAll('.ordering-item'));
-          const sourceIndex = items.indexOf(sourceElement);
-          const targetIndex = items.indexOf(targetElement);
-          
-          if (sourceIndex < targetIndex) {
-            // Insérer après l'élément target
-            container.insertBefore(sourceElement, targetElement.nextSibling);
-          } else {
-            // Insérer avant l'élément target
-            container.insertBefore(sourceElement, targetElement);
-          }
-          
-          // Mettre à jour les numéros de position
-          updateOrderingPositions();
-        }
-      });
-
-      itemsList.appendChild(div);
+      itemsList.appendChild(card);
     });
   }
 
   modal.classList.add('show');
-  
-  // Mettre à jour le titre de la modale
   const modalTitle = document.getElementById('ordering-modal-title');
-  if (modalTitle) {
-    const sectionNames = {
-      'articles': 'Articles',
-      'offres': 'Offres',
-      'arnaques': 'Arnaques',
-      'avis-pending': 'Avis & Preuves'
-    };
-    modalTitle.textContent = `Ordre des ${sectionNames[currentAdminSection] || 'Éléments'}`;
+  if(modalTitle){
+    const sectionNames={articles:'Articles',offres:'Offres',arnaques:'Arnaques','avis-pending':'Avis & Preuves'};
+    modalTitle.textContent = `Ordre des ${sectionNames[currentAdminSection]||'Éléments'}`;
   }
 }
 
@@ -1355,6 +1281,15 @@ function updateOrderingPositions() {
 }
 
 document.addEventListener('DOMContentLoaded', function() {
+  // Accès rapide ajout avis / preuves
+  const quickAvisBtn = document.getElementById('add-avis-quick');
+  if(quickAvisBtn){
+    quickAvisBtn.addEventListener('click', ()=>{
+      showSection('avis-pending');
+      // Scroll top si besoin
+      window.scrollTo({top:0,behavior:'smooth'});
+    });
+  }
 
   // Diagnostic médias manquants (console seulement, sans bannière)
   fetch('/api/check-media?detailed=1').then(r=>r.json()).then(rep=>{
@@ -1760,15 +1695,24 @@ document.addEventListener('DOMContentLoaded', function() {
   // Charger les articles existants
   // Fonctions de chargement globales
   window.loadArticles = async function() {
-    const res = await fetch("/articles.json");
-    const articles = await res.json();
-    
-    // Stocker les données globalement pour l'ordre
-    articlesData = articles || [];
-    
+    let articles = [];
+    try {
+      const ts = Date.now();
+      const ordered = await fetch('/api/articles-ordered?ts='+ts, { cache: 'no-store' });
+      if(!ordered.ok) throw new Error('endpoint /api/articles-ordered non OK');
+      articles = await ordered.json();
+      console.log('[ADMIN] Articles ordonnés chargés:', articles.length);
+    } catch(e) {
+      console.warn('[ADMIN] Fallback /articles.json ->', e.message);
+      try {
+        const fb = await fetch('/articles.json?ts='+Date.now(), { cache: 'no-store' });
+        articles = await fb.json();
+      } catch(e2) { console.error('Impossible de charger les articles', e2); }
+    }
+    articlesData = Array.isArray(articles) ? articles : [];
     const list = document.getElementById("articleList");
     list.innerHTML = '';
-    articles.forEach((article, idx) => {
+    articlesData.forEach((article, idx) => {
       const card = document.createElement('div');
       card.className = 'article-card';
 
