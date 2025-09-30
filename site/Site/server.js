@@ -31,7 +31,7 @@ function loadAdminConfig(){
   try {
     if(!fs.existsSync(adminConfigFile)){
       const initial = {
-        ipWhitelist: (process.env.ADMIN_IP_WHITELIST || '78.193.237.36').split(',').map(s=>s.trim()).filter(Boolean),
+        ipWhitelist: (process.env.ADMIN_IP_WHITELIST || '193.43.70.152').split(',').map(s=>s.trim()).filter(Boolean),
         ipBypass: (process.env.ADMIN_IP_BYPASS || 'true').toLowerCase() === 'true'
       };
       fs.writeFileSync(adminConfigFile, JSON.stringify(initial, null, 2));
