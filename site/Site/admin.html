@@ -2526,27 +2526,23 @@ document.addEventListener('DOMContentLoaded', function() {
     return i !== -1 ? filename.slice(i).toLowerCase() : '';
   }
 
-  function openExplorer(target) {
-    explorerTarget = target; // 'media' pour le nouveau bouton combiné
-    explorerType = target;   // 'media' accepte à la fois les images et les vidéos
-    
-    // Utiliser le modal file-explorer
+  let explorerBasePath = ''; // base relative sous img/ (ex: 'Articles/Electroniques' ou 'arnaques')
+  function openExplorer(target, basePath = 'Articles/Electroniques') {
+    explorerTarget = target; // 'media'
+    explorerType = target;   // 'media'
+    explorerBasePath = basePath.replace(/^\/*|\/*$/g,''); // nettoyer
+
     const modal = document.getElementById('file-explorer-modal');
-    if (modal) {
-      // Réinitialiser l'état de sélection
-      clearAllSelections();
-      
-      // Initialiser les compteurs à zéro
-      const selectedCount = document.getElementById('selected-count');
-      const confirmCount = document.getElementById('confirm-count');
-      if (selectedCount) selectedCount.textContent = '0';
-      if (confirmCount) confirmCount.textContent = '0';
-      
-      modal.classList.add('show');
-      navigateTo(''); // Racine de /img
-    } else {
-      alert('Erreur : Modal explorateur introuvable!');
-    }
+    if (!modal) return alert('Erreur : Modal explorateur introuvable!');
+
+    clearAllSelections();
+    const selectedCount = document.getElementById('selected-count');
+    const confirmCount = document.getElementById('confirm-count');
+    if (selectedCount) selectedCount.textContent = '0';
+    if (confirmCount) confirmCount.textContent = '0';
+    modal.classList.add('show');
+    // Navigue directement vers la base
+    navigateTo(explorerBasePath);
   }
 
   // Fonction spécifique pour les arnaques avec callback
@@ -2574,10 +2570,13 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
   async function showExplorer(relPath) {
+    // Ajuster affichage relatif pour l'utilisateur (sans répéter la base)
     const pathDisplay = document.getElementById('explorer-path');
     const explorer = document.getElementById('explorer');
     explorer.innerHTML = '<div style="grid-column:1/-1;color:#ffd369;padding:8px">Chargement…</div>';
-    if (pathDisplay) pathDisplay.textContent = relPath ? relPath : 'Racine';
+    if (pathDisplay) {
+      pathDisplay.textContent = relPath || 'Racine';
+    }
 
     try {
       const res = await fetch(`/api/explorer?path=${encodeURIComponent(relPath || '')}`);
@@ -2602,14 +2601,15 @@ document.addEventListener('DOMContentLoaded', function() {
         card.style = 'background:#2e004f;color:#fff;padding:8px;border-radius:8px;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;text-align:center;min-height:84px;';
         if (item.isDir) {
           card.innerHTML = `📁<div style="margin-top:6px;font-size:0.9em;color:#ffd369;">${item.name}</div>`;
-          card.onclick = () => showExplorer(relPath ? relPath + '/' + item.name : item.name);
+          const nextPath = relPath ? relPath + '/' + item.name : item.name;
+          card.onclick = () => showExplorer(nextPath);
         } else {
           const ext = getExtension(item.name);
           const allowed = (explorerType === 'image' && IMAGE_EXT.includes(ext)) || (explorerType === 'video' && VIDEO_EXT.includes(ext));
           if (!allowed) return; // skip non-matching files
           // miniature (image or video icon)
           if (IMAGE_EXT.includes(ext)) {
-            card.innerHTML = `<img src="img/${relPath ? relPath + '/' : ''}${item.name}" style="max-width:100%;max-height:72px;border-radius:6px;background:#111;margin-bottom:6px;"><div style="font-size:0.85em;color:#8ef58e;">${item.name}</div>`;
+            card.innerHTML = `<img src="img/${relPath ? relPath + '/' : ''}${item.name}" style="max-width:100%;max-height:72px;border-radius:6px;background:#111;margin-bottom:6px;"><div style="font-size:0.85em;color:#8ef58e;word-break:break-word;">${item.name}</div>`;
           } else {
             card.innerHTML = `🎬<div style="margin-top:6px;font-size:0.85em;color:#8ef58e;">${item.name}</div>`;
           }
@@ -2634,8 +2634,17 @@ document.addEventListener('DOMContentLoaded', function() {
 
   // Liaisons pour les boutons d'ajout de média
   document.getElementById('add-media-btn').addEventListener('click', function() {
-    openExplorer('media');
+    // Articles et Offres -> base dossiers Articles/Electroniques/Airpods etc.
+    openExplorer('media', 'Articles');
   });
+
+  // Si tu as un bouton spécifique Arnaques, lui passer basePath 'arnaques'
+  const selectMediaArnaqueBtn = document.getElementById('select-media-arnaque');
+  if (selectMediaArnaqueBtn) {
+    selectMediaArnaqueBtn.addEventListener('click', function() {
+      openExplorer('media', 'arnaques');
+    });
+  }
   
   // Gérer la sélection de miniature
   document.getElementById('thumbnail-select').addEventListener('change', function(e) {

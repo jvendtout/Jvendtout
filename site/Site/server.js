@@ -19,7 +19,7 @@ ensureFile(categoriesPath, '[]');
 //  ADMIN_USER : identifiant
 //  ADMIN_PASS : mot de passe (min 16+ caractères aléatoires)
 //  ADMIN_TOKEN (optionnel) : jeton alternatif à envoyer dans x-admin-token
-//  ADMIN_IP_WHITELIST (optionnel) : liste CSV d'IP autorisées (ex: "1.2.3.4,5.6.7.8")
+//  ADMIN_IP_WHITELIST (optionnel) : liste CSV d'IP autorisées (ex: "1.2.3.4,5.6.7.8,::1")
 //  ADMIN_MAX_FAILS / ADMIN_WINDOW_MS / ADMIN_LOCK_MS (optionnels) pour ajuster la protection brute force
 const ADMIN_USER = process.env.ADMIN_USER || 'Moi le dieu des dieux';
 const ADMIN_PASS = process.env.ADMIN_PASS || 'Si un connard voit ca je l\'encule';
@@ -31,13 +31,22 @@ function loadAdminConfig(){
   try {
     if(!fs.existsSync(adminConfigFile)){
       const initial = {
-        ipWhitelist: (process.env.ADMIN_IP_WHITELIST || '193.43.70.152').split(',').map(s=>s.trim()).filter(Boolean),
+        ipWhitelist: (process.env.ADMIN_IP_WHITELIST || '78.193.237.36')
+          .split(',')
+          .map(s=>normalizeIp(s.trim()))
+          .filter(Boolean),
         ipBypass: (process.env.ADMIN_IP_BYPASS || 'true').toLowerCase() === 'true'
       };
       fs.writeFileSync(adminConfigFile, JSON.stringify(initial, null, 2));
       return initial;
     }
-    return JSON.parse(fs.readFileSync(adminConfigFile,'utf8'));
+    const loaded = JSON.parse(fs.readFileSync(adminConfigFile,'utf8'));
+    if(Array.isArray(loaded.ipWhitelist)){
+      loaded.ipWhitelist = loaded.ipWhitelist.map(ip=>normalizeIp(ip));
+    } else {
+      loaded.ipWhitelist = [];
+    }
+    return loaded;
   } catch(e){
     console.error('[admin-config] erreur chargement', e);
     return { ipWhitelist: [], ipBypass: false };
@@ -82,6 +91,14 @@ function constantTimeEqual(a,b){
   return !!ok;
 }
 
+// Normalise les IP (gère ::ffff: et ::1)
+function normalizeIp(ip){
+  if(!ip) return ip;
+  if(ip.startsWith('::ffff:')) ip = ip.slice(7);
+  if(ip === '::1') ip = '127.0.0.1';
+  return ip;
+}
+
 app.set('trust proxy', 1); // nécessaire pour avoir req.ip correcte derrière Render
 
 if(ADMIN_PASS === 'change-me'){
@@ -98,7 +115,8 @@ function requireAdmin(req,res,next){
   // (Bypass token retiré)
 
   const { ipWhitelist, ipBypass } = runtimeConfig;
-  if(ipBypass && ipWhitelist.length && ipWhitelist.includes(ip)){
+  const normIp = normalizeIp(ip);
+  if(ipBypass && ipWhitelist.length && (ipWhitelist.includes(ip) || ipWhitelist.includes(normIp))){
     console.log('[AUTH admin] bypass IP pour', ip);
     registerSuccess(ip);
     return next();
@@ -146,7 +164,8 @@ function requireAdminWrite(req,res,next){
   // Réutilisation de la logique minimaliste: Basic Auth ou IP bypass
   const ip = req.ip || req.connection?.remoteAddress || 'unknown';
   const { ipWhitelist, ipBypass } = runtimeConfig;
-  if(ipBypass && ipWhitelist.length && ipWhitelist.includes(ip)){
+  const normIp = normalizeIp(ip);
+  if(ipBypass && ipWhitelist.length && (ipWhitelist.includes(ip) || ipWhitelist.includes(normIp))){
     return next();
   }
   // Si pas bypass et pas token et pas Basic valide plus tard, l'IP pourra être un facteur, mais on ne bloque plus juste sur IP avant d'essayer Basic.
