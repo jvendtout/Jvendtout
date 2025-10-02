@@ -9,10 +9,10 @@
     "medias": [
       {
         "type": "image",
-        "path": "img/Articles/Electroniques/Airpods/Airpods-pro-2/Airpods-pro-2.webp"
+        "path": "img/Articles/Electroniques/Airpods/airpods-pro-2/airpods-pro-2.webp"
       }
     ],
-    "image": "img/Articles/Electroniques/Airpods/Airpods-pro-2/Airpods-pro-2.webp"
+    "image": "img/Articles/Electroniques/Airpods/airpods-pro-2/airpods-pro-2.webp"
   },
   {
     "nom": "Airpods 3",
@@ -24,10 +24,10 @@
     "medias": [
       {
         "type": "image",
-        "path": "img/Articles/Electroniques/Airpods/Airpods-3/Airpods-3.webp"
+        "path": "img/Articles/Electroniques/Airpods/airpods-3/airpods-3.webp"
       }
     ],
-    "image": "img/Articles/Electroniques/Airpods/Airpods-3/Airpods-3.webp"
+    "image": "img/Articles/Electroniques/Airpods/airpods-3/airpods-3.webp"
   },
   {
     "nom": "Airpods 4",
@@ -39,10 +39,10 @@
     "medias": [
       {
         "type": "image",
-        "path": "img/Articles/Electroniques/Airpods/Airpods-4/Airpods-4.webp"
+        "path": "img/Articles/Electroniques/Airpods/airpods-4/airpods-4.webp"
       }
     ],
-    "image": "img/Articles/Electroniques/Airpods/Airpods-4/Airpods-4.webp"
+    "image": "img/Articles/Electroniques/Airpods/airpods-4/airpods-4.webp"
   },
   {
     "nom": "Airpods Max",
@@ -69,18 +69,18 @@
     "medias": [
       {
         "type": "image",
-        "path": "img/Articles/Electroniques/Airpods/Boitier-airpods/Boitier-airpods-noir.jpg"
+        "path": "img/Articles/Electroniques/Airpods/boitier-airpods/boitier-airpods-noir.jpg"
       },
       {
         "type": "image",
-        "path": "img/Articles/Electroniques/Airpods/Boitier-airpods/Boitier-airpods-bleu.jpg"
+        "path": "img/Articles/Electroniques/Airpods/boitier-airpods/boitier-airpods-bleu.jpg"
       },
       {
         "type": "image",
-        "path": "img/Articles/Electroniques/Airpods/Boitier-airpods/Boitier-airpods-vert.jpg"
+        "path": "img/Articles/Electroniques/Airpods/boitier-airpods/boitier-airpods-vert.jpg"
       }
     ],
-    "image": "img/Articles/Electroniques/Airpods/Boitier-airpods/Boitier-airpods-noir.jpg"
+    "image": "img/Articles/Electroniques/Airpods/boitier-airpods/boitier-airpods-noir.jpg"
   },
   {
     "nom": "Mitraillette 1000 coups",
