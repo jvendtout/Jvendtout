@@ -715,7 +715,8 @@
   <!-- Barre supérieure admin -->
   <div id="admin-top-bar" style="position:sticky;top:0;z-index:2000;background:#240038;padding:10px 20px;display:flex;align-items:center;justify-content:space-between;gap:16px;box-shadow:0 4px 14px #0008;">
     <div style="display:flex;align-items:center;gap:10px;">
-           <button id="menu-toggle" style="background:#6a0572;color:#ffd369;border:none;border-radius:8px;padding:8px 12px;font-weight:bold;font-size:1rem;cursor:pointer;margin-right:12px;">☰</button>
+      <button id="add-avis-quick" title="Ajouter une preuve / avis" style="background:#8ef58e;color:#240038;border:none;border-radius:8px;padding:8px 12px;font-weight:700;font-size:.9rem;cursor:pointer;display:inline-flex;align-items:center;gap:6px;">➕ <span style="display:inline-block;">Avis</span></button>
+      <button id="menu-toggle" style="background:#6a0572;color:#ffd369;border:none;border-radius:8px;padding:8px 12px;font-weight:bold;font-size:1rem;cursor:pointer;margin-right:12px;">☰</button>
       <div style="font-weight:700;letter-spacing:1px;font-size:15px;">Panneau d'administration</div>
     </div>
     <div style="display:flex;gap:10px;flex-wrap:wrap;">
@@ -1088,7 +1089,7 @@
           <input type="hidden" id="selected-file-paths" value="">
         </div>
         
-  <div class="explorer-footer" style="display:flex;justify-content:space-between;margin-bottom:20px; padding:10px 20px 20px 20px; background:rgba(46,0,78,0.85);backdrop-filter:blur(6px);">
+  <div class="explorer-footer" style="display:flex;justify-content:space-between;margin-top:20px; padding:10px 20px 20px 20px; background:rgba(46,0,78,0.85);backdrop-filter:blur(6px);">
           <button id="cancel-file-selection" class="btn" style="background:#6d6d6d;padding:10px 20px;border-radius:6px;border:none;color:#fff;cursor:pointer;">Annuler</button>
           <div style="display:flex;align-items:center;gap:10px;">
             <span id="mobile-selection-count" style="color:#8ef58e;font-weight:bold;display:none;">0 sélection(s)</span>
@@ -1278,6 +1279,17 @@ function updateOrderingPositions() {
     }
   });
 }
+
+document.addEventListener('DOMContentLoaded', function() {
+  // Accès rapide ajout avis / preuves
+  const quickAvisBtn = document.getElementById('add-avis-quick');
+  if(quickAvisBtn){
+    quickAvisBtn.addEventListener('click', ()=>{
+      showSection('avis-pending');
+      // Scroll top si besoin
+      window.scrollTo({top:0,behavior:'smooth'});
+    });
+  }
 
   // Diagnostic médias manquants (console seulement, sans bannière)
   fetch('/api/check-media?detailed=1').then(r=>r.json()).then(rep=>{
