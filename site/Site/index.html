@@ -319,6 +319,7 @@
       padding: 8px 12px;
       flex: 1;
       min-width: 200px;
+      overflow: hidden;
     }
 
     #search-input {
@@ -328,6 +329,10 @@
       color: white;
       flex: 1;
       padding: 4px 8px;
+      min-width: 0; /* autorise le shrink dans flex */
+      white-space: nowrap; /* une seule ligne */
+      overflow: hidden; /* cacher dépassement */
+      text-overflow: ellipsis; /* afficher ... si trop long */
     }
 
     #search-input::placeholder {
@@ -6224,4 +6229,5 @@
 </body>
 
 </html>
+
 
