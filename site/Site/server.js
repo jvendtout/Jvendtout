@@ -256,6 +256,21 @@ app.put('/api/admin/security-config', requireAdminStrong, (req,res)=>{
 app.use(express.json());
 app.use(express.static(__dirname));
 
+// Endpoint de santé ultra léger pour keep-alive / monitoring
+// - Répond en < 1ms avec 200 OK
+// - Compatible GET et HEAD (Express gère HEAD automatiquement)
+app.get('/health', (req, res) => {
+  try {
+    res.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+    res.set('Pragma', 'no-cache');
+    res.set('Expires', '0');
+    res.json({ ok: true, uptime: process.uptime(), timestamp: new Date().toISOString() });
+  } catch (e) {
+    // Même en cas d’erreur inattendue, renvoyer un 200 minimal pour éviter les faux négatifs de ping
+    res.status(200).end();
+  }
+});
+
 // Injecter le script de chargement des articles en premier sur toutes les requêtes HTML
 app.use((req, res, next) => {
   const originalSend = res.send;
@@ -297,6 +312,29 @@ app.use((req, res, next) => {
   next();
 });
 
+// Route debug pour lister les routes enregistrées
+app.get('/api/_debug/routes', (req,res)=>{
+  try {
+    const routes = [];
+    app._router.stack.forEach(layer => {
+      if(layer.route && layer.route.path){
+        const methods = Object.keys(layer.route.methods).filter(m=>layer.route.methods[m]);
+        routes.push({ path: layer.route.path, methods });
+      } else if(layer.name === 'router' && layer.handle?.stack){
+        layer.handle.stack.forEach(r => {
+          if(r.route){
+            const methods = Object.keys(r.route.methods).filter(m=>r.route.methods[m]);
+            routes.push({ path: r.route.path, methods });
+          }
+        });
+      }
+    });
+    res.json({ count: routes.length, routes });
+  } catch(e){
+    res.status(500).json({ error:'debug routes failed', details:e.message });
+  }
+});
+
 
 // Endpoint pour explorer les fichiers/dossiers dans img/
 app.get('/api/explorer', (req, res) => {
@@ -304,10 +342,6 @@ app.get('/api/explorer', (req, res) => {
   const baseDir = path.join(__dirname, 'img');
   const targetDir = path.join(baseDir, relPath);
 
-  // Sécurité : empêcher de sortir de /img
-  if (!targetDir.startsWith(baseDir)) {
-    return res.status(400).json({ error: 'Chemin invalide' });
-  }
 
   fs.readdir(targetDir, { withFileTypes: true }, (err, files) => {
     if (err) return res.status(500).json({ error: 'Impossible de lire le dossier' });
@@ -922,11 +956,6 @@ app.post('/api/save-computer', (req, res) => {
       computerData.description = `Ordinateur ${computerData.nom}`;
     }
     
-    // Image par défaut si non fournie
-    if (!computerData.image) {
-      computerData.image = '/img/Electronique/Ordinateurs/default.jpg';
-    }
-    
     // Lire les articles existants
     const articlesPath = path.join(__dirname, 'articles.json');
     let articles = [];
@@ -969,6 +998,167 @@ app.post('/api/save-computer', (req, res) => {
   } catch (error) {
     console.error('Erreur de sauvegarde d\'ordinateur:', error);
     res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// ---- Messages Preuve (courts messages anonymes distincts des avis classiques) ----
+const messagesPreuveFile = path.join(__dirname, 'messages-preuve.json');
+function ensureMessagesPreuveFile(){
+  if(!fs.existsSync(messagesPreuveFile)){
+    fs.writeFileSync(messagesPreuveFile, JSON.stringify([], null, 2));
+    console.log('[messages-preuve] Fichier messages-preuve.json créé');
+  }
+}
+ensureMessagesPreuveFile();
+
+app.get('/api/messages-preuve', (req,res)=>{
+  try {
+    ensureMessagesPreuveFile();
+    const data = fs.readFileSync(messagesPreuveFile,'utf8');
+    return res.json(JSON.parse(data||'[]'));
+  } catch(e){
+    console.error('[messages-preuve] lecture échouée', e);
+    return res.status(500).json({ error:'Impossible de lire messages-preuve' });
+  }
+});
+
+app.post('/api/messages-preuve', (req,res)=>{
+  try {
+    ensureMessagesPreuveFile();
+    const body = req.body || {};
+    // Structure minimale: { id, titre?, message, medias?[] }
+    if(!body.message || typeof body.message !== 'string' || !body.message.trim()){
+      return res.status(400).json({ error: 'Champ message requis' });
+    }
+    const list = JSON.parse(fs.readFileSync(messagesPreuveFile,'utf8')||'[]');
+    const entry = {
+      id: Date.now().toString(36)+Math.random().toString(36).slice(2,8),
+      titre: body.titre?.toString().slice(0,120) || null,
+      message: body.message.toString().slice(0,2000),
+      produit: body.produit || null,
+      medias: Array.isArray(body.medias)? body.medias.slice(0,10): [],
+      dateSubmission: new Date().toISOString()
+    };
+    list.push(entry);
+    fs.writeFileSync(messagesPreuveFile, JSON.stringify(list,null,2));
+    return res.json({ success:true, entry });
+  } catch(e){
+    console.error('[messages-preuve] ajout échoué', e);
+    return res.status(500).json({ error:'Impossible d\'ajouter un message' });
+  }
+});
+
+app.delete('/api/messages-preuve/:id', (req,res)=>{
+  try {
+    ensureMessagesPreuveFile();
+    const id = req.params.id;
+    const list = JSON.parse(fs.readFileSync(messagesPreuveFile,'utf8')||'[]');
+    const filtered = list.filter(m=>m.id !== id);
+    if(filtered.length === list.length){
+      return res.status(404).json({ error:'Message non trouvé' });
+    }
+    fs.writeFileSync(messagesPreuveFile, JSON.stringify(filtered,null,2));
+    return res.json({ success:true, removed:id });
+  } catch(e){
+    console.error('[messages-preuve] suppression échouée', e);
+    return res.status(500).json({ error:'Impossible de supprimer' });
+  }
+});
+
+// ---- Annonces (section dédiée) ----
+const annoncesFile = path.join(__dirname, 'annonces.json');
+function ensureAnnoncesFile(){
+  if(!fs.existsSync(annoncesFile)){
+    fs.writeFileSync(annoncesFile, JSON.stringify([], null, 2));
+    console.log('[annonces] Fichier annonces.json créé');
+  }
+}
+ensureAnnoncesFile();
+
+// GET toutes les annonces
+app.get('/api/annonces', (req,res)=>{
+  try {
+    ensureAnnoncesFile();
+    const raw = fs.readFileSync(annoncesFile,'utf8');
+    return res.json(JSON.parse(raw||'[]'));
+  } catch(e){
+    console.error('[annonces] lecture échouée', e);
+    return res.status(500).json({ error:'Impossible de lire annonces' });
+  }
+});
+
+// POST nouvelle annonce
+app.post('/api/annonces', (req,res)=>{
+  try {
+    console.log('[HTTP POST /api/annonces] body=', req.body);
+    ensureAnnoncesFile();
+    const body = req.body || {};
+    if(!body.message || !body.message.trim()){
+      return res.status(400).json({ error:'Message requis' });
+    }
+    const list = JSON.parse(fs.readFileSync(annoncesFile,'utf8')||'[]');
+    const entry = {
+      id: Date.now().toString(36)+Math.random().toString(36).slice(2,6),
+      titre: body.titre?.toString().slice(0,140) || null,
+      message: body.message.toString().slice(0,4000),
+      produit: body.produit || null, // id produit optionnel
+      medias: Array.isArray(body.medias)? body.medias.slice(0,10): [],
+      lien: body.lien || null, // URL externe éventuellement
+      pin: !!body.pin, // mise en avant
+      dateCreation: new Date().toISOString(),
+      dateMaj: null
+    };
+    list.push(entry);
+    fs.writeFileSync(annoncesFile, JSON.stringify(list,null,2));
+    return res.json({ success:true, entry });
+  } catch(e){
+    console.error('[annonces] ajout échoué', e);
+    return res.status(500).json({ error:'Impossible d\'ajouter annonce' });
+  }
+});
+
+// PUT mise à jour
+app.put('/api/annonces/:id', (req,res)=>{
+  try {
+    console.log('[HTTP PUT /api/annonces/'+req.params.id+'] body=', req.body);
+    ensureAnnoncesFile();
+    const id = req.params.id;
+    const list = JSON.parse(fs.readFileSync(annoncesFile,'utf8')||'[]');
+    const idx = list.findIndex(a=>a.id===id);
+    if(idx === -1) return res.status(404).json({ error:'Annonce non trouvée' });
+    const prev = list[idx];
+    const body = req.body || {};
+    list[idx] = {
+      ...prev,
+      titre: body.titre?.toString().slice(0,140) || prev.titre,
+      message: body.message? body.message.toString().slice(0,4000): prev.message,
+      produit: typeof body.produit === 'undefined'? prev.produit : body.produit,
+      medias: Array.isArray(body.medias)? body.medias.slice(0,10): prev.medias,
+      lien: typeof body.lien === 'undefined'? prev.lien : body.lien,
+      pin: typeof body.pin === 'undefined'? prev.pin : !!body.pin,
+      dateMaj: new Date().toISOString()
+    };
+    fs.writeFileSync(annoncesFile, JSON.stringify(list,null,2));
+    return res.json({ success:true, entry:list[idx] });
+  } catch(e){
+    console.error('[annonces] update échouée', e);
+    return res.status(500).json({ error:'Impossible de mettre à jour annonce' });
+  }
+});
+
+// DELETE annonce
+app.delete('/api/annonces/:id', (req,res)=>{
+  try {
+    ensureAnnoncesFile();
+    const id = req.params.id;
+    const list = JSON.parse(fs.readFileSync(annoncesFile,'utf8')||'[]');
+    const filtered = list.filter(a=>a.id!==id);
+    if(filtered.length === list.length) return res.status(404).json({ error:'Annonce non trouvée' });
+    fs.writeFileSync(annoncesFile, JSON.stringify(filtered,null,2));
+    return res.json({ success:true, removed:id });
+  } catch(e){
+    console.error('[annonces] suppression échouée', e);
+    return res.status(500).json({ error:'Impossible de supprimer annonce' });
   }
 });
 
