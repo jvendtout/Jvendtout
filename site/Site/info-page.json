@@ -1,0 +1,59 @@
+{
+  "elements": [
+    {
+      "type": "text",
+      "content": "Mon but principal en lancant ce projet était de centraliser ce qui se vend en un seul et meme endroit avec la meilleur qualité possible. Avant que je commence a revendre sur le compte snap (@jvendtous), beacoup devait avoir énormement de gens en contact pour pouvoir obtenir différents articles, un contact pour les&nbsp;<span class=\"product-link\" data-product-id=\"airpods-pro-2\" title=\"🔗 Produit\" style=\"color: rgb(142, 245, 142); cursor: pointer; position: relative; padding: 2px 4px; background: rgba(142, 245, 142, 0.15); border-radius: 3px; transition: 0.2s;\">Airpods</span><span class=\"product-link\" data-product-id=\"airpods-pro-2\" title=\"🔗 Produit\" style=\"color: rgb(142, 245, 142); text-decoration: underline wavy; cursor: pointer; position: relative; padding: 2px 4px; background: rgba(142, 245, 142, 0.15); border-radius: 3px; transition: 0.2s;\"></span>, un pour les&nbsp;<span class=\"product-link\" data-product-id=\"puff-argus-12k\" title=\"🔗 Produit\" style=\"color: rgb(142, 245, 142); cursor: pointer; position: relative; padding: 2px 4px; background: rgba(142, 245, 142, 0.15); border-radius: 3px; transition: 0.2s;\">puffs</span><span class=\"product-link\" data-product-id=\"puff-argus-12k\" title=\"🔗 Produit\" style=\"color: rgb(142, 245, 142); text-decoration: underline wavy; cursor: pointer; position: relative; padding: 2px 4px; background: rgba(142, 245, 142, 0.15); border-radius: 3px; transition: 0.2s;\"></span>, un pour les sappes, pour les montres, les <span class=\"product-link\" data-product-id=\"mortier-30mm-8cps\" title=\"🔗 Produit\" style=\"color: rgb(142, 245, 142); cursor: pointer; position: relative; padding: 2px 4px; background: rgba(142, 245, 142, 0.15); border-radius: 3px; transition: 0.2s;\">artifices</span>, les services...<br>L'autre probleme majeur était qu'entre les arnaques et les articles de mauvaise qualité vendu comme \"1.1\", on avait vite fait de perdre beacoup d'argent ou se retrouver avec des produit mal reproduit.<br>maintenant, je vous propose de tout avoir, centralisé a un seul et meme endroit et avec la meilleur qualité du marché.",
+      "style": "text-align:left;",
+      "position": {
+        "x": 20,
+        "y": 283,
+        "width": 840,
+        "height": 172,
+        "zIndex": 1
+      }
+    },
+    {
+      "type": "anchor",
+      "content": "but-de-ce-site>introduction>tout-au-mme-endroit",
+      "position": {
+        "x": 80,
+        "y": 82,
+        "width": 400,
+        "height": 200,
+        "zIndex": 2
+      }
+    }
+  ],
+  "sommaire": {
+    "visible": true,
+    "items": [
+      {
+        "id": "introduction",
+        "titre": "Introduction",
+        "children": [
+          {
+            "id": "introduction>but-de-ce-site",
+            "titre": "But de ce site",
+            "children": [
+              {
+                "id": "but-de-ce-site>introduction>tout-au-mme-endroit",
+                "titre": "Tout au même endroit",
+                "children": []
+              },
+              {
+                "id": "but-de-ce-site>introduction>reprer-les-arnaques",
+                "titre": "Repérer les arnaques",
+                "children": []
+              },
+              {
+                "id": "but-de-ce-site>introduction>faire-de-la-pub",
+                "titre": "Faire de la Pub",
+                "children": []
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

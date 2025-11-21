@@ -1,0 +1,16 @@
+[
+  {
+    "id": "mi0jlqdtg047",
+    "titre": "Site ouvert 🎉🎉",
+    "message": "<b>gras </b><i>italique </i><u>souligné</u>&nbsp;<span style=\"background-color: rgb(255, 255, 255);\">coloré&nbsp;</span><span class=\"annonce-product-link\" data-product-id=\"mortier-30mm-8cps\" style=\"color: rgb(142, 245, 142); background: rgba(142, 245, 142, 0.15); cursor: pointer; text-decoration: underline wavy;\">produit&nbsp;</span><a href=\"http://localhost:3000/index.html#but-de-ce-site&gt;introduction&gt;tout-au-mme-endroit\" target=\"_blank\" style=\"color: rgb(255, 211, 105); text-decoration: underline;\">lien</a>&nbsp;",
+    "produits": [],
+    "medias": [
+      "https://pixeldrain.com/api/file/3cxZzpGh",
+      "https://pixeldrain.com/api/file/ioTGttZ3",
+      "https://pixeldrain.com/api/file/icPfj7hY"
+    ],
+    "lien": null,
+    "dateCreation": "2025-11-15T17:10:18.833Z",
+    "dateMaj": null
+  }
+]

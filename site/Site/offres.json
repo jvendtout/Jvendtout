@@ -1,0 +1,17 @@
+[
+  {
+    "id": "offre_sample_1",
+    "nom": "Pack découverte",
+    "description": "Un pack spécial avec plusieurs produits à prix réduit",
+    "prix": 25,
+    "categorie": "Electronique/Airpods",
+    "image": "img/Electronique/Airpods/Airpods-pro-2.webp"
+  },
+  {
+    "nom": "Spa a Nime",
+    "id": "spa_nime",
+    "prix": 50000,
+    "description": "un spa",
+    "categorie": "immobiler/divers"
+  }
+]

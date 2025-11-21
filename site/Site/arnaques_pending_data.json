@@ -1,0 +1,36 @@
+[
+  {
+    "id": 1763572433763,
+    "nom": "le mechant",
+    "arnaqueurId": "pas_gentil",
+    "reseaux": "Snapchat, Telegram, Discord, Instagram, Facebook, WhatsApp",
+    "denonceur": "moi",
+    "denonceurReel": "moi",
+    "isAnonymous": true,
+    "technique": "nbjkk",
+    "produits": [
+      {
+        "id": "puff-argus-12k",
+        "nom": "Puff Argus 12k",
+        "prix": 10
+      },
+      {
+        "id": "airpods-4",
+        "nom": "Airpods 4",
+        "prix": 100
+      },
+      {
+        "id": "mortier-30mm-8cps",
+        "nom": "Mortier 30mm 8cps",
+        "prix": 25
+      }
+    ],
+    "date": "2025-11-19T17:13:53.763Z",
+    "status": "pending",
+    "verified": false,
+    "preuves": [
+      "img/arnaques/arnaque-preuve-1763572433814-1.png"
+    ],
+    "dateSubmission": "2025-11-19T17:13:54.080Z"
+  }
+]
