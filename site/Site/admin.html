@@ -801,7 +801,7 @@
         <img src="img/_technique/icon/produit.png" style="width:18px;height:18px;margin-right:10px;"/> Articles
       </button>
       <button id="menu-medias" style="display:flex; align-items:center; width:100%; padding:14px 18px; background:#4b1a7f; color:#ffd369; border:none; border-radius:8px; cursor:pointer; font-weight:600; font-size:0.95em; transition:all 0.3s;">
-        <span style="margin-right:10px; font-size:1.1em;">🎨</span> Médias Pixeldrain
+        <span style="margin-right:10px; font-size:1.1em;">🎨</span> Médias GoFile
       </button>
       <button id="menu-offres" style="display:flex; align-items:center; width:100%; padding:14px 18px; background:#4b1a7f; color:#8ef58e; border:none; border-radius:8px; cursor:pointer; font-weight:600; font-size:0.95em; transition:all 0.3s;">
         <span style="margin-right:10px; font-size:1.1em;">🏷️</span> Offres
@@ -943,10 +943,16 @@
       </div>
     </div>
 
-    <!-- Section Médias Pixeldrain -->
+    <!-- Section Médias GoFile -->
     <div id="medias-section" class="admin-section" style="display:none;">
       <div style="background: rgba(45,0,75,0.92); border-radius: 18px; box-shadow: 0 8px 32px #0006; padding: 32px; margin: 40px auto; max-width: 1400px;">
-        <h1 style="text-align: center; font-weight: 700; margin-bottom: 32px; letter-spacing: 1px; color: #ffd369;">🎨 Explorateur Médias Pixeldrain</h1>
+        <h1 style="text-align: center; font-weight: 700; margin-bottom: 32px; letter-spacing: 1px; color: #ffd369;">🎨 Explorateur Médias GoFile</h1>
+        
+        <!-- Navigation dossiers -->
+        <div id="gofile-breadcrumb" style="padding: 15px 20px; background: #3a1a4c; border-radius: 10px; margin-bottom: 20px; display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+          <span style="color: #ffd369;">📁 Chemin:</span>
+          <span id="breadcrumb-path" style="color: #fff;">Chargement...</span>
+        </div>
         
         <!-- Contrôles -->
         <div style="padding: 20px 30px; background: #4a1a5c; border-radius: 12px; margin-bottom: 30px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
@@ -959,11 +965,16 @@
             <button class="admin-filter-btn active" data-filter="all" style="padding: 8px 16px; border: 2px solid #ffd369; background: #ffd369; color: #2e003e; border-radius: 20px; cursor: pointer; font-size: 0.9rem; font-weight: 600;">Tous</button>
             <button class="admin-filter-btn" data-filter="image" style="padding: 8px 16px; border: 2px solid #6a0572; background: #6a0572; color: #fff; border-radius: 20px; cursor: pointer; font-size: 0.9rem; font-weight: 500;">Images</button>
             <button class="admin-filter-btn" data-filter="video" style="padding: 8px 16px; border: 2px solid #6a0572; background: #6a0572; color: #fff; border-radius: 20px; cursor: pointer; font-size: 0.9rem; font-weight: 500;">Vidéos</button>
+            <button class="admin-filter-btn" data-filter="folder" style="padding: 8px 16px; border: 2px solid #6a0572; background: #6a0572; color: #fff; border-radius: 20px; cursor: pointer; font-size: 0.9rem; font-weight: 500;">📁 Dossiers</button>
             <button class="admin-filter-btn" data-filter="other" style="padding: 8px 16px; border: 2px solid #6a0572; background: #6a0572; color: #fff; border-radius: 20px; cursor: pointer; font-size: 0.9rem; font-weight: 500;">Autres</button>
           </div>
 
-          <button id="admin-refresh" style="padding: 12px 25px; background: #d72660; color: white; border: none; border-radius: 25px; cursor: pointer; font-size: 1rem; font-weight: 600;">🔄 Actualiser</button>
-          <button id="admin-regenerate-mapping" style="padding: 12px 25px; background: #ff6b35; color: white; border: none; border-radius: 25px; cursor: pointer; font-size: 1rem; font-weight: 600; margin-left: 10px;">⚡ Auto-mapping</button>
+          <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+            <button id="admin-create-folder" style="padding: 12px 20px; background: #28a745; color: white; border: none; border-radius: 25px; cursor: pointer; font-size: 0.95rem; font-weight: 600;">📁+ Nouveau dossier</button>
+            <button id="admin-refresh" style="padding: 12px 25px; background: #d72660; color: white; border: none; border-radius: 25px; cursor: pointer; font-size: 1rem; font-weight: 600;">🔄 Actualiser</button>
+            <button id="admin-regenerate-mapping" style="padding: 12px 25px; background: #ff6b35; color: white; border: none; border-radius: 25px; cursor: pointer; font-size: 1rem; font-weight: 600; margin-left: 10px;">⚡ Auto-mapping</button>
+            <a href="/ping.html" target="_blank" style="padding: 12px 20px; background: #17a2b8; color: white; border: none; border-radius: 25px; cursor: pointer; font-size: 0.95rem; font-weight: 600; text-decoration: none;">🔔 Ping fichiers</a>
+          </div>
         </div>
 
         <!-- Statistiques -->
@@ -1607,7 +1618,7 @@ function showSection(sectionName) {
         restoreArticleForm();
       }
     } else if (sectionName === 'medias') {
-      initPixeldrainExplorer();
+      initGofileExplorer();
     } else if (sectionName === 'offres') {
       loadOffres();
     } else if (sectionName === 'arnaques') {
@@ -2514,7 +2525,7 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Insertion d'image/vidéo
     document.getElementById('annonce-insert-image-btn')?.addEventListener('click', async () => {
-      // Ouvrir sélecteur Pixeldrain
+      // Ouvrir sélecteur GoFile
       const modal = document.createElement('div');
       modal.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.95);z-index:10003;display:flex;align-items:center;justify-content:center;';
       modal.innerHTML = `
@@ -2534,21 +2545,21 @@ document.addEventListener('DOMContentLoaded', function() {
       
       let currentFilter = 'all';
       let searchTerm = '';
-      let pixeldrainFiles = [];
+      let gofileFiles = [];
       
-      // Charger les fichiers Pixeldrain
+      // Charger les fichiers GoFile
       try {
-        const res = await fetch('/api/pixeldrain-list');
+        const res = await fetch('/images');
         if (res.ok) {
-          pixeldrainFiles = await res.json();
+          gofileFiles = (await res.json()).filter(f => f.type !== 'folder');
         }
       } catch(e) {
-        console.error('Erreur chargement Pixeldrain:', e);
+        console.error('Erreur chargement GoFile:', e);
       }
       
       function renderGallery() {
         const gallery = document.getElementById('media-gallery');
-        let filtered = pixeldrainFiles.filter(f => {
+        let filtered = gofileFiles.filter(f => {
           const matchSearch = f.name.toLowerCase().includes(searchTerm.toLowerCase());
           const isImage = /\.(jpg|jpeg|png|gif|webp)$/i.test(f.name);
           const isVideo = /\.(mp4|webm|mov)$/i.test(f.name);
@@ -2564,7 +2575,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         
         gallery.innerHTML = filtered.map(f => {
-          const url = `https://pixeldrain.com/api/file/${f.id}`;
+          const url = `/media/${f.id}?name=${encodeURIComponent(f.name)}&server=${f.server || 'store1'}`;
           const isVideo = /\.(mp4|webm|mov)$/i.test(f.name);
           return `
             <div class="media-item" data-url="${url}" data-is-video="${isVideo}" style="cursor:pointer;background:#3a0066;border:2px solid #ffd369;border-radius:10px;padding:8px;text-align:center;transition:all 0.3s;">
@@ -2941,7 +2952,7 @@ document.addEventListener('DOMContentLoaded', function() {
   
   // Bouton Sélectionner médias
   document.getElementById('annonce-add-medias')?.addEventListener('click', () => {
-    openPixeldrainSelectorForAnnonces();
+    openGofileSelectorForAnnonces();
   });
   
   // Modal sélection de produit
@@ -3383,7 +3394,7 @@ document.addEventListener('DOMContentLoaded', function() {
           ? `<span style="color:#8ef58e;">${vraiNom}</span> <span style="color:#ff6b6b;font-weight:600;font-size:0.85em;background:rgba(255,107,107,0.2);padding:2px 8px;border-radius:4px;">🔒 ANONYME PUBLIQUEMENT</span>` 
           : `<span style="color:#8ef58e;">${vraiNom}</span>`;
         
-        // Générer aperçu des médias Pixeldrain
+        // Générer aperçu des médias GoFile
         let mediasPreview = '';
         if (arnaque.preuves && arnaque.preuves.length > 0) {
           mediasPreview = `
@@ -4292,8 +4303,8 @@ document.addEventListener('DOMContentLoaded', function() {
       const varianteModal = document.getElementById('variante-modal-overlay');
       if (varianteModal) varianteModal.style.display = 'none';
       
-      // Ouvrir le sélecteur Pixeldrain
-      openPixeldrainSelectorGeneric((selectedMedias) => {
+      // Ouvrir le sélecteur GoFile
+      openGofileSelectorGeneric((selectedMedias) => {
         // Ajouter les médias sélectionnés à tempVarianteMedia
         if (!window.tempVarianteMedia) window.tempVarianteMedia = [];
         
@@ -4313,160 +4324,6 @@ document.addEventListener('DOMContentLoaded', function() {
         // Restaurer la modal variante
         if (varianteModal) varianteModal.style.display = 'flex';
       }, true);
-      
-      /* ANCIEN CODE - Explorateur local désactivé, on utilise Pixeldrain maintenant
-      return; // Ne pas exécuter le code ci-dessous
-      
-      // Afficher une modale d'aide
-      const helpModal = document.createElement('div');
-      helpModal.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.9);z-index:10002;display:flex;align-items:center;justify-content:center;';
-      helpModal.innerHTML = `
-        <div style="background:linear-gradient(135deg, #2e003e, #6a0572);border:2px solid #ffd369;border-radius:16px;padding:30px;max-width:600px;width:90%;text-align:center;">
-          <h3 style="color:#ffd369;margin-bottom:20px;font-size:1.5em;">� Sélection de médias</h3>
-          <p style="color:#8ef58e;margin-bottom:15px;font-size:0.95em;text-align:center;">
-            Cliquez sur un média pour l'ajouter à cette variante :
-          </p>
-          <div id="variante-current-path" style="color:#ffd369;margin-bottom:10px;padding:8px;background:rgba(255,211,105,0.1);border-radius:6px;font-size:0.9em;text-align:center;"></div>
-          <div id="variante-quick-select" style="flex:1;display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:10px;overflow-y:auto;padding:10px;background:rgba(0,0,0,0.3);border-radius:8px;margin-bottom:15px;">
-            <!-- Médias seront listés ici -->
-          </div>
-          <button id="close-help-modal" style="background:#6c757d;color:#fff;border:none;padding:12px 24px;border-radius:8px;cursor:pointer;font-weight:600;">Fermer</button>
-        </div>
-      `;
-      document.body.appendChild(helpModal);
-      
-      
-      // Charger les médias depuis l'explorateur local (API /api/explorer)
-      const loadMedias = async (searchPath = '') => {
-        try {
-          const gallery = document.getElementById('variante-quick-select');
-          const pathDisplay = document.getElementById('variante-current-path');
-          gallery.innerHTML = '<div style="grid-column:1/-1;text-align:center;color:#ffd369;padding:20px;">⏳ Chargement...</div>';
-          
-          console.log('[VARIANTE MEDIA] Chargement depuis:', searchPath || 'img/');
-          const res = await fetch('/api/explorer?path=' + encodeURIComponent(searchPath));
-          console.log('[VARIANTE MEDIA] Response status:', res.status);
-          const files = await res.json();
-          console.log('[VARIANTE MEDIA] Fichiers trouvés:', files);
-          
-          // Afficher le chemin actuel
-          pathDisplay.innerHTML = searchPath ? 
-            `📂 img/${searchPath}` : 
-            `📂 img/`;
-          
-          gallery.innerHTML = '';
-          
-          // Bouton retour si on est dans un sous-dossier
-          if (searchPath) {
-            const backBtn = document.createElement('div');
-            backBtn.style.cssText = 'cursor:pointer;border:2px solid #8ef58e;border-radius:8px;padding:15px;background:#1a0033;text-align:center;transition:all 0.2s;';
-            backBtn.innerHTML = `<div style="font-size:2em;">⬆️</div><div style="color:#8ef58e;font-size:0.85em;margin-top:5px;">Retour</div>`;
-            backBtn.addEventListener('click', () => {
-              const parentPath = searchPath.split('/').slice(0, -1).join('/');
-              loadMedias(parentPath);
-            });
-            backBtn.addEventListener('mouseenter', () => {
-              backBtn.style.borderColor = '#ffd369';
-              backBtn.style.transform = 'scale(1.05)';
-            });
-            backBtn.addEventListener('mouseleave', () => {
-              backBtn.style.borderColor = '#8ef58e';
-              backBtn.style.transform = 'scale(1)';
-            });
-            gallery.appendChild(backBtn);
-          }
-          
-          
-          // Afficher les dossiers d'abord
-          const directories = files.filter(f => f.isDirectory);
-          directories.forEach(dir => {
-            const folderItem = document.createElement('div');
-            folderItem.style.cssText = 'cursor:pointer;border:2px solid #ffd369;border-radius:8px;padding:15px;background:#2e003e;text-align:center;transition:all 0.2s;';
-            folderItem.innerHTML = `<div style="font-size:2em;">📁</div><div style="color:#ffd369;font-size:0.85em;margin-top:5px;">${dir.name}</div>`;
-            folderItem.addEventListener('click', () => {
-              const newPath = searchPath ? `${searchPath}/${dir.name}` : dir.name;
-              loadMedias(newPath);
-            });
-            folderItem.addEventListener('mouseenter', () => {
-              folderItem.style.borderColor = '#8ef58e';
-              folderItem.style.transform = 'scale(1.05)';
-            });
-            folderItem.addEventListener('mouseleave', () => {
-              folderItem.style.borderColor = '#ffd369';
-              folderItem.style.transform = 'scale(1)';
-            });
-            gallery.appendChild(folderItem);
-          });
-          
-          const mediaFiles = files.filter(f => 
-            !f.isDirectory && /\.(jpg|jpeg|png|gif|webp|mp4|webm|mov)$/i.test(f.name)
-          );
-          
-          if (mediaFiles.length === 0 && directories.length === 0) {
-            gallery.innerHTML = '<div style="grid-column:1/-1;text-align:center;color:#8ef58e;padding:40px;">Aucun média trouvé<br><br>📁 Ou utilisez "Charger depuis votre appareil"</div>';
-            return;
-          }
-          
-          mediaFiles.forEach(file => {
-            const isVideo = /\.(mp4|webm|mov)$/i.test(file.name);
-            const mediaPath = searchPath ? `img/${searchPath}/${file.name}` : `img/${file.name}`;
-            
-            const item = document.createElement('div');
-            item.style.cssText = 'cursor:pointer;border:2px solid #6a0572;border-radius:8px;overflow:hidden;transition:all 0.2s;background:#1a0033;';
-            
-            item.innerHTML = isVideo ?
-              `<video src="${mediaPath}" muted style="width:100%;height:80px;object-fit:cover;"></video>` :
-              `<img src="${mediaPath}" style="width:100%;height:80px;object-fit:cover;" alt="${file.name}">`;
-            
-            item.addEventListener('click', () => {
-              if (!window.tempVarianteMedia) window.tempVarianteMedia = [];
-              
-              window.tempVarianteMedia.push({
-                path: mediaPath,
-                url: mediaPath,
-                name: file.name,
-                type: isVideo ? 'video' : 'image',
-                mime_type: isVideo ? 'video/mp4' : 'image/jpeg'
-              });
-              
-              updateVarianteMediaDisplay();
-              showToast('✅ Média ajouté à la variante', 'success');
-            });
-            
-            item.addEventListener('mouseenter', () => {
-              item.style.borderColor = '#ffd369';
-              item.style.transform = 'scale(1.05)';
-            });
-            item.addEventListener('mouseleave', () => {
-              item.style.borderColor = '#6a0572';
-              item.style.transform = 'scale(1)';
-            });
-            
-            gallery.appendChild(item);
-          });
-        } catch(err) {
-          console.error('[VARIANTE] Erreur chargement médias:', err);
-          document.getElementById('variante-quick-select').innerHTML = 
-            '<div style="grid-column:1/-1;text-align:center;color:#ff6b6b;padding:40px;">❌ Erreur de chargement</div>';
-        }
-      };
-      
-      // Charger les médias au démarrage
-      loadMedias();
-      
-      // Fermer et restaurer
-      document.getElementById('close-help-modal').addEventListener('click', () => {
-        helpModal.remove();
-        if (varianteModal) varianteModal.style.display = 'flex';
-      });
-      
-      helpModal.addEventListener('click', (e) => {
-        if (e.target === helpModal) {
-          helpModal.remove();
-          if (varianteModal) varianteModal.style.display = 'flex';
-        }
-      });
-      FIN ANCIEN CODE */
     });
     
     document.getElementById('variante-save-btn').addEventListener('click', function() {
@@ -4624,26 +4481,26 @@ document.addEventListener('DOMContentLoaded', function() {
       allMedias.push(...window.currentEditingArticle.medias);
     }
     
-    // Médias temporaires (sélectionnés depuis Pixeldrain)
+    // Médias temporaires (sélectionnés depuis GoFile)
     if (window.tempSelectedMedia && window.tempSelectedMedia.length > 0) {
       allMedias.push(...window.tempSelectedMedia);
     }
     
     console.log('[Debug] Tous les médias trouvés:', allMedias);
     
-    // Convertir les médias Pixeldrain au format standard
+    // Convertir les médias GoFile au format standard
     article.medias = allMedias.map(media => {
-      if (media.type === 'pixeldrain') {
-        // Convertir le format Pixeldrain vers le format standard
+      if (media.type === 'gofile' || media.type === 'pixeldrain') {
+        // Convertir le format GoFile vers le format standard
         const filename = media.name || media.filename;
         return {
           type: media.mime_type && media.mime_type.startsWith('image/') ? 'image' : 
                 media.mime_type && media.mime_type.startsWith('video/') ? 'video' : 'file',
-          path: media.url, // URL Pixeldrain pour affichage
+          path: media.url, // URL GoFile pour affichage
           url: media.url,
           name: filename,
           mime_type: media.mime_type,
-          pixeldrain_id: media.id
+          gofile_id: media.id
         };
       }
       return media; // Garder les autres médias tels quels
@@ -4856,7 +4713,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   }
 
-  // Si tu as un bouton spécifique Arnaques, lui passer vers Pixeldrain aussi
+  // Si tu as un bouton spécifique Arnaques, lui passer vers GoFile aussi
   const selectMediaArnaqueBtn = document.getElementById('select-media-arnaque');
   if (selectMediaArnaqueBtn) {
     selectMediaArnaqueBtn.addEventListener('click', function() {
@@ -6567,14 +6424,14 @@ function refreshThumbnailGrid(){
   let editPendingProducts = [];
   let editPendingTechniques = [];
   
-  // Sélecteur Pixeldrain générique réutilisable
-  function openPixeldrainSelectorGeneric(callback, multipleMode = true) {
+  // Sélecteur GoFile générique réutilisable
+  function openGofileSelectorGeneric(callback, multipleMode = true) {
     const modal = document.createElement('div');
     modal.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.9);z-index:10003;display:flex;align-items:center;justify-content:center;padding:20px;';
     
     modal.innerHTML = `
       <div style="background:#2e004f;border:2px solid #ffd369;border-radius:12px;padding:20px;max-width:1000px;width:100%;max-height:90vh;overflow-y:auto;">
-        <h3 style="color:#ffd369;margin-bottom:15px;">🎨 Sélectionner des médias Pixeldrain</h3>
+        <h3 style="color:#ffd369;margin-bottom:15px;">🎨 Sélectionner des médias GoFile</h3>
         <input type="text" id="generic-pd-search" placeholder="🔍 Rechercher..." style="width:100%;padding:10px;margin-bottom:15px;border-radius:6px;border:1px solid #6a0572;background:#1a0033;color:#fff;">
         <div id="generic-pd-gallery" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:10px;max-height:500px;overflow-y:auto;"></div>
         <div style="display:flex;gap:10px;margin-top:15px;">
@@ -6589,12 +6446,12 @@ function refreshThumbnailGrid(){
     let selectedUrls = [];
     let allFiles = [];
     
-    // Charger Pixeldrain
+    // Charger GoFile
     fetch('/images').then(r => r.json()).then(files => {
-      allFiles = files.map(f => ({
+      allFiles = files.filter(f => f.type !== 'folder').map(f => ({
         ...f,
-        url: `https://pixeldrain.com/api/file/${f.id}`,
-        type: /\.(mp4|webm|mov)$/i.test(f.name) ? 'video' : 'image'
+        url: `/media/${f.id}?name=${encodeURIComponent(f.name)}&server=${f.server || 'store1'}`,
+        fileType: /\.(mp4|webm|mov)$/i.test(f.name) ? 'video' : 'image'
       }));
       renderGenericGallery(allFiles);
     });
@@ -6605,7 +6462,7 @@ function refreshThumbnailGrid(){
         const isSelected = selectedUrls.includes(file.url);
         return `
           <div onclick="toggleGenericMedia('${file.url}')" style="cursor:pointer;background:${isSelected ? 'rgba(142,245,142,0.3)' : '#3a0066'};border:2px solid ${isSelected ? '#8ef58e' : 'transparent'};border-radius:8px;padding:8px;position:relative;">
-            ${file.type === 'video' ? 
+            ${file.fileType === 'video' ? 
               `<video src="${file.url}" muted style="width:100%;height:80px;object-fit:cover;border-radius:6px;"></video>` :
               `<img src="${file.url}" style="width:100%;height:80px;object-fit:cover;border-radius:6px;">`
             }
@@ -6775,7 +6632,7 @@ function refreshThumbnailGrid(){
   
   // Bouton ajouter médias
   document.getElementById('edit-pending-add-medias')?.addEventListener('click', () => {
-    openPixeldrainSelectorForEdit((selectedMedias) => {
+    openGofileSelectorForEdit((selectedMedias) => {
       editPendingMedias = [...editPendingMedias, ...selectedMedias.map(url => ({ path: url, url: url }))];
       updateEditPendingMediasPreview();
     });
@@ -6801,9 +6658,9 @@ function refreshThumbnailGrid(){
     window.currentPendingEdit = null;
   };
   
-  // Sélecteur Pixeldrain simplifié pour édition
-  function openPixeldrainSelectorForEdit(callback) {
-    openPixeldrainSelectorGeneric((urls) => {
+  // Sélecteur GoFile simplifié pour édition
+  function openGofileSelectorForEdit(callback) {
+    openGofileSelectorGeneric((urls) => {
       callback(urls);
     }, true);
   }
@@ -7232,27 +7089,29 @@ document.getElementById('close-review-detail-modal').addEventListener('click', (
   document.getElementById('review-detail-modal').classList.remove('show');
 });
 
-// ==================== EXPLORATEUR PIXELDRAIN ADMIN ====================
+// ==================== EXPLORATEUR GOFILE ADMIN ====================
 
-let adminPixeldrainFiles = [];
+let adminGofileFiles = [];
 let adminFilteredFiles = [];
 let adminSelectedFiles = new Set();
 let adminCurrentFilter = 'all';
 let adminSearchTerm = '';
+let currentGofileFolderId = null; // ID du dossier courant
+let gofileFolderStack = []; // Pile de navigation pour le breadcrumb
 
-function initPixeldrainExplorer() {
-  console.log('[Admin Pixeldrain] Initialisation...');
-  loadPixeldrainFiles();
-  bindPixeldrainEvents();
+function initGofileExplorer() {
+  console.log('[Admin GoFile] Initialisation...');
+  loadGofileRootFolder();
+  bindGofileEvents();
 }
 
-function bindPixeldrainEvents() {
+function bindGofileEvents() {
   // Recherche
   const searchInput = document.getElementById('admin-search');
   if (searchInput) {
     searchInput.addEventListener('input', (e) => {
       adminSearchTerm = e.target.value.toLowerCase();
-      filterAndDisplayPixeldrainFiles();
+      filterAndDisplayGofileFiles();
     });
   }
 
@@ -7268,14 +7127,20 @@ function bindPixeldrainEvents() {
       e.target.style.color = '#2e003e';
       e.target.classList.add('active');
       adminCurrentFilter = e.target.dataset.filter;
-      filterAndDisplayPixeldrainFiles();
+      filterAndDisplayGofileFiles();
     });
   });
 
   // Actualiser
   const refreshBtn = document.getElementById('admin-refresh');
   if (refreshBtn) {
-    refreshBtn.addEventListener('click', loadPixeldrainFiles);
+    refreshBtn.addEventListener('click', () => loadGofileFolder(currentGofileFolderId));
+  }
+
+  // Nouveau dossier
+  const createFolderBtn = document.getElementById('admin-create-folder');
+  if (createFolderBtn) {
+    createFolderBtn.addEventListener('click', createGofileFolder);
   }
 
   // Régénérer le mapping automatique
@@ -7287,13 +7152,46 @@ function bindPixeldrainEvents() {
   // Désélectionner
   const clearBtn = document.getElementById('admin-clear-selection');
   if (clearBtn) {
-    clearBtn.addEventListener('click', clearPixeldrainSelection);
+    clearBtn.addEventListener('click', clearGofileSelection);
   }
 
   // Utiliser sélection pour l'article
   const useSelectedBtn = document.getElementById('admin-use-selected');
   if (useSelectedBtn) {
     useSelectedBtn.addEventListener('click', useSelectedForArticle);
+  }
+}
+
+async function createGofileFolder() {
+  const folderName = prompt('Nom du nouveau dossier:');
+  if (!folderName || !folderName.trim()) return;
+  
+  const parentId = currentGofileFolderId;
+  
+  try {
+    const response = await fetch('/api/gofile/folder', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Basic ' + btoa(adminCredentials.user + ':' + adminCredentials.pass)
+      },
+      body: JSON.stringify({ 
+        folderName: folderName.trim(),
+        parentFolderId: parentId
+      })
+    });
+    
+    const result = await response.json();
+    
+    if (result.success) {
+      showToast(`✅ Dossier "${folderName}" créé !`, 'success');
+      loadGofileFolder(currentGofileFolderId);
+    } else {
+      throw new Error(result.error || 'Erreur inconnue');
+    }
+  } catch (error) {
+    console.error('[GoFile] Erreur création dossier:', error);
+    showToast(`❌ Erreur: ${error.message}`, 'error');
   }
 }
 
@@ -7308,7 +7206,7 @@ async function regenerateMapping() {
   btn.style.background = '#666';
 
   try {
-    console.log('[Admin] Régénération du mapping Pixeldrain...');
+    console.log('[Admin] Régénération du mapping GoFile...');
     
     const response = await fetch('/api/regenerate-mapping', {
       method: 'GET',
@@ -7330,11 +7228,11 @@ async function regenerateMapping() {
       
       // Afficher les détails
       console.log(`✅ Mapping généré: ${result.count} fichiers`);
-      showToast(`✅ Mapping automatique généré avec succès ! ${result.count} fichiers associés. Les images devraient maintenant s'afficher depuis Pixeldrain.`, 'success');
+      showToast(`✅ Mapping automatique généré avec succès ! ${result.count} fichiers associés. Les images devraient maintenant s'afficher depuis GoFile.`, 'success');
       
       // Recharger les fichiers pour voir les changements
       setTimeout(() => {
-        loadPixeldrainFiles();
+        loadGofileFolder(currentGofileFolderId);
       }, 1000);
       
     } else {
@@ -7345,7 +7243,7 @@ async function regenerateMapping() {
     console.error('[Admin] Erreur régénération mapping:', error);
     btn.innerHTML = '❌ Erreur';
     btn.style.background = '#dc3545';
-    showToast(`❌ Erreur lors de la génération du mapping: ${error.message}. Vérifiez que votre clé API Pixeldrain est configurée.`, 'error');
+    showToast(`❌ Erreur lors de la génération du mapping: ${error.message}. Vérifiez que votre clé API GoFile est configurée.`, 'error');
   }
 
   // Restaurer le bouton après 3 secondes
@@ -7356,40 +7254,56 @@ async function regenerateMapping() {
   }, 3000);
 }
 
-async function loadPixeldrainFiles() {
+// Charger le dossier racine GoFile
+async function loadGofileRootFolder() {
+  currentGofileFolderId = null;
+  gofileFolderStack = [];
+  await loadGofileFolder(null);
+}
+
+// Charger un dossier GoFile spécifique
+async function loadGofileFolder(folderId) {
   const gallery = document.getElementById('admin-gallery');
   if (!gallery) return;
 
-  gallery.innerHTML = '<div style="text-align: center; padding: 60px; color: #ffd369;"><div style="width: 40px; height: 40px; border: 4px solid #4a1a5c; border-top: 4px solid #ffd369; border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 20px;"></div>Chargement des fichiers Pixeldrain...</div>';
+  currentGofileFolderId = folderId;
+
+  gallery.innerHTML = '<div style="text-align: center; padding: 60px; color: #ffd369;"><div style="width: 40px; height: 40px; border: 4px solid #4a1a5c; border-top: 4px solid #ffd369; border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 20px;"></div>Chargement des fichiers GoFile...</div>';
 
   try {
-    const response = await fetch('/images');
+    const url = folderId ? `/api/gofile/contents/${folderId}` : '/images';
+    const response = await fetch(url);
     if (!response.ok) {
       throw new Error(`Erreur ${response.status}: ${response.statusText}`);
     }
 
     const data = await response.json();
-    adminPixeldrainFiles = data.map(file => ({
-      ...file,
-      url: `https://pixeldrain.com/api/file/${file.id}`,
-      type: getPixeldrainFileType(file.name),
-      extension: getPixeldrainFileExtension(file.name),
-      formattedSize: formatPixeldrainFileSize(file.size),
-      formattedDate: formatPixeldrainDate(file.date_upload)
+    
+    // Mettre à jour le breadcrumb
+    updateGofileBreadcrumb(data);
+    
+    // Mapper les fichiers/dossiers
+    adminGofileFiles = data.map(item => ({
+      ...item,
+      url: item.type === 'folder' ? null : `/media/${item.id}?name=${encodeURIComponent(item.name)}&server=${item.server || 'store1'}`,
+      fileType: item.type === 'folder' ? 'folder' : getGofileFileType(item.name),
+      extension: item.type === 'folder' ? 'folder' : getGofileFileExtension(item.name),
+      formattedSize: item.type === 'folder' ? `${item.childrenCount || 0} éléments` : formatGofileFileSize(item.size),
+      formattedDate: formatGofileDate(item.createTime)
     }));
 
-    filterAndDisplayPixeldrainFiles();
-    updatePixeldrainStats();
-    console.log(`[Admin Pixeldrain] ${adminPixeldrainFiles.length} fichiers chargés`);
+    filterAndDisplayGofileFiles();
+    updateGofileStats();
+    console.log(`[Admin GoFile] ${adminGofileFiles.length} éléments chargés`);
 
   } catch (error) {
-    console.error('[Admin Pixeldrain] Erreur:', error);
+    console.error('[Admin GoFile] Erreur:', error);
     gallery.innerHTML = `
       <div style="text-align: center; padding: 60px; color: #dc3545;">
         <div style="font-size: 3rem; margin-bottom: 20px;">⚠️</div>
         <div><strong>Erreur de chargement</strong></div>
         <div>${error.message}</div>
-        <button onclick="loadPixeldrainFiles()" style="margin-top: 20px; padding: 10px 20px; background: #d72660; color: white; border: none; border-radius: 5px; cursor: pointer;">
+        <button onclick="loadGofileFolder(currentGofileFolderId)" style="margin-top: 20px; padding: 10px 20px; background: #d72660; color: white; border: none; border-radius: 5px; cursor: pointer;">
           Réessayer
         </button>
       </div>
@@ -7397,18 +7311,49 @@ async function loadPixeldrainFiles() {
   }
 }
 
-function filterAndDisplayPixeldrainFiles() {
-  adminFilteredFiles = adminPixeldrainFiles.filter(file => {
-    const typeMatch = adminCurrentFilter === 'all' || file.type === adminCurrentFilter;
+// Mettre à jour le fil d'Ariane
+function updateGofileBreadcrumb(data) {
+  const breadcrumbPath = document.getElementById('breadcrumb-path');
+  if (!breadcrumbPath) return;
+  
+  let html = '<button onclick="loadGofileRootFolder()" style="background:#ffd369; color:#2e003e; border:none; padding:4px 10px; border-radius:4px; cursor:pointer; font-weight:600;">🏠 Racine</button>';
+  
+  gofileFolderStack.forEach((folder, index) => {
+    html += ` <span style="color:#888;">›</span> `;
+    html += `<button onclick="navigateToFolder(${index})" style="background:#6a0572; color:#fff; border:none; padding:4px 10px; border-radius:4px; cursor:pointer;">${folder.name}</button>`;
+  });
+  
+  breadcrumbPath.innerHTML = html;
+}
+
+// Naviguer vers un dossier du breadcrumb
+function navigateToFolder(stackIndex) {
+  // Tronquer la pile au niveau voulu
+  gofileFolderStack = gofileFolderStack.slice(0, stackIndex + 1);
+  const folder = gofileFolderStack[stackIndex];
+  loadGofileFolder(folder.id);
+}
+
+// Entrer dans un dossier
+function enterGofileFolder(folderId, folderName) {
+  gofileFolderStack.push({ id: folderId, name: folderName });
+  loadGofileFolder(folderId);
+}
+
+function filterAndDisplayGofileFiles() {
+  adminFilteredFiles = adminGofileFiles.filter(file => {
+    const typeMatch = adminCurrentFilter === 'all' || 
+                      file.fileType === adminCurrentFilter ||
+                      (adminCurrentFilter === 'folder' && file.type === 'folder');
     const searchMatch = !adminSearchTerm || file.name.toLowerCase().includes(adminSearchTerm);
     return typeMatch && searchMatch;
   });
 
-  displayPixeldrainFiles();
-  updatePixeldrainStats();
+  displayGofileFiles();
+  updateGofileStats();
 }
 
-function displayPixeldrainFiles() {
+function displayGofileFiles() {
   const gallery = document.getElementById('admin-gallery');
   if (!gallery) return;
 
@@ -7416,49 +7361,101 @@ function displayPixeldrainFiles() {
     gallery.innerHTML = `
       <div style="grid-column: 1 / -1; text-align: center; padding: 80px; color: #ffd369;">
         <div style="font-size: 5rem; margin-bottom: 30px; opacity: 0.3;">📁</div>
-        <h3 style="font-size: 1.5rem; margin-bottom: 15px;">Aucun fichier trouvé</h3>
-        <p>Vérifiez votre connexion Pixeldrain ou ajustez vos filtres.</p>
+        <h3 style="font-size: 1.5rem; margin-bottom: 15px;">Dossier vide</h3>
+        <p>Aucun fichier dans ce dossier ou vos filtres ne correspondent à rien.</p>
       </div>
     `;
     return;
   }
 
-  const filesHTML = adminFilteredFiles.map(file => createPixeldrainFileHTML(file)).join('');
+  const filesHTML = adminFilteredFiles.map(file => createGofileFileHTML(file)).join('');
   gallery.innerHTML = filesHTML;
 
-  // Ajouter les événements de clic
-  gallery.querySelectorAll('.admin-file-item').forEach(item => {
+  // Ajouter les événements de clic (seulement pour les fichiers, pas les dossiers)
+  gallery.querySelectorAll('.admin-file-item:not(.folder-item)').forEach(item => {
     item.addEventListener('click', (e) => {
       e.preventDefault();
       const fileId = item.dataset.fileId;
-      togglePixeldrainFileSelection(fileId);
+      toggleGofileFileSelection(fileId);
     });
   });
 }
 
-function createPixeldrainFileHTML(file) {
+function createGofileFileHTML(file) {
   const isSelected = adminSelectedFiles.has(file.id);
   const selectedClass = isSelected ? 'selected' : '';
+  const isFolder = file.type === 'folder';
   
+  if (isFolder) {
+    // Affichage pour les dossiers
+    return `
+      <div class="admin-file-item folder-item" data-file-id="${file.id}" data-folder-name="${file.name}" style="background: #3a2a5c; border-radius: 12px; overflow: hidden; cursor: pointer; transition: all 0.3s ease; border: 3px solid #ffd369; position: relative;" ondblclick="enterGofileFolder('${file.id}', '${file.name.replace(/'/g, "\\'")}')">
+        <div style="height: 150px; display: flex; align-items: center; justify-content: center; background: #4a3a6c; overflow: hidden;">
+          <div style="font-size: 4rem;">📁</div>
+        </div>
+        <div style="padding: 15px;">
+          <div style="font-weight: 600; margin-bottom: 8px; word-break: break-word; color: #ffd369; font-size: 0.9rem;" title="${file.name}">${truncateGofileFileName(file.name, 30)}</div>
+          <div style="display: flex; justify-content: space-between; align-items: center; color: #ffd369; font-size: 0.8rem;">
+            <span style="background: #ffd369; color: #2e003e; padding: 4px 8px; border-radius: 12px; font-size: 0.7rem; text-transform: uppercase; font-weight: 600;">DOSSIER</span>
+            <span>${file.formattedSize}</span>
+          </div>
+          <div style="margin-top: 8px; display: flex; gap: 5px;">
+            <button onclick="event.stopPropagation(); deleteGofileContent('${file.id}', '${file.name.replace(/'/g, "\\'")}')" style="background: #dc3545; color: white; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 0.7rem;">🗑️ Suppr</button>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+  
+  // Affichage pour les fichiers
   return `
     <div class="admin-file-item ${selectedClass}" data-file-id="${file.id}" style="background: #4a1a5c; border-radius: 12px; overflow: hidden; cursor: pointer; transition: all 0.3s ease; border: 3px solid ${isSelected ? '#ffd369' : 'transparent'}; position: relative;">
       ${isSelected ? '<div style="position: absolute; top: 10px; right: 10px; background: #ffd369; color: #2e003e; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; z-index: 2;">✓</div>' : ''}
       <div style="height: 150px; display: flex; align-items: center; justify-content: center; background: #6a0572; overflow: hidden;">
-        ${getPixeldrainMediaHTML(file)}
+        ${getGofileMediaHTML(file)}
       </div>
       <div style="padding: 15px;">
-        <div style="font-weight: 600; margin-bottom: 8px; word-break: break-word; color: #fff; font-size: 0.9rem;" title="${file.name}">${truncatePixeldrainFileName(file.name, 30)}</div>
+        <div style="font-weight: 600; margin-bottom: 8px; word-break: break-word; color: #fff; font-size: 0.9rem;" title="${file.name}">${truncateGofileFileName(file.name, 30)}</div>
         <div style="display: flex; justify-content: space-between; align-items: center; color: #ffd369; font-size: 0.8rem;">
-          <span style="background: ${file.type === 'image' ? '#d4edda' : file.type === 'video' ? '#cce5ff' : '#e9ecef'}; color: ${file.type === 'image' ? '#155724' : file.type === 'video' ? '#004085' : '#495057'}; padding: 4px 8px; border-radius: 12px; font-size: 0.7rem; text-transform: uppercase; font-weight: 600;">${file.extension}</span>
+          <span style="background: ${file.fileType === 'image' ? '#d4edda' : file.fileType === 'video' ? '#cce5ff' : '#e9ecef'}; color: ${file.fileType === 'image' ? '#155724' : file.fileType === 'video' ? '#004085' : '#495057'}; padding: 4px 8px; border-radius: 12px; font-size: 0.7rem; text-transform: uppercase; font-weight: 600;">${file.extension}</span>
           <span>${file.formattedSize}</span>
+        </div>
+        <div style="margin-top: 8px; display: flex; gap: 5px;">
+          <button onclick="event.stopPropagation(); deleteGofileContent('${file.id}', '${file.name.replace(/'/g, "\\'")}')" style="background: #dc3545; color: white; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 0.7rem;">🗑️ Suppr</button>
         </div>
       </div>
     </div>
   `;
 }
 
-function getPixeldrainMediaHTML(file) {
-  switch (file.type) {
+// Supprimer un contenu GoFile
+async function deleteGofileContent(contentId, contentName) {
+  if (!confirm(`⚠️ Supprimer "${contentName}" définitivement ?`)) return;
+  
+  try {
+    const response = await fetch(`/api/gofile/content/${contentId}`, {
+      method: 'DELETE',
+      headers: {
+        'Authorization': 'Basic ' + btoa(adminCredentials.user + ':' + adminCredentials.pass)
+      }
+    });
+    
+    const result = await response.json();
+    
+    if (result.success) {
+      showToast(`✅ "${contentName}" supprimé`, 'success');
+      loadGofileFolder(currentGofileFolderId);
+    } else {
+      throw new Error(result.error || 'Erreur inconnue');
+    }
+  } catch (error) {
+    console.error('[GoFile] Erreur suppression:', error);
+    showToast(`❌ Erreur: ${error.message}`, 'error');
+  }
+}
+
+function getGofileMediaHTML(file) {
+  switch (file.fileType) {
     case 'image':
       return `<img src="${file.url}" alt="${file.name}" style="max-width: 100%; max-height: 100%; object-fit: cover;" loading="lazy" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
               <div style="display: none; font-size: 3rem; color: #ffd369;">🖼️</div>`;
@@ -7469,7 +7466,7 @@ function getPixeldrainMediaHTML(file) {
                 <div style="font-size: 3rem; color: #ffd369;">🎥</div>
               </video>`;
     default:
-      return `<div style="font-size: 3rem; color: #ffd369;">${getPixeldrainFileIcon(file.extension)}</div>`;
+      return `<div style="font-size: 3rem; color: #ffd369;">${getGofileFileIcon(file.extension)}</div>`;
   }
 }
 
@@ -7486,8 +7483,8 @@ function getVideoMimeType(extension) {
   return mimeTypes[extension.toLowerCase()] || `video/${extension}`;
 }
 
-function getPixeldrainFileType(filename) {
-  const extension = getPixeldrainFileExtension(filename);
+function getGofileFileType(filename) {
+  const extension = getGofileFileExtension(filename);
   const imageExtensions = ['png', 'jpg', 'jpeg', 'gif', 'webp', 'svg', 'bmp', 'ico'];
   const videoExtensions = ['mp4', 'webm', 'avi', 'mov', 'wmv', 'flv', 'mkv'];
   
@@ -7496,11 +7493,11 @@ function getPixeldrainFileType(filename) {
   return 'other';
 }
 
-function getPixeldrainFileExtension(filename) {
+function getGofileFileExtension(filename) {
   return filename.split('.').pop().toLowerCase();
 }
 
-function getPixeldrainFileIcon(extension) {
+function getGofileFileIcon(extension) {
   const icons = {
     pdf: '📄', txt: '📝', doc: '📝', docx: '📝',
     zip: '📦', rar: '📦', '7z': '📦',
@@ -7512,7 +7509,7 @@ function getPixeldrainFileIcon(extension) {
   return icons[extension] || '📄';
 }
 
-function formatPixeldrainFileSize(bytes) {
+function formatGofileFileSize(bytes) {
   if (!bytes) return '0 B';
   const sizes = ['B', 'KB', 'MB', 'GB'];
   const i = Math.floor(Math.log(bytes) / Math.log(1024));
@@ -7520,10 +7517,11 @@ function formatPixeldrainFileSize(bytes) {
   return `${size} ${sizes[i]}`;
 }
 
-function formatPixeldrainDate(dateString) {
-  if (!dateString) return 'Date inconnue';
+function formatGofileDate(timestamp) {
+  if (!timestamp) return 'Date inconnue';
   try {
-    const date = new Date(dateString);
+    // GoFile retourne un timestamp Unix en secondes
+    const date = new Date(timestamp * 1000);
     return date.toLocaleDateString('fr-FR', {
       day: '2-digit', month: '2-digit', year: 'numeric'
     });
@@ -7532,27 +7530,27 @@ function formatPixeldrainDate(dateString) {
   }
 }
 
-function truncatePixeldrainFileName(filename, maxLength = 30) {
+function truncateGofileFileName(filename, maxLength = 30) {
   if (filename.length <= maxLength) return filename;
-  const extension = getPixeldrainFileExtension(filename);
+  const extension = getGofileFileExtension(filename);
   const nameWithoutExt = filename.substring(0, filename.lastIndexOf('.'));
   const truncatedName = nameWithoutExt.substring(0, maxLength - extension.length - 4);
   return `${truncatedName}...${extension}`;
 }
 
-function togglePixeldrainFileSelection(fileId) {
+function toggleGofileFileSelection(fileId) {
   if (adminSelectedFiles.has(fileId)) {
     adminSelectedFiles.delete(fileId);
   } else {
     adminSelectedFiles.add(fileId);
   }
   
-  updatePixeldrainSelectionUI();
-  updatePixeldrainSelectionInfo();
+  updateGofileSelectionUI();
+  updateGofileSelectionInfo();
 }
 
-function updatePixeldrainSelectionUI() {
-  document.querySelectorAll('.admin-file-item').forEach(item => {
+function updateGofileSelectionUI() {
+  document.querySelectorAll('.admin-file-item:not(.folder-item)').forEach(item => {
     const fileId = item.dataset.fileId;
     const isSelected = adminSelectedFiles.has(fileId);
     
@@ -7571,7 +7569,7 @@ function updatePixeldrainSelectionUI() {
   });
 }
 
-function updatePixeldrainSelectionInfo() {
+function updateGofileSelectionInfo() {
   const count = adminSelectedFiles.size;
   const selectionText = document.getElementById('admin-selection-text');
   const selectionInfo = document.getElementById('admin-selection-info');
@@ -7588,42 +7586,43 @@ function updatePixeldrainSelectionInfo() {
     }
   }
   
-  updatePixeldrainStats();
+  updateGofileStats();
 }
 
-function updatePixeldrainStats() {
+function updateGofileStats() {
   const totalFilesSpan = document.getElementById('admin-total-files');
   const selectedCountSpan = document.getElementById('admin-selected-count');
   const filteredCountSpan = document.getElementById('admin-filtered-count');
   
-  if (totalFilesSpan) totalFilesSpan.textContent = `Fichiers: ${adminPixeldrainFiles.length}`;
+  if (totalFilesSpan) totalFilesSpan.textContent = `Éléments: ${adminGofileFiles.length}`;
   if (selectedCountSpan) selectedCountSpan.textContent = `Sélectionnés: ${adminSelectedFiles.size}`;
   if (filteredCountSpan) filteredCountSpan.textContent = `Affichés: ${adminFilteredFiles.length}`;
 }
 
-function clearPixeldrainSelection() {
+function clearGofileSelection() {
   adminSelectedFiles.clear();
-  updatePixeldrainSelectionUI();
-  updatePixeldrainSelectionInfo();
+  updateGofileSelectionUI();
+  updateGofileSelectionInfo();
 }
 
 function useSelectedForArticle() {
-  const selectedFiles = getSelectedPixeldrainFilesAdmin();
+  const selectedFiles = getSelectedGofileFilesAdmin();
   console.log('[Debug] Fichiers sélectionnés:', selectedFiles);
   
   if (selectedFiles.length === 0) {
-    showToast('?? Aucun fichier sélectionné', 'error');
+    showToast('⚠️ Aucun fichier sélectionné', 'error');
     return;
   }
 
-  // Convertir les fichiers Pixeldrain en format compatible article
+  // Convertir les fichiers GoFile en format compatible article
   const mediaFiles = selectedFiles.map(file => ({
-    type: 'pixeldrain',
+    type: 'gofile',
     url: file.url,
     id: file.id,
     name: file.name,
     filename: file.name,
-    mime_type: file.mime_type
+    mime_type: file.mimetype || file.mime_type,
+    server: file.server
   }));
 
   console.log('[Debug] Médias formatés:', mediaFiles);
@@ -7637,7 +7636,7 @@ function useSelectedForArticle() {
     showToast(`✓ ${mediaFiles.length} média(s) ajouté(s) à la variante`, 'success');
     // Ne pas retourner à la section article, rester sur l'explorateur
     // L'utilisateur fermera le modal variante manuellement
-    clearPixeldrainSelection();
+    clearGofileSelection();
     showSection('articles'); // Retourner au formulaire article avec le modal variante ouvert
     window.varianteMediaTarget = false;
   } else {
@@ -7661,39 +7660,39 @@ function useSelectedForArticle() {
   }
   
   // Vider la sélection
-  clearPixeldrainSelection();
+  clearGofileSelection();
   
 }
 
 // API pour récupérer les fichiers sélectionnés
-function getSelectedPixeldrainFilesAdmin() {
-  return adminPixeldrainFiles.filter(file => adminSelectedFiles.has(file.id));
+function getSelectedGofileFilesAdmin() {
+  return adminGofileFiles.filter(file => adminSelectedFiles.has(file.id));
 }
 
-function getSelectedPixeldrainUrlsAdmin() {
-  return getSelectedPixeldrainFilesAdmin().map(file => file.url);
+function getSelectedGofileUrlsAdmin() {
+  return getSelectedGofileFilesAdmin().map(file => file.url);
 }
 
-// Ouvrir le sélecteur Pixeldrain pour admin>infos (sélection unique)
-function openPixeldrainSelectorForInfos(callback) {
+// Ouvrir le sélecteur GoFile pour admin>infos (sélection unique)
+function openGofileSelectorForInfos(callback) {
   // Sauvegarder le callback et le contexte
   window.infosMediaCallback = callback;
   
   // Vider la sélection actuelle
   adminSelectedFiles.clear();
-  updatePixeldrainSelectionUI();
-  updatePixeldrainSelectionInfo();
+  updateGofileSelectionUI();
+  updateGofileSelectionInfo();
   
   // Créer le modal de sélection
   const modal = document.createElement('div');
-  modal.id = 'pixeldrain-selector-modal';
+  modal.id = 'gofile-selector-modal';
   modal.className = 'modal';
   modal.style.cssText = 'display:flex;align-items:center;justify-content:center;z-index:10002;';
   
   modal.innerHTML = `
     <div class="modal-content" style="max-width:1200px;width:95%;max-height:90vh;background:linear-gradient(135deg, #2e003e, #6a0572);border-radius:16px;padding:0;overflow:hidden;display:flex;flex-direction:column;">
       <div style="background:linear-gradient(135deg, #ffd369, #ffb347);padding:20px;display:flex;justify-content:space-between;align-items:center;">
-        <h3 style="margin:0;color:#2e003e;font-size:1.3em;">🎨 Sélectionner un média Pixeldrain</h3>
+        <h3 style="margin:0;color:#2e003e;font-size:1.3em;">🎨 Sélectionner un média GoFile</h3>
         <button id="close-pd-selector" style="background:none;border:none;color:#2e003e;font-size:2em;cursor:pointer;width:40px;height:40px;">×</button>
       </div>
       
@@ -7721,8 +7720,8 @@ function openPixeldrainSelectorForInfos(callback) {
   document.body.appendChild(modal);
   modal.classList.add('show');
   
-  // Charger les médias Pixeldrain
-  loadPixeldrainForInfos();
+  // Charger les médias GoFile
+  loadGofileForInfos();
   
   // Events
   document.getElementById('close-pd-selector').onclick = () => {
@@ -7736,7 +7735,7 @@ function openPixeldrainSelectorForInfos(callback) {
   };
   
   document.getElementById('pd-use-infos').onclick = () => {
-    const selected = getSelectedPixeldrainFilesAdmin();
+    const selected = getSelectedGofileFilesAdmin();
     if (selected.length === 0) {
       showToast('⚠️ Veuillez sélectionner un média', 'warning');
       return;
@@ -7753,7 +7752,7 @@ function openPixeldrainSelectorForInfos(callback) {
   // Recherche
   document.getElementById('pd-search-infos').addEventListener('input', (e) => {
     adminSearchTerm = e.target.value.toLowerCase();
-    renderPixeldrainGalleryForInfos();
+    renderGofileGalleryForInfos();
   });
   
   // Filtres
@@ -7768,46 +7767,46 @@ function openPixeldrainSelectorForInfos(callback) {
       e.target.style.color = '#2e003e';
       e.target.classList.add('active');
       adminCurrentFilter = e.target.dataset.filter;
-      renderPixeldrainGalleryForInfos();
+      renderGofileGalleryForInfos();
     });
   });
 }
 
-async function loadPixeldrainForInfos() {
+async function loadGofileForInfos() {
   const gallery = document.getElementById('pd-gallery-infos');
   if (!gallery) return;
   
   gallery.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:40px;color:#ffd369;">Chargement...</div>';
   
   try {
-    if (adminPixeldrainFiles.length === 0) {
+    if (adminGofileFiles.length === 0) {
       const response = await fetch('/images');
       if (!response.ok) throw new Error(`Erreur ${response.status}`);
       const data = await response.json();
-      adminPixeldrainFiles = data.map(file => ({
+      adminGofileFiles = data.map(file => ({
         ...file,
-        url: `https://pixeldrain.com/api/file/${file.id}`,
-        type: getPixeldrainFileType(file.name),
-        extension: getPixeldrainFileExtension(file.name),
-        formattedSize: formatPixeldrainFileSize(file.size),
-        formattedDate: formatPixeldrainDate(file.date_upload)
+        url: file.type === 'folder' ? null : `/media/${file.id}?name=${encodeURIComponent(file.name)}&server=${file.server || 'store1'}`,
+        fileType: file.type === 'folder' ? 'folder' : getGofileFileType(file.name),
+        extension: file.type === 'folder' ? 'folder' : getGofileFileExtension(file.name),
+        formattedSize: file.type === 'folder' ? `${file.childrenCount || 0} éléments` : formatGofileFileSize(file.size),
+        formattedDate: formatGofileDate(file.createTime)
       }));
     }
-    renderPixeldrainGalleryForInfos();
+    renderGofileGalleryForInfos();
   } catch (error) {
     gallery.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:40px;color:#ff6b6b;">Erreur de chargement</div>';
-    console.error('[Pixeldrain Infos] Erreur:', error);
+    console.error('[GoFile Infos] Erreur:', error);
   }
 }
 
-function renderPixeldrainGalleryForInfos() {
+function renderGofileGalleryForInfos() {
   const gallery = document.getElementById('pd-gallery-infos');
   if (!gallery) return;
   
   // Filtrer
-  let filtered = adminPixeldrainFiles;
+  let filtered = adminGofileFiles.filter(f => f.type !== 'folder'); // Exclure dossiers pour infos
   if (adminCurrentFilter !== 'all') {
-    filtered = filtered.filter(file => file.type === adminCurrentFilter);
+    filtered = filtered.filter(file => file.fileType === adminCurrentFilter);
   }
   if (adminSearchTerm) {
     filtered = filtered.filter(file => file.name.toLowerCase().includes(adminSearchTerm));
@@ -7832,9 +7831,9 @@ function renderPixeldrainGalleryForInfos() {
     `;
     
     let preview = '';
-    if (file.type === 'image') {
+    if (file.fileType === 'image') {
       preview = `<img src="${file.url}" style="width:100%;height:120px;object-fit:cover;border-radius:8px;"/>`;
-    } else if (file.type === 'video') {
+    } else if (file.fileType === 'video') {
       preview = `<video src="${file.url}" muted loop style="width:100%;height:120px;object-fit:cover;border-radius:8px;"></video>`;
     } else {
       preview = `<div style="width:100%;height:120px;display:flex;align-items:center;justify-content:center;background:#2e004f;border-radius:8px;font-size:2em;">📄</div>`;
@@ -7850,7 +7849,7 @@ function renderPixeldrainGalleryForInfos() {
       // Sélection unique seulement
       adminSelectedFiles.clear();
       adminSelectedFiles.add(file.id);
-      renderPixeldrainGalleryForInfos();
+      renderGofileGalleryForInfos();
       document.getElementById('pd-selected-info').textContent = `✓ ${file.name}`;
     });
     
@@ -7858,25 +7857,25 @@ function renderPixeldrainGalleryForInfos() {
   });
 }
 
-// Ouvrir le sélecteur Pixeldrain pour admin>annonces (multi-sélection + drag & drop)
+// Ouvrir le sélecteur GoFile pour admin>annonces (multi-sélection + drag & drop)
 let annonceMedias = [];
 
-function openPixeldrainSelectorForAnnonces() {
+function openGofileSelectorForAnnonces() {
   // Créer le modal de sélection
   const modal = document.createElement('div');
-  modal.id = 'pixeldrain-selector-annonces-modal';
+  modal.id = 'gofile-selector-annonces-modal';
   modal.className = 'modal';
   modal.style.cssText = 'display:flex;align-items:center;justify-content:center;z-index:10002;';
   
   modal.innerHTML = `
     <div class="modal-content" style="max-width:1400px;width:98%;max-height:95vh;background:linear-gradient(135deg, #2e003e, #6a0572);border-radius:16px;padding:0;overflow:hidden;display:flex;flex-direction:column;">
       <div style="background:linear-gradient(135deg, #ffd369, #ffb347);padding:20px;display:flex;justify-content:space-between;align-items:center;">
-        <h3 style="margin:0;color:#2e003e;font-size:1.3em;">🎨 Sélectionner des médias Pixeldrain</h3>
+        <h3 style="margin:0;color:#2e003e;font-size:1.3em;">🎨 Sélectionner des médias GoFile</h3>
         <button id="close-pd-selector-annonces" style="background:none;border:none;color:#2e003e;font-size:2em;cursor:pointer;width:40px;height:40px;">×</button>
       </div>
       
       <div style="display:flex;flex:1;min-height:0;overflow:hidden;">
-        <!-- Galerie Pixeldrain -->
+        <!-- Galerie GoFile -->
         <div style="flex:2;padding:20px;border-right:2px solid rgba(255,255,255,0.1);overflow-y:auto;display:flex;flex-direction:column;gap:15px;">
           <h4 style="color:#ffd369;margin:0;">Médias disponibles</h4>
           <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
@@ -7911,8 +7910,8 @@ function openPixeldrainSelectorForAnnonces() {
   document.body.appendChild(modal);
   modal.classList.add('show');
   
-  // Charger les médias Pixeldrain
-  loadPixeldrainForAnnonces();
+  // Charger les médias GoFile
+  loadGofileForAnnonces();
   
   // Events
   document.getElementById('close-pd-selector-annonces').onclick = () => {
@@ -7966,7 +7965,7 @@ function openPixeldrainSelectorForAnnonces() {
   // Recherche
   document.getElementById('pd-search-annonces').addEventListener('input', (e) => {
     adminSearchTerm = e.target.value.toLowerCase();
-    renderPixeldrainGalleryForAnnonces();
+    renderGofileGalleryForAnnonces();
   });
   
   // Filtres
@@ -7981,47 +7980,47 @@ function openPixeldrainSelectorForAnnonces() {
       e.target.style.color = '#2e003e';
       e.target.classList.add('active');
       adminCurrentFilter = e.target.dataset.filter;
-      renderPixeldrainGalleryForAnnonces();
+      renderGofileGalleryForAnnonces();
     });
   });
 }
 
-async function loadPixeldrainForAnnonces() {
+async function loadGofileForAnnonces() {
   const gallery = document.getElementById('pd-gallery-annonces');
   if (!gallery) return;
   
   gallery.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:40px;color:#ffd369;">Chargement...</div>';
   
   try {
-    if (adminPixeldrainFiles.length === 0) {
+    if (adminGofileFiles.length === 0) {
       const response = await fetch('/images');
       if (!response.ok) throw new Error(`Erreur ${response.status}`);
       const data = await response.json();
-      adminPixeldrainFiles = data.map(file => ({
+      adminGofileFiles = data.map(file => ({
         ...file,
-        url: `https://pixeldrain.com/api/file/${file.id}`,
-        type: getPixeldrainFileType(file.name),
-        extension: getPixeldrainFileExtension(file.name),
-        formattedSize: formatPixeldrainFileSize(file.size),
-        formattedDate: formatPixeldrainDate(file.date_upload)
+        url: file.type === 'folder' ? null : `/media/${file.id}?name=${encodeURIComponent(file.name)}&server=${file.server || 'store1'}`,
+        fileType: file.type === 'folder' ? 'folder' : getGofileFileType(file.name),
+        extension: file.type === 'folder' ? 'folder' : getGofileFileExtension(file.name),
+        formattedSize: file.type === 'folder' ? `${file.childrenCount || 0} éléments` : formatGofileFileSize(file.size),
+        formattedDate: formatGofileDate(file.createTime)
       }));
     }
-    renderPixeldrainGalleryForAnnonces();
+    renderGofileGalleryForAnnonces();
     renderSelectedAnnoncesMedias();
   } catch (error) {
     gallery.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:40px;color:#ff6b6b;">Erreur de chargement</div>';
-    console.error('[Pixeldrain Annonces] Erreur:', error);
+    console.error('[GoFile Annonces] Erreur:', error);
   }
 }
 
-function renderPixeldrainGalleryForAnnonces() {
+function renderGofileGalleryForAnnonces() {
   const gallery = document.getElementById('pd-gallery-annonces');
   if (!gallery) return;
   
   // Filtrer
-  let filtered = adminPixeldrainFiles;
+  let filtered = adminGofileFiles.filter(f => f.type !== 'folder');
   if (adminCurrentFilter !== 'all') {
-    filtered = filtered.filter(file => file.type === adminCurrentFilter);
+    filtered = filtered.filter(file => file.fileType === adminCurrentFilter);
   }
   if (adminSearchTerm) {
     filtered = filtered.filter(file => file.name.toLowerCase().includes(adminSearchTerm));
@@ -8047,9 +8046,9 @@ function renderPixeldrainGalleryForAnnonces() {
     `;
     
     let preview = '';
-    if (file.type === 'image') {
+    if (file.fileType === 'image') {
       preview = `<img src="${file.url}" style="width:100%;height:100px;object-fit:cover;border-radius:8px;"/>`;
-    } else if (file.type === 'video') {
+    } else if (file.fileType === 'video') {
       preview = `<video src="${file.url}" muted loop style="width:100%;height:100px;object-fit:cover;border-radius:8px;"></video>`;
     } else {
       preview = `<div style="width:100%;height:100px;display:flex;align-items:center;justify-content:center;background:#2e004f;border-radius:8px;font-size:2em;">📄</div>`;
@@ -8072,7 +8071,7 @@ function renderPixeldrainGalleryForAnnonces() {
         // Ajouter
         annonceMedias.push(file.url);
       }
-      renderPixeldrainGalleryForAnnonces();
+      renderGofileGalleryForAnnonces();
       renderSelectedAnnoncesMedias();
     });
     
@@ -8095,7 +8094,7 @@ function renderSelectedAnnoncesMedias() {
   list.innerHTML = '';
   annonceMedias.forEach((media, idx) => {
     const url = typeof media === 'string' ? media : media.url;
-    const file = adminPixeldrainFiles.find(f => f.url === url);
+    const file = adminGofileFiles.find(f => f.url === url);
     
     const item = document.createElement('div');
     item.draggable = true;
@@ -8114,9 +8113,9 @@ function renderSelectedAnnoncesMedias() {
     
     let preview = '';
     if (file) {
-      if (file.type === 'image') {
+      if (file.fileType === 'image') {
         preview = `<img src="${url}" style="width:60px;height:60px;object-fit:cover;border-radius:6px;"/>`;
-      } else if (file.type === 'video') {
+      } else if (file.fileType === 'video') {
         preview = `<video src="${url}" muted style="width:60px;height:60px;object-fit:cover;border-radius:6px;"></video>`;
       } else {
         preview = `<div style="width:60px;height:60px;display:flex;align-items:center;justify-content:center;background:#2e004f;border-radius:6px;font-size:1.5em;">📄</div>`;
@@ -8176,7 +8175,7 @@ function renderSelectedAnnoncesMedias() {
 
 function removeAnnonceMedia(idx) {
   annonceMedias.splice(idx, 1);
-  renderPixeldrainGalleryForAnnonces();
+  renderGofileGalleryForAnnonces();
   renderSelectedAnnoncesMedias();
 }
 
@@ -8786,12 +8785,12 @@ function openMediaExplorer() {
   // Récupérer l'ID de l'article pour pré-remplir la recherche
   const articleId = document.getElementById('id-article')?.value || '';
   
-  // Ouvrir l'explorateur de fichiers Pixeldrain
+  // Ouvrir l'explorateur de fichiers GoFile
   showSection('medias');
   
   // Pré-remplir la recherche avec l'ID de l'article
   setTimeout(() => {
-    const searchInput = document.getElementById('pixeldrain-search');
+    const searchInput = document.getElementById('admin-search');
     if (searchInput && articleId) {
       searchInput.value = articleId;
       // Déclencher la recherche
@@ -9148,7 +9147,7 @@ function restoreArticleForm() {
   console.log('[Admin] Formulaire d\'article restauré');
 }
 
-// ==================== FIN EXPLORATEUR PIXELDRAIN ====================
+// ==================== FIN EXPLORATEUR GOFILE ====================
 
 // ==================== PROMPT STYLISÉ POUR POSITION ====================
 function showPositionPrompt(articleName, currentPos, maxPos, callback) {
@@ -10344,7 +10343,7 @@ function showProductVariantSelector(callback) {
   modal.onclick = (e) => { if (e.target === modal) modal.remove(); };
 }
 
-// Sélecteur de média depuis Pixeldrain
+// Sélecteur de média depuis GoFile
 function showInfosMediaSelector(callback, initialMediaPath = '', initialStyle = '') {
   const modal = document.createElement('div');
   modal.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.7);display:flex;align-items:center;justify-content:center;z-index:10001;';
@@ -10359,7 +10358,7 @@ function showInfosMediaSelector(callback, initialMediaPath = '', initialStyle = 
       <div id="infos-media-preview" style="margin-top:15px;text-align:center;"></div>
     </div>
     
-    <button id="infos-media-browse" style="width:100%;background:#6a0572;color:#fff;border:none;padding:12px;border-radius:8px;cursor:pointer;font-weight:600;margin-bottom:20px;">📁 Parcourir Pixeldrain</button>
+    <button id="infos-media-browse" style="width:100%;background:#6a0572;color:#fff;border:none;padding:12px;border-radius:8px;cursor:pointer;font-weight:600;margin-bottom:20px;">📁 Parcourir GoFile</button>
     
     <div style="display:flex;gap:10px;justify-content:flex-end;">
       <button id="infos-media-selector-cancel" style="background:#6d6d6d;color:#fff;border:none;padding:10px 20px;border-radius:8px;cursor:pointer;">Annuler</button>
@@ -10399,8 +10398,8 @@ function showInfosMediaSelector(callback, initialMediaPath = '', initialStyle = 
         }
       });
     } else {
-      // Ouvrir le sélecteur Pixeldrain si l'explorateur n'est pas disponible
-      openPixeldrainSelectorForInfos(callback);
+      // Ouvrir le sélecteur GoFile si l'explorateur n'est pas disponible
+      openGofileSelectorForInfos(callback);
     }
   };
   

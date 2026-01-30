@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ping GoFile - Maintien des fichiers actifs</title>
+  <style>
+    :root {
+      --bg: #0a0a0f;
+      --card-bg: #12121a;
+      --border: #1e1e2e;
+      --text: #e0e0e0;
+      --text-muted: #888;
+      --accent: #00d4ff;
+      --success: #22c55e;
+      --warning: #f59e0b;
+      --error: #ef4444;
+    }
+    
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      padding: 2rem;
+    }
+    
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    
+    header {
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+    
+    h1 {
+      font-size: 2rem;
+      color: var(--accent);
+      margin-bottom: 0.5rem;
+    }
+    
+    .subtitle {
+      color: var(--text-muted);
+      font-size: 0.9rem;
+    }
+    
+    .info-box {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin-bottom: 2rem;
+    }
+    
+    .info-box h3 {
+      color: var(--warning);
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    
+    .info-box p {
+      color: var(--text-muted);
+      line-height: 1.6;
+      margin-bottom: 0.5rem;
+    }
+    
+    .controls {
+      display: flex;
+      gap: 1rem;
+      margin-bottom: 2rem;
+      flex-wrap: wrap;
+    }
+    
+    button {
+      background: linear-gradient(135deg, var(--accent), #0099cc);
+      border: none;
+      color: #000;
+      font-weight: 600;
+      padding: 0.8rem 1.5rem;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 1rem;
+      transition: all 0.2s;
+    }
+    
+    button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 20px rgba(0, 212, 255, 0.3);
+    }
+    
+    button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none;
+    }
+    
+    button.secondary {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      color: var(--text);
+    }
+    
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+    
+    .stat-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.2rem;
+      text-align: center;
+    }
+    
+    .stat-value {
+      font-size: 2rem;
+      font-weight: 700;
+      color: var(--accent);
+    }
+    
+    .stat-label {
+      color: var(--text-muted);
+      font-size: 0.85rem;
+      margin-top: 0.3rem;
+    }
+    
+    .stat-card.success .stat-value { color: var(--success); }
+    .stat-card.error .stat-value { color: var(--error); }
+    .stat-card.warning .stat-value { color: var(--warning); }
+    
+    .progress-section {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin-bottom: 2rem;
+    }
+    
+    .progress-bar {
+      height: 8px;
+      background: var(--border);
+      border-radius: 4px;
+      overflow: hidden;
+      margin-top: 1rem;
+    }
+    
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--accent), var(--success));
+      width: 0%;
+      transition: width 0.3s;
+    }
+    
+    .progress-text {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 0.5rem;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+    
+    .files-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+      gap: 1rem;
+      margin-top: 2rem;
+    }
+    
+    .file-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 0.8rem;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .file-card.loading {
+      border-color: var(--warning);
+    }
+    
+    .file-card.success {
+      border-color: var(--success);
+    }
+    
+    .file-card.error {
+      border-color: var(--error);
+    }
+    
+    .file-thumb {
+      width: 80px;
+      height: 80px;
+      object-fit: cover;
+      border-radius: 4px;
+      margin-bottom: 0.5rem;
+      background: var(--border);
+    }
+    
+    .file-name {
+      font-size: 0.7rem;
+      color: var(--text-muted);
+      word-break: break-all;
+      line-height: 1.3;
+    }
+    
+    .file-status {
+      position: absolute;
+      top: 4px;
+      right: 4px;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: var(--border);
+    }
+    
+    .file-card.loading .file-status { background: var(--warning); }
+    .file-card.success .file-status { background: var(--success); }
+    .file-card.error .file-status { background: var(--error); }
+    
+    .log-section {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin-top: 2rem;
+    }
+    
+    .log-section h3 {
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    
+    .log-entries {
+      font-family: 'Monaco', 'Menlo', monospace;
+      font-size: 0.8rem;
+      max-height: 300px;
+      overflow-y: auto;
+      background: #000;
+      padding: 1rem;
+      border-radius: 8px;
+    }
+    
+    .log-entry {
+      padding: 0.3rem 0;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    
+    .log-entry.success { color: var(--success); }
+    .log-entry.error { color: var(--error); }
+    .log-entry.info { color: var(--accent); }
+    
+    .auto-ping-info {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-top: 1rem;
+      padding: 1rem;
+      background: rgba(0, 212, 255, 0.1);
+      border-radius: 8px;
+    }
+    
+    .toggle-switch {
+      position: relative;
+      width: 50px;
+      height: 26px;
+    }
+    
+    .toggle-switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+    
+    .toggle-slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: var(--border);
+      transition: .3s;
+      border-radius: 26px;
+    }
+    
+    .toggle-slider:before {
+      position: absolute;
+      content: "";
+      height: 20px;
+      width: 20px;
+      left: 3px;
+      bottom: 3px;
+      background-color: white;
+      transition: .3s;
+      border-radius: 50%;
+    }
+    
+    input:checked + .toggle-slider {
+      background-color: var(--success);
+    }
+    
+    input:checked + .toggle-slider:before {
+      transform: translateX(24px);
+    }
+    
+    @media (max-width: 600px) {
+      body { padding: 1rem; }
+      h1 { font-size: 1.5rem; }
+      .controls { flex-direction: column; }
+      button { width: 100%; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>🔄 Ping GoFile</h1>
+      <p class="subtitle">Maintien des fichiers actifs sur GoFile (compte gratuit)</p>
+    </header>
+    
+    <div class="info-box">
+      <h3>⚠️ Important - Compte GoFile Gratuit</h3>
+      <p>Les fichiers sur un compte GoFile gratuit sont supprimés après <strong>10 jours d'inactivité</strong>.</p>
+      <p>Cette page charge tous les fichiers pour les garder actifs. <strong>Visitez cette page au moins une fois par semaine</strong> pour éviter la perte de données.</p>
+      <p>Vous pouvez aussi utiliser l'API <code>/api/ping-all</code> via un cron job externe.</p>
+    </div>
+    
+    <div class="controls">
+      <button id="startPing" onclick="startPing()">▶️ Démarrer le Ping</button>
+      <button id="stopPing" class="secondary" onclick="stopPing()" disabled>⏹️ Arrêter</button>
+      <button class="secondary" onclick="loadMapping()">🔄 Recharger le mapping</button>
+    </div>
+    
+    <div class="stats">
+      <div class="stat-card">
+        <div class="stat-value" id="totalFiles">-</div>
+        <div class="stat-label">Fichiers Total</div>
+      </div>
+      <div class="stat-card success">
+        <div class="stat-value" id="successCount">0</div>
+        <div class="stat-label">Succès</div>
+      </div>
+      <div class="stat-card error">
+        <div class="stat-value" id="errorCount">0</div>
+        <div class="stat-label">Erreurs</div>
+      </div>
+      <div class="stat-card warning">
+        <div class="stat-value" id="pendingCount">-</div>
+        <div class="stat-label">En attente</div>
+      </div>
+    </div>
+    
+    <div class="progress-section">
+      <h3>Progression</h3>
+      <div class="progress-bar">
+        <div class="progress-fill" id="progressFill"></div>
+      </div>
+      <div class="progress-text">
+        <span id="progressText">En attente...</span>
+        <span id="progressPercent">0%</span>
+      </div>
+      
+      <div class="auto-ping-info">
+        <label class="toggle-switch">
+          <input type="checkbox" id="autoPingToggle" onchange="toggleAutoPing()">
+          <span class="toggle-slider"></span>
+        </label>
+        <div>
+          <strong>Auto-ping via API</strong>
+          <div style="font-size: 0.85rem; color: var(--text-muted);">
+            Appel automatique de /api/ping-all toutes les 6 heures (nécessite que cette page reste ouverte)
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div id="filesGrid" class="files-grid"></div>
+    
+    <div class="log-section">
+      <h3>📋 Journal</h3>
+      <div class="log-entries" id="logEntries">
+        <div class="log-entry info">[info] Prêt. Cliquez sur "Démarrer le Ping" pour commencer.</div>
+      </div>
+    </div>
+  </div>
+  
+  <script>
+    let mapping = {};
+    let isRunning = false;
+    let successCount = 0;
+    let errorCount = 0;
+    let autoPingInterval = null;
+    
+    // Charger le mapping au démarrage
+    document.addEventListener('DOMContentLoaded', loadMapping);
+    
+    async function loadMapping() {
+      try {
+        log('info', 'Chargement du mapping GoFile...');
+        const res = await fetch('/gofile-mapping.json?t=' + Date.now());
+        mapping = await res.json();
+        
+        const entries = Object.entries(mapping);
+        document.getElementById('totalFiles').textContent = entries.length;
+        document.getElementById('pendingCount').textContent = entries.length;
+        
+        // Afficher la grille de fichiers
+        renderFilesGrid(entries);
+        
+        log('success', `Mapping chargé: ${entries.length} fichiers`);
+      } catch (e) {
+        log('error', 'Erreur chargement mapping: ' + e.message);
+        document.getElementById('totalFiles').textContent = '?';
+      }
+    }
+    
+    function renderFilesGrid(entries) {
+      const grid = document.getElementById('filesGrid');
+      grid.innerHTML = '';
+      
+      entries.forEach(([path, info]) => {
+        const card = document.createElement('div');
+        card.className = 'file-card';
+        card.id = 'file-' + (info.id || path.replace(/[^a-z0-9]/gi, '_'));
+        
+        const isImage = /\.(jpg|jpeg|png|gif|webp|svg)$/i.test(path);
+        const thumbSrc = isImage ? `/media/${info.id}?name=${encodeURIComponent(info.name)}&server=${info.server}` : '';
+        
+        card.innerHTML = `
+          <div class="file-status"></div>
+          ${isImage ? `<img class="file-thumb" src="" data-src="${thumbSrc}" alt="">` : '<div class="file-thumb" style="display:flex;align-items:center;justify-content:center;">📄</div>'}
+          <div class="file-name">${info.name || path.split('/').pop()}</div>
+        `;
+        
+        grid.appendChild(card);
+      });
+    }
+    
+    async function startPing() {
+      if (isRunning) return;
+      isRunning = true;
+      successCount = 0;
+      errorCount = 0;
+      
+      document.getElementById('startPing').disabled = true;
+      document.getElementById('stopPing').disabled = false;
+      
+      const entries = Object.entries(mapping);
+      const total = entries.length;
+      
+      log('info', `Démarrage du ping de ${total} fichiers...`);
+      
+      for (let i = 0; i < entries.length; i++) {
+        if (!isRunning) {
+          log('info', 'Ping interrompu par l\'utilisateur');
+          break;
+        }
+        
+        const [path, info] = entries[i];
+        const cardId = 'file-' + (info.id || path.replace(/[^a-z0-9]/gi, '_'));
+        const card = document.getElementById(cardId);
+        
+        if (card) card.className = 'file-card loading';
+        
+        try {
+          // Charger l'image pour la "pinger"
+          const url = `/media/${info.id}?name=${encodeURIComponent(info.name)}&server=${info.server}`;
+          
+          const response = await fetch(url, { method: 'HEAD' });
+          
+          if (response.ok) {
+            successCount++;
+            if (card) {
+              card.className = 'file-card success';
+              const img = card.querySelector('img[data-src]');
+              if (img && !img.src) img.src = img.dataset.src;
+            }
+          } else {
+            throw new Error(`HTTP ${response.status}`);
+          }
+        } catch (e) {
+          errorCount++;
+          if (card) card.className = 'file-card error';
+          log('error', `✗ ${info.name}: ${e.message}`);
+        }
+        
+        // Mise à jour stats
+        const done = successCount + errorCount;
+        const percent = Math.round((done / total) * 100);
+        
+        document.getElementById('successCount').textContent = successCount;
+        document.getElementById('errorCount').textContent = errorCount;
+        document.getElementById('pendingCount').textContent = total - done;
+        document.getElementById('progressFill').style.width = percent + '%';
+        document.getElementById('progressPercent').textContent = percent + '%';
+        document.getElementById('progressText').textContent = `${done}/${total} fichiers traités`;
+        
+        // Petit délai pour ne pas surcharger
+        await sleep(100);
+      }
+      
+      isRunning = false;
+      document.getElementById('startPing').disabled = false;
+      document.getElementById('stopPing').disabled = true;
+      
+      log('success', `Ping terminé: ${successCount} succès, ${errorCount} erreurs`);
+    }
+    
+    function stopPing() {
+      isRunning = false;
+      document.getElementById('startPing').disabled = false;
+      document.getElementById('stopPing').disabled = true;
+    }
+    
+    function toggleAutoPing() {
+      const enabled = document.getElementById('autoPingToggle').checked;
+      
+      if (enabled) {
+        log('info', 'Auto-ping activé (toutes les 6 heures)');
+        // Premier appel immédiat via API
+        callApiPing();
+        // Puis toutes les 6 heures
+        autoPingInterval = setInterval(callApiPing, 6 * 60 * 60 * 1000);
+      } else {
+        log('info', 'Auto-ping désactivé');
+        if (autoPingInterval) {
+          clearInterval(autoPingInterval);
+          autoPingInterval = null;
+        }
+      }
+    }
+    
+    async function callApiPing() {
+      log('info', 'Appel API /api/ping-all...');
+      try {
+        const res = await fetch('/api/ping-all');
+        const data = await res.json();
+        if (data.success) {
+          log('success', `API ping: ${data.pinged}/${data.total} fichiers pingés`);
+        } else {
+          throw new Error(data.error || 'Erreur inconnue');
+        }
+      } catch (e) {
+        log('error', 'Erreur API ping: ' + e.message);
+      }
+    }
+    
+    function log(type, message) {
+      const container = document.getElementById('logEntries');
+      const entry = document.createElement('div');
+      entry.className = 'log-entry ' + type;
+      const time = new Date().toLocaleTimeString('fr-FR');
+      entry.textContent = `[${time}] ${message}`;
+      container.appendChild(entry);
+      container.scrollTop = container.scrollHeight;
+    }
+    
+    function sleep(ms) {
+      return new Promise(resolve => setTimeout(resolve, ms));
+    }
+  </script>
+</body>
+</html>
