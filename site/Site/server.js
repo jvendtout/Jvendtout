@@ -554,7 +554,18 @@ app.get('/images', async (req,res)=>{
 });
 
 // Lister le contenu d'un dossier spécifique
-app.get('/api/gofile/contents/:folderId?', async (req, res) => {
+app.get('/api/gofile/contents', async (req, res) => {
+  try {
+    const folderId = GOFILE_ROOT_FOLDER;
+    const data = await listGofileFolder(folderId);
+    return res.json({ success: true, data });
+  } catch (e) {
+    console.error('[/api/gofile/contents] error', e);
+    return res.status(500).json({ error: 'Failed to list folder', details: String(e) });
+  }
+});
+
+app.get('/api/gofile/contents/:folderId', async (req, res) => {
   try {
     const folderId = req.params.folderId || GOFILE_ROOT_FOLDER;
     const data = await listGofileFolder(folderId);
