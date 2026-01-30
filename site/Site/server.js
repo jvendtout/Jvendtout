@@ -25,44 +25,60 @@ process.on('unhandledRejection', (reason) => {
 
 // --- Définition des chemins critiques ---
 const categoriesPath = path.join(__dirname, 'categories.json');
-// Mapping Pixeldrain (pour hotlink direct)
-const mappingFile = path.join(__dirname, 'pixeldrain-mapping.json');
+
+// ==================== GOFILE CONFIGURATION ====================
+const GOFILE_API_KEY = process.env.GOFILE_API_KEY || 'YxYI4wVuB8zlrBiWpNZ85eXRWmDplVrl';
+const GOFILE_ACCOUNT_ID = process.env.GOFILE_ACCOUNT_ID || '687ae5a7-41fe-4667-b57e-29b045c9c427';
+const GOFILE_ROOT_FOLDER = process.env.GOFILE_ROOT_FOLDER || 'b0457c78-8aeb-41b5-b64d-0f4960a769a4';
+
+// Mapping GoFile (fichier → contentId + server)
+const mappingFile = path.join(__dirname, 'gofile-mapping.json');
 let mediaMapping = {};
 
-// Vérification de la configuration Pixeldrain
-if (process.env.PIXELDRAIN_API_KEY) {
-  console.log(`[pixeldrain] API Key chargée: ${process.env.PIXELDRAIN_API_KEY.substring(0, 8)}...`);
+// Vérification de la configuration GoFile
+if (GOFILE_API_KEY) {
+  console.log(`[gofile] API Key chargée: ${GOFILE_API_KEY.substring(0, 8)}...`);
+  console.log(`[gofile] Root folder: ${GOFILE_ROOT_FOLDER}`);
 } else {
-  console.error('[pixeldrain] ⚠️  ATTENTION: PIXELDRAIN_API_KEY non trouvée dans .env');
+  console.error('[gofile] ⚠️  ATTENTION: GOFILE_API_KEY non trouvée');
 }
 
-function loadPixeldrainMapping(){
+// Charger le mapping GoFile
+function loadGofileMapping(){
   try {
     if(fs.existsSync(mappingFile)){
       mediaMapping = JSON.parse(fs.readFileSync(mappingFile,'utf8')||'{}');
       const cnt = Object.keys(mediaMapping||{}).length;
-      // Construire rapidement un hash pour détecter changements
       const hash = require('crypto').createHash('md5').update(JSON.stringify(mediaMapping)).digest('hex').slice(0,8);
-      console.log(`[pixeldrain] mapping chargé (${cnt} entrées) hash=${hash}`);
+      console.log(`[gofile] mapping chargé (${cnt} entrées) hash=${hash}`);
     } else {
       mediaMapping = {};
-      console.warn('[pixeldrain] fichier de mapping introuvable:', mappingFile);
+      console.warn('[gofile] fichier de mapping introuvable, création...');
+      fs.writeFileSync(mappingFile, '{}');
     }
   } catch(e){
-    console.warn('[pixeldrain] impossible de charger le mapping:', e.message);
+    console.warn('[gofile] impossible de charger le mapping:', e.message);
     mediaMapping = {};
   }
 }
-loadPixeldrainMapping();
+loadGofileMapping();
 
-function getPixeldrainIdByBasename(name){
+// Trouver un fichier dans le mapping par son nom
+function getGofileInfoByBasename(name){
   if(!name) return null;
   const noExt = name.replace(/\.[^.]+$/, '').toLowerCase();
-  // 1) correspondance exacte de la clé (type "img/airpods-4.webp")
-  const exactKey = Object.keys(mediaMapping).find(k => k.toLowerCase() === ('img/'+name).toLowerCase());
-  if(exactKey) return mediaMapping[exactKey];
-  // 2) par basename sans extension
-  for(const [key,val] of Object.entries(mediaMapping)){
+  
+  // 1) Correspondance exacte de la clé
+  const exactKey = Object.keys(mediaMapping).find(k => k.toLowerCase() === name.toLowerCase());
+  if(exactKey && mediaMapping[exactKey]) return mediaMapping[exactKey];
+  
+  // 2) Correspondance avec préfixe img/
+  const imgKey = Object.keys(mediaMapping).find(k => k.toLowerCase() === ('img/'+name).toLowerCase());
+  if(imgKey && mediaMapping[imgKey]) return mediaMapping[imgKey];
+  
+  // 3) Par basename sans extension
+  for(const [key, val] of Object.entries(mediaMapping)){
+    if(!val) continue;
     const base = key.split('/').pop();
     if(!base) continue;
     const baseNoExt = base.replace(/\.[^.]+$/, '').toLowerCase();
@@ -71,49 +87,182 @@ function getPixeldrainIdByBasename(name){
   return null;
 }
 
-// Fonction pour uploader un fichier vers Pixeldrain
-async function uploadToPixeldrain(buffer, filename) {
-  const apiKey = process.env.PIXELDRAIN_API_KEY;
-  
-  if (!apiKey) {
-    throw new Error('PIXELDRAIN_API_KEY non configurée');
+// Obtenir le meilleur serveur pour upload
+async function getGofileUploadServer() {
+  try {
+    const response = await fetch('https://api.gofile.io/servers', {
+      headers: { 'Authorization': `Bearer ${GOFILE_API_KEY}` }
+    });
+    const data = await response.json();
+    if (data.status === 'ok' && data.data?.servers?.length > 0) {
+      // Prendre le premier serveur disponible pour l'upload
+      const server = data.data.servers.find(s => s.zone === 'eu') || data.data.servers[0];
+      return server.name;
+    }
+    return 'store1'; // fallback
+  } catch (e) {
+    console.error('[gofile] Erreur récupération serveur:', e.message);
+    return 'store1';
+  }
+}
+
+// Fonction pour uploader un fichier vers GoFile
+async function uploadToGofile(buffer, filename, folderId = null) {
+  if (!GOFILE_API_KEY) {
+    throw new Error('GOFILE_API_KEY non configurée');
   }
 
+  const server = await getGofileUploadServer();
   const form = new FormData();
   form.append('file', buffer, { filename });
+  if (folderId) {
+    form.append('folderId', folderId);
+  } else {
+    form.append('folderId', GOFILE_ROOT_FOLDER);
+  }
 
   try {
-    const response = await fetch('https://pixeldrain.com/api/file', {
+    const response = await fetch(`https://${server}.gofile.io/contents/uploadfile`, {
       method: 'POST',
       headers: {
-        'Authorization': `Basic ${Buffer.from(`API_KEY:${apiKey}`).toString('base64')}`
+        'Authorization': `Bearer ${GOFILE_API_KEY}`
       },
       body: form
     });
 
     if (!response.ok) {
       const errorText = await response.text();
-      throw new Error(`Pixeldrain upload failed: ${response.status} ${errorText}`);
+      throw new Error(`GoFile upload failed: ${response.status} ${errorText}`);
     }
 
     const result = await response.json();
-    return result.id; // Pixeldrain renvoie { id, success, ... }
+    if (result.status !== 'ok') {
+      throw new Error(`GoFile upload error: ${result.status}`);
+    }
+    
+    // Retourner les infos complètes du fichier
+    return {
+      id: result.data.fileId,
+      contentId: result.data.fileId,
+      name: result.data.fileName,
+      downloadPage: result.data.downloadPage,
+      directLink: result.data.directLink,
+      server: server,
+      parentFolder: result.data.parentFolder
+    };
   } catch (e) {
-    console.error('[pixeldrain] Erreur upload:', e.message);
+    console.error('[gofile] Erreur upload:', e.message);
     throw e;
   }
 }
 
-// Fonction pour sauvegarder le mapping mis à jour
-function savePixeldrainMapping() {
+// Créer un dossier sur GoFile
+async function createGofileFolder(folderName, parentFolderId = null) {
+  if (!GOFILE_API_KEY) {
+    throw new Error('GOFILE_API_KEY non configurée');
+  }
+
+  try {
+    const response = await fetch('https://api.gofile.io/contents/createFolder', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${GOFILE_API_KEY}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        parentFolderId: parentFolderId || GOFILE_ROOT_FOLDER,
+        folderName: folderName
+      })
+    });
+
+    const result = await response.json();
+    if (result.status !== 'ok') {
+      throw new Error(`GoFile folder creation error: ${JSON.stringify(result)}`);
+    }
+    
+    console.log(`[gofile] Dossier créé: ${folderName} (${result.data.folderId})`);
+    return result.data;
+  } catch (e) {
+    console.error('[gofile] Erreur création dossier:', e.message);
+    throw e;
+  }
+}
+
+// Lister le contenu d'un dossier GoFile
+async function listGofileFolder(folderId = null) {
+  if (!GOFILE_API_KEY) {
+    throw new Error('GOFILE_API_KEY non configurée');
+  }
+
+  const targetFolder = folderId || GOFILE_ROOT_FOLDER;
+
+  try {
+    const response = await fetch(`https://api.gofile.io/contents/${targetFolder}?token=${GOFILE_API_KEY}`, {
+      headers: {
+        'Authorization': `Bearer ${GOFILE_API_KEY}`
+      }
+    });
+
+    const result = await response.json();
+    if (result.status !== 'ok') {
+      throw new Error(`GoFile list error: ${JSON.stringify(result)}`);
+    }
+    
+    return result.data;
+  } catch (e) {
+    console.error('[gofile] Erreur listage dossier:', e.message);
+    throw e;
+  }
+}
+
+// Supprimer un contenu GoFile (fichier ou dossier)
+async function deleteGofileContent(contentId) {
+  if (!GOFILE_API_KEY) {
+    throw new Error('GOFILE_API_KEY non configurée');
+  }
+
+  try {
+    const response = await fetch(`https://api.gofile.io/contents/${contentId}`, {
+      method: 'DELETE',
+      headers: {
+        'Authorization': `Bearer ${GOFILE_API_KEY}`
+      }
+    });
+
+    const result = await response.json();
+    if (result.status !== 'ok') {
+      throw new Error(`GoFile delete error: ${JSON.stringify(result)}`);
+    }
+    
+    console.log(`[gofile] Contenu supprimé: ${contentId}`);
+    return true;
+  } catch (e) {
+    console.error('[gofile] Erreur suppression:', e.message);
+    throw e;
+  }
+}
+
+// Construire l'URL de téléchargement direct GoFile
+function buildGofileDownloadUrl(fileInfo) {
+  if (!fileInfo) return null;
+  // Format: https://{server}.gofile.io/download/web/{contentId}/{filename}
+  if (fileInfo.directLink) return fileInfo.directLink;
+  if (fileInfo.server && fileInfo.id && fileInfo.name) {
+    return `https://${fileInfo.server}.gofile.io/download/web/${fileInfo.id}/${encodeURIComponent(fileInfo.name)}`;
+  }
+  return null;
+}
+
+// Sauvegarder le mapping GoFile
+function saveGofileMapping() {
   try {
     fs.writeFileSync(mappingFile, JSON.stringify(mediaMapping, null, 2));
     const cnt = Object.keys(mediaMapping).length;
     const hash = require('crypto').createHash('md5').update(JSON.stringify(mediaMapping)).digest('hex').slice(0,8);
-    console.log(`[pixeldrain] mapping sauvegardé (${cnt} entrées) hash=${hash}`);
+    console.log(`[gofile] mapping sauvegardé (${cnt} entrées) hash=${hash}`);
     return true;
   } catch (e) {
-    console.error('[pixeldrain] Erreur sauvegarde mapping:', e.message);
+    console.error('[gofile] Erreur sauvegarde mapping:', e.message);
     return false;
   }
 }
@@ -367,71 +516,220 @@ app.put('/api/admin/security-config', requireAdminStrong, (req,res)=>{
 
 app.use(express.json());
 
-// Endpoint pour lister les fichiers Pixeldrain (pour l'admin) - AVANT express.static !
+// ==================== GOFILE API ENDPOINTS ====================
+
+// Lister les fichiers GoFile (pour l'admin)
 app.get('/images', async (req,res)=>{
   try {
-    const apiKey = process.env.PIXELDRAIN_API_KEY;
-    if(!apiKey){
-      return res.status(500).json({ error: 'PIXELDRAIN_API_KEY manquante' });
+    const folderId = req.query.folderId || GOFILE_ROOT_FOLDER;
+    const data = await listGofileFolder(folderId);
+    
+    // Transformer en format compatible avec l'ancien format Pixeldrain
+    const files = [];
+    if (data.children) {
+      for (const [id, content] of Object.entries(data.children)) {
+        files.push({
+          id: content.id,
+          name: content.name,
+          type: content.type, // 'file' ou 'folder'
+          size: content.size || 0,
+          createTime: content.createTime,
+          modTime: content.modTime,
+          downloadCount: content.downloadCount || 0,
+          server: data.servers?.[0] || 'store1',
+          directLink: content.link,
+          parentFolder: data.id,
+          isFolder: content.type === 'folder',
+          mimetype: content.mimetype || ''
+        });
+      }
     }
-    const auth = 'Basic ' + Buffer.from(':' + apiKey).toString('base64');
-    const response = await fetch('https://pixeldrain.com/api/user/files', {
-      headers: { 'Authorization': auth }
-    });
-    if(!response.ok){
-      return res.status(response.status).json({ error: 'Pixeldrain error', status: response.status });
-    }
-    const data = await response.json();
-    console.log(`[/images] ${data.files?.length || 0} fichiers renvoyés`);
-    return res.json(data.files || []);
+    
+    console.log(`[/images] ${files.length} fichiers/dossiers renvoyés depuis ${folderId}`);
+    return res.json(files);
   } catch(e){
     console.error('[/images] error', e);
-    return res.status(500).json({ error: 'Failed to fetch Pixeldrain files', details: String(e) });
+    return res.status(500).json({ error: 'Failed to fetch GoFile files', details: String(e) });
   }
 });
 
-// Endpoint pour régénérer automatiquement le mapping - AVANT express.static !
-app.get('/api/regenerate-mapping', async (req,res)=>{
+// Lister le contenu d'un dossier spécifique
+app.get('/api/gofile/contents/:folderId?', async (req, res) => {
   try {
-    const apiKey = process.env.PIXELDRAIN_API_KEY;
-    if(!apiKey){
-      return res.status(500).json({ error: 'PIXELDRAIN_API_KEY manquante' });
+    const folderId = req.params.folderId || GOFILE_ROOT_FOLDER;
+    const data = await listGofileFolder(folderId);
+    return res.json({ success: true, data });
+  } catch (e) {
+    console.error('[/api/gofile/contents] error', e);
+    return res.status(500).json({ error: 'Failed to list folder', details: String(e) });
+  }
+});
+
+// Créer un dossier
+app.post('/api/gofile/folder', async (req, res) => {
+  try {
+    const { folderName, parentFolderId } = req.body;
+    if (!folderName) {
+      return res.status(400).json({ error: 'folderName requis' });
     }
-    const auth = 'Basic ' + Buffer.from(':' + apiKey).toString('base64');
-    const response = await fetch('https://pixeldrain.com/api/user/files', {
-      headers: { 'Authorization': auth }
-    });
-    if(!response.ok){
-      return res.status(response.status).json({ error: 'Pixeldrain error', status: response.status });
-    }
-    const data = await response.json();
-    const files = data.files || [];
+    const result = await createGofileFolder(folderName, parentFolderId);
+    return res.json({ success: true, data: result });
+  } catch (e) {
+    console.error('[/api/gofile/folder] error', e);
+    return res.status(500).json({ error: 'Failed to create folder', details: String(e) });
+  }
+});
+
+// Supprimer un fichier ou dossier
+app.delete('/api/gofile/content/:contentId', async (req, res) => {
+  try {
+    const { contentId } = req.params;
+    await deleteGofileContent(contentId);
     
-    // Générer mapping automatique basé sur les noms de fichiers
-    const newMapping = {};
-    files.forEach(file => {
-      if(file.name && file.id){
-        // Normaliser le nom pour correspondre au chemin img/
-        let cleanName = file.name.trim();
-        // Si le nom ne commence pas par img/, on l'ajoute
-        if(!cleanName.startsWith('img/')){
-          cleanName = 'img/' + cleanName;
-        }
-        newMapping[cleanName] = file.id;
+    // Retirer du mapping si présent
+    for (const [key, val] of Object.entries(mediaMapping)) {
+      if (val && val.id === contentId) {
+        delete mediaMapping[key];
       }
+    }
+    saveGofileMapping();
+    
+    return res.json({ success: true, deleted: contentId });
+  } catch (e) {
+    console.error('[/api/gofile/content] delete error', e);
+    return res.status(500).json({ error: 'Failed to delete content', details: String(e) });
+  }
+});
+
+// Upload vers GoFile
+app.post('/api/gofile/upload', upload.array('files', 20), async (req, res) => {
+  try {
+    const folderId = req.body.folderId || GOFILE_ROOT_FOLDER;
+    const uploadedFiles = [];
+    
+    if (req.files && req.files.length > 0) {
+      for (const file of req.files) {
+        try {
+          const result = await uploadToGofile(file.buffer, file.originalname, folderId);
+          
+          // Ajouter au mapping
+          const mappedPath = `img/${file.originalname}`;
+          mediaMapping[mappedPath] = {
+            id: result.id,
+            name: result.name,
+            server: result.server,
+            directLink: result.directLink
+          };
+          
+          uploadedFiles.push({
+            originalName: file.originalname,
+            ...result
+          });
+          
+          console.log(`[gofile] ✓ ${file.originalname} → ${result.id}`);
+        } catch (uploadError) {
+          console.error(`[gofile] ✗ Échec upload ${file.originalname}:`, uploadError.message);
+        }
+      }
+      
+      if (uploadedFiles.length > 0) {
+        saveGofileMapping();
+      }
+    }
+    
+    return res.json({ 
+      success: true, 
+      uploaded: uploadedFiles.length,
+      files: uploadedFiles
     });
+  } catch (e) {
+    console.error('[/api/gofile/upload] error', e);
+    return res.status(500).json({ error: 'Upload failed', details: String(e) });
+  }
+});
+
+// Régénérer le mapping automatiquement depuis GoFile
+app.get('/api/regenerate-mapping', async (req, res) => {
+  try {
+    const newMapping = {};
+    
+    // Fonction récursive pour parcourir les dossiers
+    async function scanFolder(folderId, pathPrefix = 'img/') {
+      const data = await listGofileFolder(folderId);
+      const server = data.servers?.[0] || 'store1';
+      
+      if (data.children) {
+        for (const [id, content] of Object.entries(data.children)) {
+          if (content.type === 'folder') {
+            // Parcourir récursivement
+            await scanFolder(content.id, pathPrefix + content.name + '/');
+          } else {
+            // C'est un fichier
+            newMapping[pathPrefix + content.name] = {
+              id: content.id,
+              name: content.name,
+              server: server,
+              directLink: content.link
+            };
+          }
+        }
+      }
+    }
+    
+    await scanFolder(GOFILE_ROOT_FOLDER);
     
     // Sauvegarder le nouveau mapping
     fs.writeFileSync(mappingFile, JSON.stringify(newMapping, null, 2));
     
     // Recharger en mémoire
-    loadPixeldrainMapping();
+    loadGofileMapping();
     
     console.log(`[regenerate-mapping] ${Object.keys(newMapping).length} fichiers mappés`);
     return res.json({ success: true, count: Object.keys(newMapping).length, mapping: newMapping });
-  } catch(e){
+  } catch (e) {
     console.error('[/api/regenerate-mapping] error', e);
     return res.status(500).json({ error: 'Failed to regenerate mapping', details: String(e) });
+  }
+});
+
+// ==================== PING ALL FILES (pour garder les fichiers actifs) ====================
+app.get('/api/ping-all', async (req, res) => {
+  try {
+    const results = { success: 0, failed: 0, files: [] };
+    
+    // Fonction récursive pour pinger tous les fichiers
+    async function pingFolder(folderId) {
+      const data = await listGofileFolder(folderId);
+      
+      if (data.children) {
+        for (const [id, content] of Object.entries(data.children)) {
+          if (content.type === 'folder') {
+            await pingFolder(content.id);
+          } else {
+            // C'est un fichier - on le "ping" en récupérant ses infos
+            results.success++;
+            results.files.push({
+              name: content.name,
+              id: content.id,
+              size: content.size
+            });
+          }
+        }
+      }
+    }
+    
+    await pingFolder(GOFILE_ROOT_FOLDER);
+    
+    console.log(`[ping-all] ${results.success} fichiers pingés`);
+    return res.json({ 
+      success: true, 
+      message: `${results.success} fichiers pingés avec succès`,
+      count: results.success,
+      files: results.files
+    });
+  } catch (e) {
+    console.error('[/api/ping-all] error', e);
+    return res.status(500).json({ error: 'Ping failed', details: String(e) });
   }
 });
 
@@ -476,10 +774,10 @@ app.post('/api/arnaques-pending', upload.array('preuves', 20), async (req, res) 
       console.log('[arnaques-pending] Données JSON directes');
     }
     
-    // Uploader les fichiers vers Pixeldrain si présents
+    // Uploader les fichiers vers GoFile si présents
     const uploadedMedias = [];
     if (req.files && req.files.length > 0) {
-      console.log(`[arnaques-pending] ${req.files.length} fichier(s) reçu(s) pour upload Pixeldrain`);
+      console.log(`[arnaques-pending] ${req.files.length} fichier(s) reçu(s) pour upload GoFile`);
       const timestamp = Date.now();
       
       for (let i = 0; i < req.files.length; i++) {
@@ -489,26 +787,31 @@ app.post('/api/arnaques-pending', upload.array('preuves', 20), async (req, res) 
           const ext = file.originalname.split('.').pop();
           const uniqueFileName = `arnaque-preuve-${timestamp}-${i + 1}.${ext}`;
           
-          // Upload vers Pixeldrain
-          const pixeldrainId = await uploadToPixeldrain(file.buffer, uniqueFileName);
+          // Upload vers GoFile
+          const gofileResult = await uploadToGofile(file.buffer, uniqueFileName);
           
           // Générer le chemin mappé
           const mappedPath = `img/arnaques/${uniqueFileName}`;
           
           // Ajouter au mapping
-          mediaMapping[mappedPath] = pixeldrainId;
+          mediaMapping[mappedPath] = {
+            id: gofileResult.id,
+            name: gofileResult.name,
+            server: gofileResult.server,
+            directLink: gofileResult.directLink
+          };
           
           uploadedMedias.push(mappedPath);
           
-          console.log(`[pixeldrain] ✓ ${uniqueFileName} → ${pixeldrainId} (mappé: ${mappedPath})`);
+          console.log(`[gofile] ✓ ${uniqueFileName} → ${gofileResult.id} (mappé: ${mappedPath})`);
         } catch (uploadError) {
-          console.error(`[pixeldrain] ✗ Échec upload ${file.originalname}:`, uploadError.message);
+          console.error(`[gofile] ✗ Échec upload ${file.originalname}:`, uploadError.message);
         }
       }
       
       // Sauvegarder le mapping
       if (uploadedMedias.length > 0) {
-        savePixeldrainMapping();
+        saveGofileMapping();
       }
     }
     
@@ -731,8 +1034,8 @@ app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'index.html'));
 });
 
-// Servir médias via hotlink Pixeldrain si non présents localement
-app.get('/img/:filename', (req, res) => {
+// Servir médias via proxy GoFile si non présents localement
+app.get('/img/:filename', async (req, res) => {
   try {
     const requested = req.params.filename;
     if(!requested){ return res.status(400).send('missing filename'); }
@@ -745,13 +1048,36 @@ app.get('/img/:filename', (req, res) => {
       return res.sendFile(localAbs);
     }
 
-    // 2) Sinon, tenter une résolution via le mapping Pixeldrain
-    const id = getPixeldrainIdByBasename(requested);
-    console.log('[img] mapping id', requested, '->', id);
-    if (id) {
-      // Conseiller le cache navigateur/CDN sur le 302
-      res.set('Cache-Control', 'public, max-age=3600, s-maxage=3600, stale-while-revalidate=60');
-      return res.redirect(302, `https://pixeldrain.com/api/file/${id}`);
+    // 2) Sinon, tenter une résolution via le mapping GoFile
+    const fileInfo = getGofileInfoByBasename(requested);
+    console.log('[img] mapping info', requested, '->', fileInfo ? fileInfo.id : null);
+    
+    if (fileInfo) {
+      // Proxy le fichier depuis GoFile avec le token d'authentification
+      try {
+        const downloadUrl = buildGofileDownloadUrl(fileInfo) || fileInfo.directLink;
+        if (downloadUrl) {
+          const response = await fetch(downloadUrl, {
+            headers: {
+              'Cookie': `accountToken=${GOFILE_API_KEY}`,
+              'Authorization': `Bearer ${GOFILE_API_KEY}`
+            }
+          });
+          
+          if (response.ok) {
+            // Transférer les headers pertinents
+            const contentType = response.headers.get('content-type');
+            if (contentType) res.set('Content-Type', contentType);
+            res.set('Cache-Control', 'public, max-age=86400, s-maxage=86400');
+            
+            // Stream le contenu
+            const buffer = await response.buffer();
+            return res.send(buffer);
+          }
+        }
+      } catch (proxyError) {
+        console.error('[img] proxy error:', proxyError.message);
+      }
     }
 
     // 3) Fallback image propre si c'est un format d'image
@@ -769,6 +1095,53 @@ app.get('/img/:filename', (req, res) => {
   } catch(e){
     console.error('[img] error', e);
     return res.status(500).send('img route error');
+  }
+});
+
+// Route proxy pour les médias GoFile (avec authentification)
+app.get('/media/:fileId', async (req, res) => {
+  try {
+    const { fileId } = req.params;
+    const { name } = req.query; // Nom du fichier optionnel
+    
+    // Chercher dans le mapping ou utiliser les paramètres
+    let fileInfo = null;
+    for (const [key, val] of Object.entries(mediaMapping)) {
+      if (val && val.id === fileId) {
+        fileInfo = val;
+        break;
+      }
+    }
+    
+    // Construire l'URL de téléchargement
+    const server = fileInfo?.server || req.query.server || 'store1';
+    const fileName = name || fileInfo?.name || 'file';
+    const downloadUrl = `https://${server}.gofile.io/download/web/${fileId}/${encodeURIComponent(fileName)}`;
+    
+    const response = await fetch(downloadUrl, {
+      headers: {
+        'Cookie': `accountToken=${GOFILE_API_KEY}`,
+        'Authorization': `Bearer ${GOFILE_API_KEY}`
+      }
+    });
+    
+    if (!response.ok) {
+      return res.status(response.status).send('File not found on GoFile');
+    }
+    
+    // Transférer les headers
+    const contentType = response.headers.get('content-type');
+    const contentLength = response.headers.get('content-length');
+    if (contentType) res.set('Content-Type', contentType);
+    if (contentLength) res.set('Content-Length', contentLength);
+    res.set('Cache-Control', 'public, max-age=86400');
+    
+    // Stream le contenu
+    const buffer = await response.buffer();
+    return res.send(buffer);
+  } catch (e) {
+    console.error('[/media] error', e);
+    return res.status(500).send('Media proxy error');
   }
 });
 
@@ -1452,7 +1825,7 @@ app.post('/api/upload-avis-media', upload.array('medias', 10), async (req, res) 
     const timestamp = Date.now();
     
     if (req.files && req.files.length > 0) {
-      console.log(`[upload-avis-media] ${req.files.length} fichier(s) reçu(s) pour upload Pixeldrain`);
+      console.log(`[upload-avis-media] ${req.files.length} fichier(s) reçu(s) pour upload GoFile`);
       
       for (let i = 0; i < req.files.length; i++) {
         const file = req.files[i];
@@ -1463,35 +1836,40 @@ app.post('/api/upload-avis-media', upload.array('medias', 10), async (req, res) 
           const slug = titre.toLowerCase().replace(/[^a-z0-9]+/g, '-');
           const uniqueFileName = `${slug}-${timestamp}-${i + 1}.${ext}`;
           
-          // Upload vers Pixeldrain avec le nom unique
-          const pixeldrainId = await uploadToPixeldrain(file.buffer, uniqueFileName);
+          // Upload vers GoFile avec le nom unique
+          const gofileResult = await uploadToGofile(file.buffer, uniqueFileName);
           
           // Générer le chemin mappé
           const mappedPath = `img/${uniqueFileName}`;
           
           // Ajouter au mapping
-          mediaMapping[mappedPath] = pixeldrainId;
+          mediaMapping[mappedPath] = {
+            id: gofileResult.id,
+            name: gofileResult.name,
+            server: gofileResult.server,
+            directLink: gofileResult.directLink
+          };
           
           // Ajouter aux médias
           uploadedMedias.push({
             type: file.mimetype.startsWith('image/') ? 'image' : 'video',
             path: mappedPath,
-            url: `https://pixeldrain.com/api/file/${pixeldrainId}`,
+            url: `/media/${gofileResult.id}?name=${encodeURIComponent(gofileResult.name)}&server=${gofileResult.server}`,
             name: uniqueFileName,
-            pixeldrain_id: pixeldrainId,
+            gofile_id: gofileResult.id,
             size: file.size
           });
           
-          console.log(`[pixeldrain] ✓ ${uniqueFileName} (original: ${file.originalname}) → ${pixeldrainId} (mappé: ${mappedPath})`);
+          console.log(`[gofile] ✓ ${uniqueFileName} (original: ${file.originalname}) → ${gofileResult.id} (mappé: ${mappedPath})`);
         } catch (uploadError) {
-          console.error(`[pixeldrain] ✗ Échec upload ${file.originalname}:`, uploadError.message);
+          console.error(`[gofile] ✗ Échec upload ${file.originalname}:`, uploadError.message);
           // Continue avec les autres fichiers
         }
       }
       
       // Sauvegarder le mapping mis à jour
       if (uploadedMedias.length > 0) {
-        savePixeldrainMapping();
+        saveGofileMapping();
       }
     }
     
@@ -1520,39 +1898,44 @@ app.post('/api/messages-preuve', upload.array('medias', 10), async (req, res) =>
     const uploadedMedias = [];
     
     if (req.files && req.files.length > 0) {
-      console.log(`[messages-preuve] ${req.files.length} fichier(s) reçu(s) pour upload Pixeldrain`);
+      console.log(`[messages-preuve] ${req.files.length} fichier(s) reçu(s) pour upload GoFile`);
       
       for (const file of req.files) {
         try {
-          // Upload vers Pixeldrain
-          const pixeldrainId = await uploadToPixeldrain(file.buffer, file.originalname);
+          // Upload vers GoFile
+          const gofileResult = await uploadToGofile(file.buffer, file.originalname);
           
           // Générer le chemin mappé
           const mappedPath = `img/${file.originalname}`;
           
           // Ajouter au mapping
-          mediaMapping[mappedPath] = pixeldrainId;
+          mediaMapping[mappedPath] = {
+            id: gofileResult.id,
+            name: gofileResult.name,
+            server: gofileResult.server,
+            directLink: gofileResult.directLink
+          };
           
           // Ajouter aux médias
           uploadedMedias.push({
             type: file.mimetype.startsWith('image/') ? 'image' : 'video',
             path: mappedPath,
-            url: `https://pixeldrain.com/api/file/${pixeldrainId}`,
+            url: `/media/${gofileResult.id}?name=${encodeURIComponent(gofileResult.name)}&server=${gofileResult.server}`,
             name: file.originalname,
-            pixeldrain_id: pixeldrainId,
+            gofile_id: gofileResult.id,
             size: file.size
           });
           
-          console.log(`[pixeldrain] ✓ ${file.originalname} → ${pixeldrainId} (mappé: ${mappedPath})`);
+          console.log(`[gofile] ✓ ${file.originalname} → ${gofileResult.id} (mappé: ${mappedPath})`);
         } catch (uploadError) {
-          console.error(`[pixeldrain] ✗ Échec upload ${file.originalname}:`, uploadError.message);
+          console.error(`[gofile] ✗ Échec upload ${file.originalname}:`, uploadError.message);
           // Continue avec les autres fichiers
         }
       }
       
       // Sauvegarder le mapping mis à jour
       if (uploadedMedias.length > 0) {
-        savePixeldrainMapping();
+        saveGofileMapping();
       }
     }
     
