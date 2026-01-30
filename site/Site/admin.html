@@ -970,9 +970,10 @@
           </div>
 
           <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+            <button id="admin-upload-files" style="padding: 12px 20px; background: #007bff; color: white; border: none; border-radius: 25px; cursor: pointer; font-size: 0.95rem; font-weight: 600;">📤 Upload fichiers</button>
+            <input type="file" id="admin-upload-input" multiple accept="image/*,video/*" style="display: none;">
             <button id="admin-create-folder" style="padding: 12px 20px; background: #28a745; color: white; border: none; border-radius: 25px; cursor: pointer; font-size: 0.95rem; font-weight: 600;">📁+ Nouveau dossier</button>
             <button id="admin-refresh" style="padding: 12px 25px; background: #d72660; color: white; border: none; border-radius: 25px; cursor: pointer; font-size: 1rem; font-weight: 600;">🔄 Actualiser</button>
-            <button id="admin-regenerate-mapping" style="padding: 12px 25px; background: #ff6b35; color: white; border: none; border-radius: 25px; cursor: pointer; font-size: 1rem; font-weight: 600; margin-left: 10px;">⚡ Auto-mapping</button>
             <a href="/ping.html" target="_blank" style="padding: 12px 20px; background: #17a2b8; color: white; border: none; border-radius: 25px; cursor: pointer; font-size: 0.95rem; font-weight: 600; text-decoration: none;">🔔 Ping fichiers</a>
           </div>
         </div>
@@ -7143,10 +7144,12 @@ function bindGofileEvents() {
     createFolderBtn.addEventListener('click', createGofileFolder);
   }
 
-  // Régénérer le mapping automatique
-  const regenerateMappingBtn = document.getElementById('admin-regenerate-mapping');
-  if (regenerateMappingBtn) {
-    regenerateMappingBtn.addEventListener('click', regenerateMapping);
+  // Upload fichiers
+  const uploadBtn = document.getElementById('admin-upload-files');
+  const uploadInput = document.getElementById('admin-upload-input');
+  if (uploadBtn && uploadInput) {
+    uploadBtn.addEventListener('click', () => uploadInput.click());
+    uploadInput.addEventListener('change', handleGofileUpload);
   }
 
   // Désélectionner
@@ -7195,63 +7198,51 @@ async function createGofileFolder() {
   }
 }
 
-async function regenerateMapping() {
-  const btn = document.getElementById('admin-regenerate-mapping');
-  if (!btn) return;
+// Upload de fichiers vers GoFile
+async function handleGofileUpload(e) {
+  const files = e.target.files;
+  if (!files || files.length === 0) return;
 
-  // Sauvegarder le texte original et désactiver le bouton
-  const originalText = btn.innerHTML;
-  btn.innerHTML = '⏳ Génération...';
-  btn.disabled = true;
-  btn.style.background = '#666';
+  const uploadBtn = document.getElementById('admin-upload-files');
+  const originalText = uploadBtn.innerHTML;
+  uploadBtn.innerHTML = `⏳ Upload 0/${files.length}...`;
+  uploadBtn.disabled = true;
 
   try {
-    console.log('[Admin] Régénération du mapping GoFile...');
-    
-    const response = await fetch('/api/regenerate-mapping', {
-      method: 'GET',
+    const formData = new FormData();
+    for (const file of files) {
+      formData.append('files', file);
+    }
+    formData.append('folderId', currentGofileFolderId || '');
+
+    const response = await fetch('/api/gofile/upload', {
+      method: 'POST',
       headers: {
         'Authorization': 'Basic ' + btoa(adminCredentials.user + ':' + adminCredentials.pass)
-      }
+      },
+      body: formData
     });
 
-    if (!response.ok) {
-      throw new Error(`Erreur ${response.status}: ${response.statusText}`);
-    }
-
     const result = await response.json();
-    
+
     if (result.success) {
-      // Afficher un message de succès
-      btn.innerHTML = '✅ Généré !';
-      btn.style.background = '#28a745';
-      
-      // Afficher les détails
-      console.log(`✅ Mapping généré: ${result.count} fichiers`);
-      showToast(`✅ Mapping automatique généré avec succès ! ${result.count} fichiers associés. Les images devraient maintenant s'afficher depuis GoFile.`, 'success');
-      
-      // Recharger les fichiers pour voir les changements
-      setTimeout(() => {
-        loadGofileFolder(currentGofileFolderId);
-      }, 1000);
-      
+      showToast(`✅ ${result.uploaded} fichier(s) uploadé(s) !`, 'success');
+      loadGofileFolder(currentGofileFolderId);
     } else {
       throw new Error(result.error || 'Erreur inconnue');
     }
-
   } catch (error) {
-    console.error('[Admin] Erreur régénération mapping:', error);
-    btn.innerHTML = '❌ Erreur';
-    btn.style.background = '#dc3545';
-    showToast(`❌ Erreur lors de la génération du mapping: ${error.message}. Vérifiez que votre clé API GoFile est configurée.`, 'error');
+    console.error('[GoFile] Erreur upload:', error);
+    showToast(`❌ Erreur: ${error.message}`, 'error');
+  } finally {
+    uploadBtn.innerHTML = originalText;
+    uploadBtn.disabled = false;
+    e.target.value = ''; // Reset input
   }
+}
 
-  // Restaurer le bouton après 3 secondes
-  setTimeout(() => {
-    btn.innerHTML = originalText;
-    btn.style.background = '#ff6b35';
-    btn.disabled = false;
-  }, 3000);
+async function regenerateMapping() {
+  showToast('ℹ️ Le mapping est mis à jour automatiquement lors des uploads', 'info');
 }
 
 // Charger le dossier racine GoFile
