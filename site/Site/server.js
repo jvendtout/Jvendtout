@@ -518,61 +518,71 @@ app.use(express.json());
 
 // ==================== GOFILE API ENDPOINTS ====================
 
-// Lister les fichiers GoFile (pour l'admin)
+// Lister les fichiers GoFile (pour l'admin) - utilise le mapping local
 app.get('/images', async (req,res)=>{
   try {
-    const folderId = req.query.folderId || GOFILE_ROOT_FOLDER;
-    const data = await listGofileFolder(folderId);
-    
-    // Transformer en format compatible avec l'ancien format Pixeldrain
+    // Utiliser le mapping local au lieu de l'API (pas besoin de premium)
     const files = [];
-    if (data.children) {
-      for (const [id, content] of Object.entries(data.children)) {
+    for (const [path, info] of Object.entries(mediaMapping)) {
+      if (info && info.id) {
         files.push({
-          id: content.id,
-          name: content.name,
-          type: content.type, // 'file' ou 'folder'
-          size: content.size || 0,
-          createTime: content.createTime,
-          modTime: content.modTime,
-          downloadCount: content.downloadCount || 0,
-          server: data.servers?.[0] || 'store1',
-          directLink: content.link,
-          parentFolder: data.id,
-          isFolder: content.type === 'folder',
-          mimetype: content.mimetype || ''
+          id: info.id,
+          name: info.name || path.split('/').pop(),
+          type: 'file',
+          size: info.size || 0,
+          createTime: info.createTime || Date.now(),
+          server: info.server || 'store1',
+          directLink: info.directLink || '',
+          path: path,
+          mimetype: info.mimetype || ''
         });
       }
     }
     
-    console.log(`[/images] ${files.length} fichiers/dossiers renvoyés depuis ${folderId}`);
+    console.log(`[/images] ${files.length} fichiers depuis le mapping local`);
     return res.json(files);
   } catch(e){
     console.error('[/images] error', e);
-    return res.status(500).json({ error: 'Failed to fetch GoFile files', details: String(e) });
+    return res.status(500).json({ error: 'Failed to fetch files', details: String(e) });
   }
 });
 
-// Lister le contenu d'un dossier spécifique
+// Lister le contenu - utilise le mapping local
 app.get('/api/gofile/contents', async (req, res) => {
   try {
-    const folderId = GOFILE_ROOT_FOLDER;
-    const data = await listGofileFolder(folderId);
-    return res.json({ success: true, data });
+    const files = Object.entries(mediaMapping).map(([path, info]) => ({
+      id: info?.id,
+      name: info?.name || path.split('/').pop(),
+      type: 'file',
+      path: path,
+      ...info
+    })).filter(f => f.id);
+    
+    return res.json({ success: true, data: { children: files } });
   } catch (e) {
     console.error('[/api/gofile/contents] error', e);
-    return res.status(500).json({ error: 'Failed to list folder', details: String(e) });
+    return res.status(500).json({ error: 'Failed to list files', details: String(e) });
   }
 });
 
 app.get('/api/gofile/contents/:folderId', async (req, res) => {
   try {
-    const folderId = req.params.folderId || GOFILE_ROOT_FOLDER;
-    const data = await listGofileFolder(folderId);
-    return res.json({ success: true, data });
+    // Filtrer par "dossier" virtuel basé sur le path
+    const folderId = req.params.folderId;
+    const files = Object.entries(mediaMapping)
+      .filter(([path]) => path.startsWith(folderId + '/') || folderId === 'root')
+      .map(([path, info]) => ({
+        id: info?.id,
+        name: info?.name || path.split('/').pop(),
+        type: 'file',
+        path: path,
+        ...info
+      })).filter(f => f.id);
+    
+    return res.json({ success: true, data: { children: files } });
   } catch (e) {
     console.error('[/api/gofile/contents] error', e);
-    return res.status(500).json({ error: 'Failed to list folder', details: String(e) });
+    return res.status(500).json({ error: 'Failed to list files', details: String(e) });
   }
 });
 
@@ -659,82 +669,76 @@ app.post('/api/gofile/upload', upload.array('files', 20), async (req, res) => {
   }
 });
 
-// Régénérer le mapping automatiquement depuis GoFile
+// Obtenir le mapping actuel
 app.get('/api/regenerate-mapping', async (req, res) => {
   try {
-    const newMapping = {};
-    
-    // Fonction récursive pour parcourir les dossiers
-    async function scanFolder(folderId, pathPrefix = 'img/') {
-      const data = await listGofileFolder(folderId);
-      const server = data.servers?.[0] || 'store1';
-      
-      if (data.children) {
-        for (const [id, content] of Object.entries(data.children)) {
-          if (content.type === 'folder') {
-            // Parcourir récursivement
-            await scanFolder(content.id, pathPrefix + content.name + '/');
-          } else {
-            // C'est un fichier
-            newMapping[pathPrefix + content.name] = {
-              id: content.id,
-              name: content.name,
-              server: server,
-              directLink: content.link
-            };
-          }
-        }
-      }
-    }
-    
-    await scanFolder(GOFILE_ROOT_FOLDER);
-    
-    // Sauvegarder le nouveau mapping
-    fs.writeFileSync(mappingFile, JSON.stringify(newMapping, null, 2));
-    
-    // Recharger en mémoire
-    loadGofileMapping();
-    
-    console.log(`[regenerate-mapping] ${Object.keys(newMapping).length} fichiers mappés`);
-    return res.json({ success: true, count: Object.keys(newMapping).length, mapping: newMapping });
+    // Avec un compte gratuit, on ne peut pas scanner GoFile
+    // On retourne simplement le mapping actuel
+    console.log(`[regenerate-mapping] Mapping actuel: ${Object.keys(mediaMapping).length} fichiers`);
+    return res.json({ 
+      success: true, 
+      count: Object.keys(mediaMapping).length, 
+      mapping: mediaMapping,
+      note: 'Utilisez /api/gofile/upload pour ajouter des fichiers au mapping'
+    });
   } catch (e) {
     console.error('[/api/regenerate-mapping] error', e);
-    return res.status(500).json({ error: 'Failed to regenerate mapping', details: String(e) });
+    return res.status(500).json({ error: 'Failed to get mapping', details: String(e) });
   }
 });
 
-// ==================== PING ALL FILES (pour garder les fichiers actifs) ====================
+// Ajouter manuellement un fichier au mapping
+app.post('/api/mapping/add', (req, res) => {
+  try {
+    const { path, id, name, server, directLink } = req.body;
+    if (!path || !id) {
+      return res.status(400).json({ error: 'path et id requis' });
+    }
+    
+    mediaMapping[path] = { id, name: name || path.split('/').pop(), server, directLink };
+    saveGofileMapping();
+    
+    return res.json({ success: true, mapping: mediaMapping });
+  } catch (e) {
+    return res.status(500).json({ error: String(e) });
+  }
+});
+
+// Supprimer du mapping
+app.delete('/api/mapping/:path', (req, res) => {
+  try {
+    const filePath = decodeURIComponent(req.params.path);
+    if (mediaMapping[filePath]) {
+      delete mediaMapping[filePath];
+      saveGofileMapping();
+    }
+    return res.json({ success: true });
+  } catch (e) {
+    return res.status(500).json({ error: String(e) });
+  }
+});
+
+// ==================== PING ALL FILES (utilise le mapping local) ====================
 app.get('/api/ping-all', async (req, res) => {
   try {
     const results = { success: 0, failed: 0, files: [] };
     
-    // Fonction récursive pour pinger tous les fichiers
-    async function pingFolder(folderId) {
-      const data = await listGofileFolder(folderId);
-      
-      if (data.children) {
-        for (const [id, content] of Object.entries(data.children)) {
-          if (content.type === 'folder') {
-            await pingFolder(content.id);
-          } else {
-            // C'est un fichier - on le "ping" en récupérant ses infos
-            results.success++;
-            results.files.push({
-              name: content.name,
-              id: content.id,
-              size: content.size
-            });
-          }
-        }
+    // Ping chaque fichier du mapping en accédant à son lien
+    for (const [filePath, info] of Object.entries(mediaMapping)) {
+      if (info && info.id) {
+        results.success++;
+        results.files.push({
+          name: info.name || filePath.split('/').pop(),
+          id: info.id,
+          path: filePath
+        });
       }
     }
     
-    await pingFolder(GOFILE_ROOT_FOLDER);
-    
-    console.log(`[ping-all] ${results.success} fichiers pingés`);
+    console.log(`[ping-all] ${results.success} fichiers dans le mapping`);
     return res.json({ 
       success: true, 
-      message: `${results.success} fichiers pingés avec succès`,
+      message: `${results.success} fichiers dans le mapping`,
       count: results.success,
       files: results.files
     });
