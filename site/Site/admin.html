@@ -7244,9 +7244,9 @@ async function createGofileFolder() {
   try {
     const response = await fetch('/api/gofile/folder', {
       method: 'POST',
+      credentials: 'include',
       headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Basic ' + btoa(adminCredentials.user + ':' + adminCredentials.pass)
+        'Content-Type': 'application/json'
       },
       body: JSON.stringify({ 
         folderName: folderName.trim(),
@@ -7307,9 +7307,7 @@ async function handleGofileUpload(filesInput) {
 
       const response = await fetch('/api/gofile/upload', {
         method: 'POST',
-        headers: {
-          'Authorization': 'Basic ' + btoa(adminCredentials.user + ':' + adminCredentials.pass)
-        },
+        credentials: 'include',
         body: formData
       });
 
@@ -7526,9 +7524,7 @@ async function deleteGofileContent(contentId, contentName) {
   try {
     const response = await fetch(`/api/gofile/content/${contentId}`, {
       method: 'DELETE',
-      headers: {
-        'Authorization': 'Basic ' + btoa(adminCredentials.user + ':' + adminCredentials.pass)
-      }
+      credentials: 'include'
     });
     
     const result = await response.json();

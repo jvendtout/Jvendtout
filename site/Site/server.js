@@ -29,7 +29,7 @@ const categoriesPath = path.join(__dirname, 'categories.json');
 // ==================== GOFILE CONFIGURATION ====================
 const GOFILE_API_KEY = process.env.GOFILE_API_KEY || 'YxYI4wVuB8zlrBiWpNZ85eXRWmDplVrl';
 const GOFILE_ACCOUNT_ID = process.env.GOFILE_ACCOUNT_ID || '687ae5a7-41fe-4667-b57e-29b045c9c427';
-const GOFILE_ROOT_FOLDER = process.env.GOFILE_ROOT_FOLDER || 'b0457c78-8aeb-41b5-b64d-0f4960a769a4';
+const GOFILE_ROOT_FOLDER = process.env.GOFILE_ROOT_FOLDER || '7c54c17c-688e-4a3e-a82e-f361c0a174b9';
 
 // Mapping GoFile (fichier → contentId + server)
 const mappingFile = path.join(__dirname, 'gofile-mapping.json');
@@ -136,19 +136,25 @@ async function uploadToGofile(buffer, filename, folderId = null) {
     }
 
     const result = await response.json();
+    console.log('[gofile] Upload response:', JSON.stringify(result));
+    
     if (result.status !== 'ok') {
       throw new Error(`GoFile upload error: ${result.status}`);
     }
     
+    // GoFile peut retourner fileId ou id selon la version de l'API
+    const fileId = result.data?.fileId || result.data?.id || result.data?.contentId;
+    const fileName = result.data?.fileName || result.data?.name || filename;
+    
     // Retourner les infos complètes du fichier
     return {
-      id: result.data.fileId,
-      contentId: result.data.fileId,
-      name: result.data.fileName,
-      downloadPage: result.data.downloadPage,
-      directLink: result.data.directLink,
+      id: fileId,
+      contentId: fileId,
+      name: fileName,
+      downloadPage: result.data?.downloadPage,
+      directLink: result.data?.directLink,
       server: server,
-      parentFolder: result.data.parentFolder
+      parentFolder: result.data?.parentFolder
     };
   } catch (e) {
     console.error('[gofile] Erreur upload:', e.message);
