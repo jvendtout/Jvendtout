@@ -5,7 +5,7 @@ const multer = require('multer');
 const fetch = require('node-fetch');
 const FormData = require('form-data');
 
-// Force rebuild: 2026-01-31-1330
+// Force rebuild: 2026-01-31-1350
 // Charger les variables d'environnement depuis le fichier .env à la racine
 require('dotenv').config({ path: path.join(__dirname, '..', '.env') });
 
@@ -69,6 +69,21 @@ function loadGofileMapping(){
   }
 }
 loadGofileMapping();
+
+// === DEBUG ENDPOINT ===
+// Endpoint pour diagnostiquer le mapping chargé
+app.get('/api/debug-mapping', (req, res) => {
+  const testKey = 'img/airpods-pro-2.webp';
+  const testVal = mediaMapping[testKey];
+  res.json({
+    loaded_at: new Date().toISOString(),
+    total_entries: Object.keys(mediaMapping).length,
+    test_file: testKey,
+    test_id: testVal?.id || 'NOT FOUND',
+    first_5_keys: Object.keys(mediaMapping).slice(0, 5),
+    hash: require('crypto').createHash('md5').update(JSON.stringify(mediaMapping)).digest('hex').slice(0,8)
+  });
+});
 
 // Trouver un fichier dans le mapping par son nom
 function getGofileInfoByBasename(name){
