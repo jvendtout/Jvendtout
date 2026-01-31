@@ -62,7 +62,7 @@
   {
     "nom": "Boitier d'Airpods",
     "article-thumbnail-radio": "on",
-    "thumbnail": "https://pixeldrain.com/api/file/U37F3xw6",
+    "thumbnail": "img/U37F3xw6",
     "categorie": "Electroniques/Airpods",
     "prix": 8,
     "description": "Boitier de Airpods avec sangle, dispo en 3 couleurs, qualité parfaite, tarif revendeur beacoup moins cher",
@@ -70,27 +70,30 @@
     "medias": [
       {
         "type": "image",
-        "path": "img/boitier-airpods-noir.webp",
-        "url": "img/boitier-airpods-noir.webp",
+        "path": "img/U37F3xw6",
+        "url": "img/U37F3xw6",
         "name": "boitier-airpods-noir.webp",
-        "mime_type": "image/webp"
+        "mime_type": "image/webp",
+        "pixeldrain_id": "U37F3xw6"
       },
       {
         "type": "image",
         "path": "img/boitier-airpods-bleu.webp",
         "url": "img/boitier-airpods-bleu.webp",
         "name": "boitier-airpods-bleu.webp",
-        "mime_type": "image/webp"
+        "mime_type": "image/webp",
+        "pixeldrain_id": "GmPstXnE"
       },
       {
         "type": "image",
         "path": "img/boitier-airpods-vert.webp",
         "url": "img/boitier-airpods-vert.webp",
         "name": "boitier-airpods-vert.webp",
-        "mime_type": "image/webp"
+        "mime_type": "image/webp",
+        "pixeldrain_id": "oJZFm65x"
       }
     ],
-    "image": "https://pixeldrain.com/api/file/U37F3xw6"
+    "image": "img/U37F3xw6"
   },
   {
     "nom": "Mitraillette 1000 coups",
@@ -602,7 +605,7 @@
   {
     "nom": "Puffs Dragbar 15k",
     "article-thumbnail-radio": "on",
-    "thumbnail": "https://pixeldrain.com/api/file/Dqunp1tm",
+    "thumbnail": "img/Dqunp1tm",
     "categorie": "Puffs",
     "prix": 10,
     "reduction_type": "quantity",
@@ -611,32 +614,32 @@
     "medias": [
       {
         "type": "video",
-        "path": "https://pixeldrain.com/api/file/BtujAtCm",
-        "url": "https://pixeldrain.com/api/file/BtujAtCm",
+        "path": "img/BtujAtCm",
+        "url": "img/BtujAtCm",
         "name": "puff-dragbar-15k-pub.mp4",
         "mime_type": "video/mp4",
         "pixeldrain_id": "BtujAtCm"
       },
       {
         "type": "image",
-        "path": "https://pixeldrain.com/api/file/2j5PqHBF",
-        "url": "https://pixeldrain.com/api/file/2j5PqHBF",
+        "path": "img/2j5PqHBF",
+        "url": "img/2j5PqHBF",
         "name": "puff-dragbar-15k-3.jpg",
         "mime_type": "image/jpeg",
         "pixeldrain_id": "2j5PqHBF"
       },
       {
         "type": "image",
-        "path": "https://pixeldrain.com/api/file/Dqunp1tm",
-        "url": "https://pixeldrain.com/api/file/Dqunp1tm",
+        "path": "img/Dqunp1tm",
+        "url": "img/Dqunp1tm",
         "name": "puff-dragbar-15k.png",
         "mime_type": "image/png",
         "pixeldrain_id": "Dqunp1tm"
       },
       {
         "type": "image",
-        "path": "https://pixeldrain.com/api/file/CkxoMh8p",
-        "url": "https://pixeldrain.com/api/file/CkxoMh8p",
+        "path": "img/puff-dragbar-15k-2.jpg",
+        "url": "img/puff-dragbar-15k-2.jpg",
         "name": "puff-dragbar-15k-2.jpg",
         "mime_type": "image/jpeg",
         "pixeldrain_id": "CkxoMh8p"
@@ -652,13 +655,13 @@
         "price": 0
       }
     ],
-    "image": "https://pixeldrain.com/api/file/2j5PqHBF",
-    "video": "https://pixeldrain.com/api/file/BtujAtCm"
+    "image": "img/2j5PqHBF",
+    "video": "img/BtujAtCm"
   },
   {
     "nom": "Puff Argus 12k",
     "article-thumbnail-radio": "on",
-    "thumbnail": "https://pixeldrain.com/api/file/eTgSJqTQ",
+    "thumbnail": "img/eTgSJqTQ",
     "categorie": "Puffs",
     "prix": 10,
     "reduction_type": "quantity",
@@ -667,40 +670,40 @@
     "medias": [
       {
         "type": "image",
-        "path": "https://pixeldrain.com/api/file/gjht6pjn",
-        "url": "https://pixeldrain.com/api/file/gjht6pjn",
+        "path": "img/gjht6pjn",
+        "url": "img/gjht6pjn",
         "name": "puff-argus-12k-3.jpg",
         "mime_type": "image/jpeg",
         "pixeldrain_id": "gjht6pjn"
       },
       {
         "type": "image",
-        "path": "https://pixeldrain.com/api/file/xM936FgJ",
-        "url": "https://pixeldrain.com/api/file/xM936FgJ",
+        "path": "img/puff-argus-12k-presentation.png",
+        "url": "img/puff-argus-12k-presentation.png",
         "name": "puff-argus-12k-presentation.png",
         "mime_type": "image/png",
         "pixeldrain_id": "xM936FgJ"
       },
       {
         "type": "image",
-        "path": "https://pixeldrain.com/api/file/D1taYCcd",
-        "url": "https://pixeldrain.com/api/file/D1taYCcd",
+        "path": "img/puff-argus-12k-batterie.jpeg",
+        "url": "img/puff-argus-12k-batterie.jpeg",
         "name": "puff-argus-12k-batterie.jpeg",
         "mime_type": "image/jpeg",
         "pixeldrain_id": "D1taYCcd"
       },
       {
         "type": "image",
-        "path": "https://pixeldrain.com/api/file/eTgSJqTQ",
-        "url": "https://pixeldrain.com/api/file/eTgSJqTQ",
+        "path": "img/eTgSJqTQ",
+        "url": "img/eTgSJqTQ",
         "name": "puff-argus-12k.png",
         "mime_type": "image/png",
         "pixeldrain_id": "eTgSJqTQ"
       },
       {
         "type": "image",
-        "path": "https://pixeldrain.com/api/file/7EQWG66N",
-        "url": "https://pixeldrain.com/api/file/7EQWG66N",
+        "path": "img/puff-argus-12k-2.jpg",
+        "url": "img/puff-argus-12k-2.jpg",
         "name": "puff-argus-12k-2.jpg",
         "mime_type": "image/jpeg",
         "pixeldrain_id": "7EQWG66N"
@@ -716,6 +719,6 @@
         "price": 27
       }
     ],
-    "image": "https://pixeldrain.com/api/file/gjht6pjn"
+    "image": "img/gjht6pjn"
   }
 ]
