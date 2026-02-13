@@ -85,6 +85,30 @@ app.get('/api/debug-mapping', (req, res) => {
   });
 });
 
+// Endpoint de diagnostic GoFile
+app.get('/api/debug-gofile', async (req, res) => {
+  try {
+    // Tester la connexion à l'API GoFile
+    const accountRes = await fetch(`https://api.gofile.io/accounts/me?token=${GOFILE_API_KEY}`);
+    const accountData = await accountRes.json();
+    
+    // Tester l'accès au dossier racine
+    const folderRes = await fetch(`https://api.gofile.io/contents/${GOFILE_ROOT_FOLDER}?token=${GOFILE_API_KEY}`);
+    const folderData = await folderRes.json();
+    
+    res.json({
+      api_key_set: !!GOFILE_API_KEY,
+      api_key_length: GOFILE_API_KEY?.length || 0,
+      root_folder: GOFILE_ROOT_FOLDER,
+      account_status: accountData.status,
+      folder_status: folderData.status,
+      folder_children_count: folderData.data?.children ? Object.keys(folderData.data.children).length : 0
+    });
+  } catch (e) {
+    res.json({ error: e.message });
+  }
+});
+
 // Trouver un fichier dans le mapping par son nom
 function getGofileInfoByBasename(name){
   if(!name) return null;
