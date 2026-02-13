@@ -5,6 +5,7 @@ const multer = require('multer');
 const fetch = require('node-fetch');
 const FormData = require('form-data');
 
+// Force rebuild: 2026-02-13-1400
 // Charger les variables d'environnement depuis le fichier .env à la racine
 require('dotenv').config({ path: path.join(__dirname, '..', '.env') });
 
@@ -35,6 +36,12 @@ const GOFILE_ROOT_FOLDER = process.env.GOFILE_ROOT_FOLDER || '7c54c17c-688e-4a3e
 const mappingFile = path.join(__dirname, 'gofile-mapping.json');
 let mediaMapping = {};
 
+// Cache mémoire pour les médias (éviter rate-limiting GoFile)
+const mediaCache = new Map();
+const CACHE_MAX_SIZE = 100 * 1024 * 1024; // 100MB max en cache
+const CACHE_TTL = 3600000; // 1 heure
+let cacheCurrentSize = 0;
+
 // Vérification de la configuration GoFile
 if (GOFILE_API_KEY) {
   console.log(`[gofile] API Key chargée: ${GOFILE_API_KEY.substring(0, 8)}...`);
@@ -62,6 +69,21 @@ function loadGofileMapping(){
   }
 }
 loadGofileMapping();
+
+// === DEBUG ENDPOINT ===
+// Endpoint pour diagnostiquer le mapping chargé
+app.get('/api/debug-mapping', (req, res) => {
+  const testKey = 'img/airpods-pro-2.webp';
+  const testVal = mediaMapping[testKey];
+  res.json({
+    loaded_at: new Date().toISOString(),
+    total_entries: Object.keys(mediaMapping).length,
+    test_file: testKey,
+    test_id: testVal?.id || 'NOT FOUND',
+    first_5_keys: Object.keys(mediaMapping).slice(0, 5),
+    hash: require('crypto').createHash('md5').update(JSON.stringify(mediaMapping)).digest('hex').slice(0,8)
+  });
+});
 
 // Trouver un fichier dans le mapping par son nom
 function getGofileInfoByBasename(name){
@@ -1119,11 +1141,23 @@ app.get('/img/:filename', async (req, res) => {
   }
 });
 
-// Route proxy pour les médias GoFile (avec authentification)
+// Route proxy pour les médias GoFile (avec cache pour éviter rate-limiting)
 app.get('/media/:fileId', async (req, res) => {
   try {
     const { fileId } = req.params;
     const { name } = req.query; // Nom du fichier optionnel
+    const cacheKey = `${fileId}:${name || ''}`;
+    
+    // Vérifier le cache d'abord
+    const cached = mediaCache.get(cacheKey);
+    if (cached && (Date.now() - cached.timestamp < CACHE_TTL)) {
+      console.log(`[/media] Cache hit: ${name || fileId}`);
+      res.set('Content-Type', cached.contentType || 'application/octet-stream');
+      res.set('Content-Length', cached.buffer.length);
+      res.set('Cache-Control', 'public, max-age=86400');
+      res.set('X-Cache', 'HIT');
+      return res.send(cached.buffer);
+    }
     
     // Chercher dans le mapping ou utiliser les paramètres
     let fileInfo = null;
@@ -1139,6 +1173,7 @@ app.get('/media/:fileId', async (req, res) => {
     const fileName = name || fileInfo?.name || 'file';
     const downloadUrl = `https://${server}.gofile.io/download/web/${fileId}/${encodeURIComponent(fileName)}`;
     
+    console.log(`[/media] Fetching from GoFile: ${fileName}`);
     const response = await fetch(downloadUrl, {
       headers: {
         'Cookie': `accountToken=${GOFILE_API_KEY}`,
@@ -1147,6 +1182,7 @@ app.get('/media/:fileId', async (req, res) => {
     });
     
     if (!response.ok) {
+      console.error(`[/media] GoFile error ${response.status} for ${fileName}`);
       return res.status(response.status).send('File not found on GoFile');
     }
     
@@ -1156,9 +1192,27 @@ app.get('/media/:fileId', async (req, res) => {
     if (contentType) res.set('Content-Type', contentType);
     if (contentLength) res.set('Content-Length', contentLength);
     res.set('Cache-Control', 'public, max-age=86400');
+    res.set('X-Cache', 'MISS');
     
-    // Stream le contenu
+    // Stream le contenu et mettre en cache
     const buffer = await response.buffer();
+    
+    // Ajouter au cache si pas trop gros (max 5MB par fichier)
+    if (buffer.length < 5 * 1024 * 1024) {
+      // Nettoyer le cache si trop plein
+      while (cacheCurrentSize + buffer.length > CACHE_MAX_SIZE && mediaCache.size > 0) {
+        const oldestKey = mediaCache.keys().next().value;
+        const oldEntry = mediaCache.get(oldestKey);
+        if (oldEntry) {
+          cacheCurrentSize -= oldEntry.buffer.length;
+          mediaCache.delete(oldestKey);
+        }
+      }
+      mediaCache.set(cacheKey, { buffer, contentType, timestamp: Date.now() });
+      cacheCurrentSize += buffer.length;
+      console.log(`[/media] Cached: ${fileName} (${(buffer.length/1024).toFixed(1)}KB, total cache: ${(cacheCurrentSize/1024/1024).toFixed(1)}MB)`);
+    }
+    
     return res.send(buffer);
   } catch (e) {
     console.error('[/media] error', e);
@@ -1287,7 +1341,7 @@ app.put('/api/techniques-arnaques', (req, res) => {
   });
 });
 
-// Endpoint de diagnostic des médias
+// Endpoint de diagnostic des médias (vérifie dans le mapping GoFile)
 app.get('/api/check-media', (req, res) => {
   try {
     const articlesRaw = fs.readFileSync(path.join(__dirname, 'articles.json'), 'utf8');
@@ -1302,12 +1356,31 @@ app.get('/api/check-media', (req, res) => {
     function checkPath(p, articleId, kind){
       if(!p) return;
       totalMedia++;
-      let rel = p.replace(/^\//,'');
-      const full = path.join(__dirname, rel);
-      const ok = fs.existsSync(full);
-      if(!ok) missing.add(p); else existing.add(p);
+      
+      // Vérifier si c'est une URL externe (Pixeldrain, etc.)
+      if(p.startsWith('http://') || p.startsWith('https://')) {
+        // URL externe - vérifier si on a un équivalent dans le mapping par nom
+        const urlParts = p.split('/');
+        const possibleName = urlParts[urlParts.length - 1];
+        const found = getGofileInfoByBasename(possibleName);
+        if(found) {
+          existing.add(p);
+        } else {
+          missing.add(p);
+        }
+      } else {
+        // Chemin local (img/xxx) - vérifier dans le mapping GoFile
+        let rel = p.replace(/^\//,'');
+        const found = mediaMapping[rel] || getGofileInfoByBasename(rel.split('/').pop());
+        if(found) {
+          existing.add(p);
+        } else {
+          missing.add(p);
+        }
+      }
+      
       if(req.query.detailed){
-        detailed.push({ articleId, kind, path: p, exists: ok });
+        detailed.push({ articleId, kind, path: p, exists: !missing.has(p) });
       }
     }
 
