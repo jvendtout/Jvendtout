@@ -5,7 +5,7 @@ const multer = require('multer');
 const fetch = require('node-fetch');
 const FormData = require('form-data');
 
-// Force rebuild: 2026-01-31-1350
+// Force rebuild: 2026-02-13-1400
 // Charger les variables d'environnement depuis le fichier .env à la racine
 require('dotenv').config({ path: path.join(__dirname, '..', '.env') });
 
